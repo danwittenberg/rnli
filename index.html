@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifeboat Station Training Matrix</title>
+    <style>
+        :root { --primary: #002366; --secondary: #f05a28; --bg: #f4f7f6; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .hidden { display: none !important; }
+        
+        #login-screen { max-width: 400px; margin: 100px auto; text-align: center; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        input { padding: 12px; width: 80%; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+        button.login-btn { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .controls { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
+        .tab { padding: 10px 20px; background: #fff; border: 1px solid #ddd; border-radius: 25px; cursor: pointer; white-space: nowrap; font-weight: 500; transition: 0.2s; }
+        .tab.active { background: var(--secondary); color: white; border-color: var(--secondary); }
+        
+        .matrix-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+        th, td { border: 1px solid #edf2f7; padding: 10px; text-align: center; min-width: 140px; }
+        
+        th:first-child, td:first-child { 
+            position: sticky; left: 0; background: #fff; z-index: 10; 
+            font-weight: bold; border-right: 2px solid #cbd5e0; text-align: left; min-width: 160px;
+        }
+        tr:nth-child(even) td:first-child { background: #f9fafb; }
+
+        .cell-btn { width: 100%; min-height: 50px; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 5px; }
+        .status-empty { background: #f8fafc; color: #94a3b8; border: 1px dashed #cbd5e0; }
+        .status-empty:hover { background: #e2e8f0; color: var(--primary); }
+        
+        .status-pending { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; cursor: default; }
+        
+        .status-allocated { background: #dcfce7; color: #166534; border: 1px solid #86efac; cursor: default; }
+        .alloc-cat { font-weight: 800; font-size: 0.7rem; text-transform: uppercase; border-bottom: 1px solid #86efac; margin-bottom: 3px; width: 100%; }
+        .alloc-role { font-size: 0.85rem; font-weight: 600; }
+
+        .session-header { font-size: 0.85rem; color: var(--primary); font-weight: bold; }
+        .session-label { display: block; font-weight: normal; font-style: italic; color: #718096; font-size: 0.75rem; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <h2 style="color: var(--primary)">Lifeboat Station Login</h2>
+        <input type="password" id="station-pass" placeholder="Password">
+        <br>
+        <button class="login-btn" onclick="checkLogin()">Access Matrix</button>
+    </div>
+
+    <div id="main-content" class="hidden">
+        <header>
+            <h2 style="margin:0">Training Matrix</h2>
+        </header>
+
+        <div class="controls" id="month-tabs"></div>
+        
+        <div class="matrix-container">
+            <table id="matrix">
+                <thead><tr id="matrix-head"></tr></thead>
+                <tbody id="matrix-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; 
+        const STATION_PASSWORD = "RNLI"; 
+        
+        let db = { crew: [], sessions: [], signups: [], config: {} };
+        let currentMonth = "";
+
+        function checkLogin() {
+            if(document.getElementById('station-pass').value === STATION_PASSWORD) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                fetchData();
+            } else { alert("Access Denied"); }
+        }
+
+        async function fetchData() {
+            try {
+                if(API_URL === "YOUR_APPS_SCRIPT_URL") {
+                   db = {
+                       crew: ["John Smith", "Sarah Jenkins", "Mike Ross"],
+                       sessions: [
+                           {id: "S1", date: "2026-06-15", time: "19:00", topic: "Nav Skills", month: "June"},
+                           {id: "S2", date: "2026-06-20", time: "10:00", topic: "Boat Handling", month: "June"}
+                       ],
+                       config: { categories: ["alb-afloat", "ilb-afloat"], activities: ["OCF1", "OCF2"], roles: ["Helm", "Cox"] },
+                       signups: [
+                           {name: "John Smith", sessionId: "S1", allocatedCategory: "alb-afloat", allocatedRole: "Coxswain"}
+                       ]
+                   };
+                   currentMonth = "June";
+                   renderTabs(["June"]);
+                   renderMatrix();
+                   return;
+                }
+                const resp = await fetch(API_URL);
+                db = await resp.json();
+                const months = [...new Set(db.sessions.map(s => s.month))];
+                if(!currentMonth) currentMonth = months[0];
+                renderTabs(months);
+                renderMatrix();
+            } catch (e) {
+                alert("Error loading data. Check your API URL.");
+            }
+        }
+
+        function renderTabs(months) {
+            const container = document.getElementById('month-tabs');
+            container.innerHTML = months.map(m => `
+                <div class="tab ${m === currentMonth ? 'active' : ''}" onclick="setMonth('${m}')">${m}</div>
+            `).join('');
+        }
+
+        function setMonth(m) {
+            currentMonth = m;
+            const months = [...new Set(db.sessions.map(s => s.month))];
+            renderTabs(months);
+            renderMatrix();
+        }
+
+        function renderMatrix() {
+            const filteredSessions = db.sessions.filter(s => s.month === currentMonth);
+            const headRow = document.getElementById('matrix-head');
+            const body = document.getElementById('matrix-body');
+
+            headRow.innerHTML = `<th>Crew Name</th>` + filteredSessions.map(s => `
+                <th>
+                    <div class="session-header">${new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} @ ${s.time}</div>
+                    <span class="session-label">${s.topic}</span>
+                </th>
+            `).join('');
+
+            body.innerHTML = db.crew.map(name => `
+                <tr>
+                    <td>${name}</td>
+                    ${filteredSessions.map(s => {
+                        const signup = db.signups.find(sig => sig.name === name && sig.sessionId === s.id);
+                        return `<td>${renderCell(name, s.id, signup)}</td>`;
+                    }).join('')}
+                </tr>
+            `).join('');
+        }
+
+        function renderCell(name, sessionId, signup) {
+            if (!signup) {
+                return `<button class="cell-btn status-empty" onclick="handleSignup('${name}', '${sessionId}')">Sign Up</button>`;
+            }
+            if (signup.allocatedCategory && signup.allocatedRole) {
+                return `
+                    <div class="cell-btn status-allocated">
+                        <div class="alloc-cat">${signup.allocatedCategory}</div>
+                        <div class="alloc-role">${signup.allocatedRole}</div>
+                    </div>`;
+            }
+            return `<div class="cell-btn status-pending">Requested:<br><strong>${signup.preferred}</strong></div>`;
+        }
+
+        function handleSignup(name, sessionId) {
+            if(API_URL === "YOUR_APPS_SCRIPT_URL") {
+                alert("This is a preview. Sign-ups will work once you paste your Apps Script URL.");
+                return;
+            }
+            const cat = prompt(`Pick choice:\n\${db.config.categories.join(', ')}`);
+            if (!cat) return;
+            const act = prompt(`Specific OCF/Activity?\n\${db.config.activities.join(', ')}`);
+            if (!act) return;
+
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ crewName: name, sessionId: sessionId, preferredRole: cat, activity: act })
+            }).then(() => {
+                alert("Request logged.");
+                fetchData(); 
+            });
+        }
+    </script>
+</body>
+</html>

@@ -141,13 +141,29 @@
             `).join('');
         }
 
-        function renderCell(name, sessionId, signup) {
-            if (!signup) return `<button class="cell-btn status-empty" onclick="handleSignup('${name}', '${sessionId}')">Sign Up</button>`;
-            if (signup.allocatedCategory && signup.allocatedRole) {
-                return `<div class="cell-btn status-allocated"><div class="alloc-cat">${signup.allocatedCategory}</div><div class="alloc-role">${signup.allocatedRole}</div></div>`;
-            }
-            return `<div class="cell-btn status-pending">Requested:<br><strong>${signup.preferred}</strong></div>`;
-        }
+function renderCell(name, sessionId, signup) {
+    // 1. Not signed up yet (Grey)
+    if (!signup) {
+        return `<button class="cell-btn status-empty" onclick="handleSignup('${name}', '${sessionId}')">Sign Up</button>`;
+    }
+    
+    // 2. Already allocated by Admin (Green) - Keep this locked
+    if (signup.allocatedCategory && signup.allocatedRole) {
+        return `
+            <div class="cell-btn status-allocated">
+                <div class="alloc-cat">${signup.allocatedCategory}</div>
+                <div class="alloc-role">${signup.allocatedRole}</div>
+            </div>`;
+    }
+    
+    // 3. Signed up but pending (Yellow) - Make this clickable to change choice
+    return `
+        <button class="cell-btn status-pending" onclick="handleSignup('${name}', '${sessionId}')">
+            <div>Requested:</div>
+            <strong>${signup.preferred}</strong>
+            <div style="font-size:0.6rem; margin-top:4px; opacity:0.7;">(Tap to change)</div>
+        </button>`;
+}
 
         function handleSignup(name, sessionId) {
             pendingSignup = { name, sessionId };

@@ -162,24 +162,26 @@
             return `<div class="cell-btn status-pending">Requested:<br><strong>${signup.preferred}</strong></div>`;
         }
 
-        function handleSignup(name, sessionId) {
-            if(API_URL === "YOUR_APPS_SCRIPT_URL") {
-                alert("This is a preview. Sign-ups will work once you paste your Apps Script URL.");
-                return;
-            }
-            const cat = prompt(`Pick choice:\n\${db.config.categories.join(', ')}`);
-            if (!cat) return;
-            const act = prompt(`Specific OCF/Activity?\n\${db.config.activities.join(', ')}`);
-            if (!act) return;
+function handleSignup(name, sessionId) {
+    // Check if config data exists, otherwise use defaults
+    const cats = (db.config && db.config.categories) ? db.config.categories.join(', ') : 'No categories found';
+    const acts = (db.config && db.config.activities) ? db.config.activities.join(', ') : 'No activities found';
 
-            fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ crewName: name, sessionId: sessionId, preferredRole: cat, activity: act })
-            }).then(() => {
-                alert("Request logged.");
-                fetchData(); 
-            });
-        }
+    const cat = prompt("Pick choice:\n" + cats);
+    if (!cat) return;
+    
+    const act = prompt("Specific OCF/Activity?\n" + acts);
+    if (!act) return;
+
+    fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Add this to prevent browser security blocks
+        body: JSON.stringify({ crewName: name, sessionId: sessionId, preferredRole: cat, activity: act })
+    }).then(() => {
+        alert("Request sent to the station log!");
+        fetchData(); 
+    }).catch(err => alert("Error sending: " + err));
+}
     </script>
 </body>
 </html>

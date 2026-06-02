@@ -154,4 +154,30 @@
             document.getElementById('select-cat').innerHTML = db.config.categories.map(c => `<option value="${c}">${c}</option>`).join('');
             document.getElementById('select-act').innerHTML = db.config.activities.map(a => `<option value="${a}">${a}</option>`).join('');
             document.getElementById('modal-title').innerText = "Sign Up: " + name;
-            document.getElementById('signup-modal
+            document.getElementById('signup-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('signup-modal').classList.add('hidden'); }
+
+        function submitSignup() {
+            const btn = document.getElementById('submit-btn');
+            btn.innerText = "Saving..."; btn.disabled = true;
+            
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    crewName: pendingSignup.name, 
+                    sessionId: pendingSignup.sessionId, 
+                    preferredRole: document.getElementById('select-cat').value, 
+                    activity: document.getElementById('select-act').value 
+                })
+            }).then(() => {
+                alert("Success!");
+                closeModal();
+                fetchData();
+            }).catch(err => alert("Error: " + err))
+              .finally(() => { btn.innerText = "Confirm"; btn.disabled = false; });
+        }
+    </script>
+</body>
+</html>

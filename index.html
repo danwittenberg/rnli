@@ -65,123 +65,75 @@
             </table>
         </div>
     </div>
+    
+<script>
+    // 1. MAKE SURE THIS URL IS EXACTLY WHAT YOU TESTED IN STEP 2
+    const API_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; 
+    const STATION_PASSWORD = "RNLI"; 
+    
+    let db = { crew: [], sessions: [], signups: [], config: { categories: [], activities: [] } };
+    let currentMonth = "";
 
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; 
-        const STATION_PASSWORD = "RNLI"; 
-        
-        let db = { crew: [], sessions: [], signups: [], config: {} };
-        let currentMonth = "";
+    function checkLogin() {
+        if(document.getElementById('station-pass').value === STATION_PASSWORD) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            fetchData();
+        } else { alert("Access Denied"); }
+    }
 
-        function checkLogin() {
-            if(document.getElementById('station-pass').value === STATION_PASSWORD) {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                fetchData();
-            } else { alert("Access Denied"); }
-        }
-
-        async function fetchData() {
-            try {
-                if(API_URL === "YOUR_APPS_SCRIPT_URL") {
-                   db = {
-                       crew: ["John Smith", "Sarah Jenkins", "Mike Ross"],
-                       sessions: [
-                           {id: "S1", date: "2026-06-15", time: "19:00", topic: "Nav Skills", month: "June"},
-                           {id: "S2", date: "2026-06-20", time: "10:00", topic: "Boat Handling", month: "June"}
-                       ],
-                       config: { categories: ["alb-afloat", "ilb-afloat"], activities: ["OCF1", "OCF2"], roles: ["Helm", "Cox"] },
-                       signups: [
-                           {name: "John Smith", sessionId: "S1", allocatedCategory: "alb-afloat", allocatedRole: "Coxswain"}
-                       ]
-                   };
-                   currentMonth = "June";
-                   renderTabs(["June"]);
-                   renderMatrix();
-                   return;
-                }
-                const resp = await fetch(API_URL);
-                db = await resp.json();
-                const months = [...new Set(db.sessions.map(s => s.month))];
-                if(!currentMonth) currentMonth = months[0];
-                renderTabs(months);
-                renderMatrix();
-            } catch (e) {
-                alert("Error loading data. Check your API URL.");
-            }
-        }
-
-        function renderTabs(months) {
-            const container = document.getElementById('month-tabs');
-            container.innerHTML = months.map(m => `
-                <div class="tab ${m === currentMonth ? 'active' : ''}" onclick="setMonth('${m}')">${m}</div>
-            `).join('');
-        }
-
-        function setMonth(m) {
-            currentMonth = m;
+    async function fetchData() {
+        try {
+            const resp = await fetch(API_URL);
+            const data = await resp.json();
+            db = data; // Store the data
+            
             const months = [...new Set(db.sessions.map(s => s.month))];
+            if(!currentMonth) currentMonth = months[0];
+            
             renderTabs(months);
             renderMatrix();
+        } catch (e) {
+            console.error(e);
+            alert("Connection Error: The website cannot reach your Google Sheet. Check Step 1 and 2 above.");
+        }
+    }
+
+    // ... (Keep your renderTabs and renderMatrix functions as they were) ...
+
+    function handleSignup(name, sessionId) {
+        // We use simple variables here to avoid the ${} error you saw
+        var catList = "No choices found";
+        if(db.config && db.config.categories) {
+            catList = db.config.categories.join(', ');
         }
 
-        function renderMatrix() {
-            const filteredSessions = db.sessions.filter(s => s.month === currentMonth);
-            const headRow = document.getElementById('matrix-head');
-            const body = document.getElementById('matrix-body');
-
-            headRow.innerHTML = `<th>Crew Name</th>` + filteredSessions.map(s => `
-                <th>
-                    <div class="session-header">${new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} @ ${s.time}</div>
-                    <span class="session-label">${s.topic}</span>
-                </th>
-            `).join('');
-
-            body.innerHTML = db.crew.map(name => `
-                <tr>
-                    <td>${name}</td>
-                    ${filteredSessions.map(s => {
-                        const signup = db.signups.find(sig => sig.name === name && sig.sessionId === s.id);
-                        return `<td>${renderCell(name, s.id, signup)}</td>`;
-                    }).join('')}
-                </tr>
-            `).join('');
+        var actList = "No activities found";
+        if(db.config && db.config.activities) {
+            actList = db.config.activities.join(', ');
         }
 
-        function renderCell(name, sessionId, signup) {
-            if (!signup) {
-                return `<button class="cell-btn status-empty" onclick="handleSignup('${name}', '${sessionId}')">Sign Up</button>`;
-            }
-            if (signup.allocatedCategory && signup.allocatedRole) {
-                return `
-                    <div class="cell-btn status-allocated">
-                        <div class="alloc-cat">${signup.allocatedCategory}</div>
-                        <div class="alloc-role">${signup.allocatedRole}</div>
-                    </div>`;
-            }
-            return `<div class="cell-btn status-pending">Requested:<br><strong>${signup.preferred}</strong></div>`;
-        }
+        var chosenCat = prompt("Role Category (e.g. alb-afloat, ilb-afloat):\n\nOptions: " + catList);
+        if (!chosenCat) return;
 
-function handleSignup(name, sessionId) {
-    // Check if config data exists, otherwise use defaults
-    const cats = (db.config && db.config.categories) ? db.config.categories.join(', ') : 'No categories found';
-    const acts = (db.config && db.config.activities) ? db.config.activities.join(', ') : 'No activities found';
+        var chosenAct = prompt("Specific Activity (e.g. OCF1, Nav):\n\nOptions: " + actList);
+        if (!chosenAct) return;
 
-    const cat = prompt("Pick choice:\n" + cats);
-    if (!cat) return;
-    
-    const act = prompt("Specific OCF/Activity?\n" + acts);
-    if (!act) return;
-
-    fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors', // Add this to prevent browser security blocks
-        body: JSON.stringify({ crewName: name, sessionId: sessionId, preferredRole: cat, activity: act })
-    }).then(() => {
-        alert("Request sent to the station log!");
-        fetchData(); 
-    }).catch(err => alert("Error sending: " + err));
-}
-    </script>
-</body>
+        fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                crewName: name, 
+                sessionId: sessionId, 
+                preferredRole: chosenCat, 
+                activity: chosenAct 
+            })
+        }).then(function() {
+            alert("Sign-up successful!");
+            fetchData(); 
+        }).catch(function(err) {
+            alert("Submission failed. The Sheet might be busy.");
+        });
+    }
+</script>
+    </body>
 </html>

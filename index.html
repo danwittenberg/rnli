@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Station Training Matrix</title>
+    <title>Newhaven RNLI Training</title>
     <style>
         :root { --primary: #002366; --secondary: #f05a28; --bg: #f4f7f6; }
         body { font-family: system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
@@ -16,12 +16,14 @@
         .tab.active { background: var(--secondary); color: white; border-color: var(--secondary); }
         .matrix-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         table { border-collapse: collapse; width: 100%; font-size: 0.8rem; }
-        th, td { border: 1px solid #edf2f7; padding: 8px; text-align: center; min-width: 110px; }
+        th, td { border: 1px solid #edf2f7; padding: 8px; text-align: center; min-width: 125px; vertical-align: top; }
         th:first-child, td:first-child { position: sticky; left: 0; background: #fff; z-index: 10; font-weight: bold; border-right: 2px solid #cbd5e0; text-align: left; }
-        .cell-btn { width: 100%; min-height: 55px; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; padding: 5px; }
-        .status-empty { background: #f8fafc; color: #94a3b8; border: 1px dashed #ccc; }
+        .cell-btn { width: 100%; min-height: 75px; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; font-size: 0.7rem; padding: 6px; }
+        .status-empty { background: #f8fafc; color: #94a3b8; border: 1px dashed #ccc; justify-content: center; }
         .status-pending { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
         .status-allocated { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+        .role-title { font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 2px; }
+        .note-text { font-style: italic; font-size: 0.65rem; color: #666; margin-top: 4px; line-height: 1.1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -30,15 +32,12 @@
     </style>
 </head>
 <body>
-
     <div id="loading" class="hidden"><div class="spinner"></div><p>Syncing Station Data...</p></div>
-
     <div id="login-screen">
         <h2 style="color:var(--primary)">Station Matrix</h2>
         <input type="password" id="pass" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
         <button class="btn" onclick="login()">Login</button>
     </div>
-
     <div id="main-content" class="hidden">
         <div id="admin-panel" class="hidden" style="background:#e2e8f0; padding:15px; border-radius:8px; margin-bottom:15px;">
             <h4 style="margin:0 0 10px 0">Admin: Add Training Session</h4>
@@ -51,53 +50,36 @@
         <div class="controls" id="tabs"></div>
         <div class="matrix-container"><table><thead><tr id="h-row"></tr></thead><tbody id="b-rows"></tbody></table></div>
     </div>
-
     <div id="modal-signup" class="modal hidden">
         <div class="modal-content">
             <h3 id="s-title" style="margin-top:0"></h3>
             <label>Preference:</label>
-            <select id="s-cat">
-                <option value="Afloat">Afloat</option>
-                <option value="Ashore">Ashore</option>
-                <option value="Either">Either</option>
-            </select>
+            <select id="s-cat"><option value="Afloat">Afloat</option><option value="Ashore">Ashore</option><option value="Either">Either</option></select>
             <label>Notes / Training Needs:</label>
-            <textarea id="s-notes" rows="3" placeholder="e.g. Need OCF check-off..."></textarea>
+            <textarea id="s-notes" rows="3" placeholder="e.g. Need OCF check-offs..."></textarea>
             <button onclick="submitSignup()" class="btn" style="background:var(--secondary)">Confirm Sign Up</button>
             <button onclick="closeModals()" style="width:100%; background:none; border:none; margin-top:10px; color:grey;">Cancel</button>
         </div>
     </div>
-
     <div id="modal-alloc" class="modal hidden">
         <div class="modal-content">
             <h3 style="margin-top:0">Allocate</h3>
             <p id="a-name" style="font-weight:bold"></p>
-            <p id="a-pref" style="font-size:0.8rem; color:#666; font-style:italic; border-left: 3px solid var(--secondary); padding-left: 10px;"></p>
-            <label>Category:</label>
-            <select id="a-cat">
-                <option value="Afloat">Afloat</option>
-                <option value="Ashore">Ashore</option>
-            </select>
-            <label>Role:</label>
-            <select id="a-role">
-                <option value="ILB Helm">ILB Helm</option>
-                <option value="ILB Crew">ILB Crew</option>
-                <option value="ALB Coxswain">ALB Coxswain</option>
-                <option value="ALB Mech">ALB Mech</option>
-                <option value="ALB Nav">ALB Nav</option>
-                <option value="ALB Crew">ALB Crew</option>
+            <p id="a-pref-display" style="font-size:0.75rem; color:#444; background:#fef3c7; padding:8px; border-radius:4px; margin-bottom:10px;"></p>
+            <label>Category:</label><select id="a-cat"><option value="Afloat">Afloat</option><option value="Ashore">Ashore</option></select>
+            <label>Role:</label><select id="a-role">
+                <option value="ILB Helm">ILB Helm</option><option value="ILB Crew">ILB Crew</option>
+                <option value="ALB Coxswain">ALB Coxswain</option><option value="ALB Mech">ALB Mech</option>
+                <option value="ALB Nav">ALB Nav</option><option value="ALB Crew">ALB Crew</option>
             </select>
             <button onclick="submitAlloc()" class="btn">Update Matrix</button>
             <button onclick="closeModals()" style="width:100%; background:none; border:none; margin-top:10px; color:grey;">Cancel</button>
         </div>
     </div>
-
     <script>
         const API = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec";
         let db = {}, isAdmin = false, currentMonth = "", target = {};
-
         function showLoad(s) { document.getElementById('loading').classList.toggle('hidden', !s); }
-
         function login() {
             const p = document.getElementById('pass').value;
             if(p === "RNLI" || p === "ADMIN123") {
@@ -108,7 +90,6 @@
                 refresh();
             } else { alert("Wrong Password"); }
         }
-
         async function refresh() {
             showLoad(true);
             try {
@@ -120,7 +101,6 @@
             } catch (e) { alert("Data Error"); }
             showLoad(false);
         }
-
         function render(months) {
             document.getElementById('tabs').innerHTML = months.map(m => `<div class="tab ${m===currentMonth?'active':''}" onclick="currentMonth='${m}';render(['${months.join("','")}'])">${m}</div>`).join('');
             const sessions = db.sessions.filter(s => s.month === currentMonth);
@@ -130,14 +110,14 @@
                 return `<td>${getCell(name, s.id, sig)}</td>`;
             }).join('')}</tr>`).join('');
         }
-
         function getCell(name, sid, sig) {
             const act = isAdmin ? `onclick="openAlloc('${name}','${sid}')"` : `onclick="openSignup('${name}','${sid}')"`;
             if(!sig) return `<button class="cell-btn status-empty" ${act}>Sign Up</button>`;
-            if(sig.allocatedCategory) return `<button class="cell-btn status-allocated" ${act}><b>${sig.allocatedCategory}</b>${sig.allocatedRole}</button>`;
-            return `<button class="cell-btn status-pending" ${act}>Req: ${sig.preferred}</button>`;
+            if(sig.allocatedCategory) {
+                return `<button class="cell-btn status-allocated" ${act}><div class="role-title">${sig.allocatedRole}</div><div class="note-text">${sig.notes || ""}</div></button>`;
+            }
+            return `<button class="cell-btn status-pending" ${act}><div class="role-title">${sig.preferred}</div><div class="note-text">${sig.notes || ""}</div></button>`;
         }
-
         function openSignup(n, sid) {
             target = {n, sid};
             const sig = db.signups.find(x => x.name == n && x.sessionId == sid);
@@ -146,36 +126,30 @@
             document.getElementById('s-notes').value = sig ? (sig.notes || "") : "";
             document.getElementById('modal-signup').classList.remove('hidden');
         }
-
         function openAlloc(n, sid) {
             target = {n, sid};
             const sig = db.signups.find(x => x.name == n && x.sessionId == sid);
             document.getElementById('a-name').innerText = n;
-            document.getElementById('a-pref').innerText = sig ? "Req: " + sig.preferred + " | Notes: " + (sig.notes || "None") : "Not signed up";
+            document.getElementById('a-pref-display').innerText = sig ? "Pref: " + sig.preferred + " | Notes: " + (sig.notes || "None") : "No signup data";
             document.getElementById('modal-alloc').classList.remove('hidden');
         }
-
         async function submitSignup() {
             await send({ action:"signup", crewName:target.n, sessionId:target.sid, preferredRole:document.getElementById('s-cat').value, notes:document.getElementById('s-notes').value });
         }
-
         async function submitAlloc() {
             await send({ action:"allocate", crewName:target.n, sessionId:target.sid, roleType:document.getElementById('a-cat').value, specificRole:document.getElementById('a-role').value });
         }
-
         async function addSession(e) {
             e.preventDefault();
             const d = document.getElementById('n-date').value;
             if(!d) return alert("Date required");
             await send({ action:"addSession", date:d, time:document.getElementById('n-time').value, topic:document.getElementById('n-topic').value });
         }
-
         async function send(data) {
             closeModals(); showLoad(true);
             await fetch(API, { method: 'POST', body: JSON.stringify(data) });
             await refresh();
         }
-
         function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); }
     </script>
 </body>

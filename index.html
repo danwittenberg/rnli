@@ -5,92 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Station Training Matrix</title>
     <style>
-        :root { --primary: #002366; --secondary: #f05a28; --bg: #f4f7f6; --border: #cbd5e0; --locked: #64748b; }
+        :root { --primary: #002366; --secondary: #f05a28; --bg: #f4f7f6; --border: #cbd5e0; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #2d3748; }
         .hidden { display: none !important; }
 
-        /* UI Elements */
+        /* Login */
         #login-screen { max-width: 400px; margin: 100px auto; text-align: center; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .btn { padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; }
         .btn-secondary { background: var(--secondary); }
         .btn-danger { background: #dc2626; }
         .btn-outline { background: white; color: #666; border: 1px solid #ccc; }
-
         input, select, textarea { padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; width: 100%; box-sizing: border-box; }
 
-        /* Top Utility Bar */
+        /* Utility & Controls */
         .top-utility { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .logout-link { background: none; border: none; color: #e53e3e; cursor: pointer; font-size: 0.75rem; font-weight: bold; text-decoration: underline; }
-
-        /* Table & Tabs */
         .header-flex { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; gap: 15px; }
         .controls { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
         .tab { padding: 8px 16px; background: #fff; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; white-space: nowrap; font-weight: 500; font-size: 0.8rem; }
         .tab.active { background: var(--secondary); color: white; border-color: var(--secondary); }
         
-        /* FREEZE FRAME CSS */
-        .matrix-container { 
-            overflow: auto; 
-            background: white; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-            max-height: 80vh; /* Limits height to allow vertical scrolling */
-        }
+        /* FREEZE FRAME TABLE */
+        .matrix-container { overflow: auto; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-height: 75vh; }
         table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 0.85rem; }
         
-        /* Freeze Top Row */
-        th { 
-            position: sticky; 
-            top: 0; 
-            background: #fff; 
-            z-index: 20; 
-            border-bottom: 2px solid var(--border);
-            box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
-        }
-
-        /* Freeze First Column */
-        td:first-child { 
-            position: sticky; 
-            left: 0; 
-            background: #fff; 
-            z-index: 10; 
-            font-weight: bold; 
-            border-right: 2px solid var(--border);
-            text-align: left;
-            box-shadow: 2px 0 2px -1px rgba(0,0,0,0.1);
-        }
-
-        /* Top-Left Corner (Needs highest priority) */
-        th:first-child { 
-            position: sticky; 
-            left: 0; 
-            top: 0; 
-            z-index: 30; 
-            background: #f8fafc;
-        }
-
+        /* Sticky Top Row */
+        th { position: sticky; top: 0; background: #fff; z-index: 20; border-bottom: 2px solid var(--border); box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1); }
+        /* Sticky First Column */
+        td:first-child { position: sticky; left: 0; background: #fff; z-index: 10; font-weight: bold; border-right: 2px solid var(--border); text-align: left; box-shadow: 2px 0 2px -1px rgba(0,0,0,0.1); }
+        /* Sticky Top-Left Corner */
+        th:first-child { position: sticky; left: 0; top: 0; z-index: 30; background: #f8fafc; }
         th, td { border: 1px solid #edf2f7; padding: 12px; text-align: center; min-width: 160px; vertical-align: top; }
 
-        /* Tile Styles */
+        /* Tiles */
         .cell-btn { width: 100%; min-height: 95px; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 8px; position: relative; background: #fff; }
         .status-empty { background: #f8fafc; color: #94a3b8; border: 1px dashed #cbd5e0; justify-content: center; }
         .status-pending { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
         .status-allocated { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
         .status-locked { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e0; cursor: not-allowed; }
-
+        
         .role-cat-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 800; opacity: 0.7; margin-bottom: 2px; }
         .role-title { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; line-height: 1.1; margin-bottom: 4px; }
         .note-text { font-style: italic; font-size: 0.7rem; color: #64748b; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .padlock { position: absolute; top: 5px; right: 5px; font-size: 0.7rem; opacity: 0.5; }
 
-        #last-update { font-size: 0.7rem; color: #718096; text-align: right; }
+        #last-update { font-size: 0.7rem; color: #718096; }
 
-        /* Loading & Modal */
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 350px; max-width: 90%; }
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 350px; max-width: 90%; }
     </style>
 </head>
 <body>
@@ -104,14 +70,13 @@
     </div>
 
     <div id="main-content" class="hidden">
-        
         <div class="top-utility">
             <button onclick="logout()" class="logout-link">Logout / Change User</button>
             <div id="last-update">Syncing...</div>
         </div>
 
         <div id="admin-panel" class="hidden" style="background:#e2e8f0; padding:15px; border-radius:8px; margin-bottom:20px;">
-            <h4 style="margin:0 0 10px 0">Admin Tools: Add Session</h4>
+            <h4 style="margin:0 0 10px 0">Admin: Add Session</h4>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                 <input type="date" id="n-date"> <input type="time" id="n-time">
                 <input type="text" id="n-topic" placeholder="Session Topic" style="grid-column: span 2">
@@ -119,15 +84,10 @@
             </div>
         </div>
 
-        <div class="header-flex">
-            <div class="controls" id="tabs"></div>
-        </div>
+        <div class="header-flex"><div class="controls" id="tabs"></div></div>
         
         <div class="matrix-container">
-            <table>
-                <thead><tr id="h-row"></tr></thead>
-                <tbody id="b-rows"></tbody>
-            </table>
+            <table><thead><tr id="h-row"></tr></thead><tbody id="b-rows"></tbody></table>
         </div>
     </div>
 
@@ -154,15 +114,8 @@
             <h3 style="margin-bottom:5px;">Allocate Role</h3>
             <p id="a-name" style="font-weight:bold; color:var(--primary); margin-bottom:15px;"></p>
             <div id="a-pref-box" style="font-size:0.8rem; background:#fef3c7; padding:10px; border-radius:6px; margin-bottom:15px;"></div>
-            <label>Category:</label><select id="a-cat"><option value="">-- Clear Allocation --</option><option value="Afloat">Afloat</option><option value="Ashore">Ashore</option></select>
-            <label>Role:</label>
-            <select id="a-role">
-                <option value="">-- Clear Allocation --</option>
-                <option value="ILB Helm">ILB Helm</option><option value="ILB Crew">ILB Crew</option>
-                <option value="ALB Coxswain">ALB Coxswain</option><option value="ALB Mech">ALB Mech</option>
-                <option value="ALB Nav">ALB Nav</option><option value="ALB Crew">ALB Crew</option>
-                <option value="Shore Crew">Shore Crew</option><option value="Head Launcher">Head Launcher</option>
-            </select>
+            <label>Category:</label><select id="a-cat"><option value="">-- Clear --</option><option value="Afloat">Afloat</option><option value="Ashore">Ashore</option></select>
+            <label>Role:</label><select id="a-role"></select>
             <button onclick="submitAlloc()" class="btn">Update Matrix</button>
             <button onclick="closeModals()" class="btn btn-outline">Cancel</button>
         </div>
@@ -170,19 +123,15 @@
 
     <script>
         const API = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; 
-        let db = { crew: [], sessions: [], signups: [] }, isAdmin = false, currentMonth = "", target = {};
+        let db = { crew: [], sessions: [], signups: [], roles: [] }, isAdmin = false, currentMonth = "", target = {};
         let refreshInterval = null;
 
         window.onload = () => {
             const savedRole = sessionStorage.getItem('matrixRole');
-            if (savedRole) {
-                isAdmin = (savedRole === 'admin');
-                initSystem();
-            }
+            if (savedRole) { isAdmin = (savedRole === 'admin'); initSystem(); }
         };
 
         function showLoad(s) { document.getElementById('loading').classList.toggle('hidden', !s); }
-
         function login() {
             const p = document.getElementById('pass').value;
             if (p === "RNLI" || p === "ADMIN123") {
@@ -191,11 +140,7 @@
                 initSystem();
             } else { alert("Wrong Password"); }
         }
-
-        function logout() {
-            sessionStorage.clear();
-            location.reload();
-        }
+        function logout() { sessionStorage.clear(); location.reload(); }
 
         function initSystem() {
             if (isAdmin) document.getElementById('admin-panel').classList.remove('hidden');
@@ -209,62 +154,42 @@
             try {
                 const response = await fetch(`${API}?t=${new Date().getTime()}`);
                 db = await response.json();
+                
+                // Build dynamic role dropdown
+                const roleSelect = document.getElementById('a-role');
+                roleSelect.innerHTML = '<option value="">-- Clear --</option>' + db.roles.map(r => `<option value="${r}">${r}</option>`).join('');
+
                 const months = [...new Set(db.sessions.map(s => s.month))];
                 if (!currentMonth || !months.includes(currentMonth)) currentMonth = months[0] || "";
                 renderMatrix(months);
                 document.getElementById('last-update').innerText = "Live • " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            } catch (err) { 
-                document.getElementById('last-update').innerText = "Sync Error - Retrying...";
-            }
+            } catch (err) { document.getElementById('last-update').innerText = "Sync Error - Retrying..."; }
         }
 
         function renderMatrix(months) {
-            document.getElementById('tabs').innerHTML = months.map(m => `
-                <div class="tab ${m === currentMonth ? 'active' : ''}" onclick="currentMonth='${m}'; renderMatrix(['${months.join("','")}'])">${m}</div>
-            `).join('');
-            
+            document.getElementById('tabs').innerHTML = months.map(m => `<div class="tab ${m === currentMonth ? 'active' : ''}" onclick="currentMonth='${m}'; renderMatrix(['${months.join("','")}'])">${m}</div>`).join('');
             const sessions = db.sessions.filter(s => s.month === currentMonth);
             document.getElementById('h-row').innerHTML = `<th>Crew Member</th>` + sessions.map(s => `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><small>${s.topic}</small></th>`).join('');
-            
-            document.getElementById('b-rows').innerHTML = db.crew.map(name => `
-                <tr>
-                    <td>${name}</td>
-                    ${sessions.map(s => `<td>${getCellHTML(name, s.id)}</td>`).join('')}
-                </tr>
-            `).join('');
+            document.getElementById('b-rows').innerHTML = db.crew.map(name => `<tr><td>${name}</td>${sessions.map(s => `<td>${getCellHTML(name, s.id)}</td>`).join('')}</tr>`).join('');
         }
 
         function getCellHTML(name, sid) {
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
             const isAllocated = (sig && sig.allocatedCategory && sig.allocatedRole);
-            let statusClass = 'status-empty';
-            let content = '<div class="role-title">Sign Up</div>';
+            let statusClass = 'status-empty', content = '<div class="role-title">Sign Up</div>';
 
             if (isAllocated) {
                 statusClass = isAdmin ? 'status-allocated' : 'status-locked';
-                content = `<div class="padlock">🔒</div>
-                           <div class="role-cat-label">${sig.allocatedCategory}</div>
-                           <div class="role-title">${sig.allocatedRole}</div>
-                           <div class="note-text">${sig.notes || ""}</div>`;
+                content = `<div class="padlock">🔒</div><div class="role-cat-label">${sig.allocatedCategory}</div><div class="role-title">${sig.allocatedRole}</div><div class="note-text">${sig.notes || ""}</div>`;
             } else if (sig) {
                 statusClass = 'status-pending';
-                content = `<div class="role-cat-label">Pending</div>
-                           <div class="role-title">${sig.preferred}</div>
-                           <div class="note-text">${sig.notes || ""}</div>`;
+                content = `<div class="role-cat-label">Requesting</div><div class="role-title">${sig.preferred}</div><div class="note-text">${sig.notes || ""}</div>`;
             }
-
-            return `<button class="cell-btn ${statusClass}" 
-                    data-name="${name}" data-sid="${sid}" 
-                    data-locked="${isAllocated ? 'true' : 'false'}"
-                    onclick="handleCellClick(this)">
-                ${content}
-            </button>`;
+            return `<button class="cell-btn ${statusClass}" data-name="${name}" data-sid="${sid}" data-locked="${isAllocated ? 'true' : 'false'}" onclick="handleCellClick(this)">${content}</button>`;
         }
 
         function handleCellClick(btn) {
-            const name = btn.getAttribute('data-name');
-            const sid = btn.getAttribute('data-sid');
-            const isLocked = btn.getAttribute('data-locked') === 'true';
+            const name = btn.getAttribute('data-name'), sid = btn.getAttribute('data-sid'), isLocked = btn.getAttribute('data-locked') === 'true';
             if (isAdmin) openAlloc(name, sid); else openSignup(name, sid, isLocked);
         }
 
@@ -275,13 +200,8 @@
             document.getElementById('locked-notice').classList.toggle('hidden', !isLocked);
             document.getElementById('signup-fields').classList.toggle('hidden', isLocked);
             document.getElementById('btn-remove-signup').classList.toggle('hidden', (!sig || isLocked));
-            if (sig) {
-                document.getElementById('s-cat').value = sig.preferred;
-                document.getElementById('s-notes').value = sig.notes;
-            } else {
-                document.getElementById('s-cat').value = "Afloat";
-                document.getElementById('s-notes').value = "";
-            }
+            if (sig) { document.getElementById('s-cat').value = sig.preferred; document.getElementById('s-notes').value = sig.notes; }
+            else { document.getElementById('s-cat').value = "Afloat"; document.getElementById('s-notes').value = ""; }
             document.getElementById('modal-signup').classList.remove('hidden');
         }
 

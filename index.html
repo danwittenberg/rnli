@@ -95,7 +95,7 @@
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; // <-- Update this!
+        const API = "REPLACE_WITH_YOUR_DEPLOYED_URL"; // <-- Update this!
         let db = { crew: [], sessions: [], signups: [] }, isAdmin = false, currentMonth = "", target = {};
 
         function showLoad(s, m = "Syncing...") { document.getElementById('load-msg').innerText = m; document.getElementById('loading').classList.toggle('hidden', !s); }
@@ -177,4 +177,29 @@
             target = { name, sessionId: sid };
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
             document.getElementById('a-name').innerText = name;
-            document.getElementById('a-pref-box').innerText = sig ? `Pref: ${sig.preferred}\nNotes: ${sig.notes || "None"}` : "No signup
+            document.getElementById('a-pref-box').innerText = sig ? `Pref: ${sig.preferred}\nNotes: ${sig.notes || "None"}` : "No signup data.";
+            if (sig && sig.allocatedRole) {
+                document.getElementById('a-cat').value = sig.allocatedCategory;
+                document.getElementById('a-role').value = sig.allocatedRole;
+            }
+            document.getElementById('modal-alloc').classList.remove('hidden');
+        }
+
+        async function sendData(payload) {
+            closeModals(); showLoad(true, "Saving...");
+            try {
+                await fetch(API, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
+                setTimeout(refreshData, 2500);
+            } catch (err) { alert("Save Error"); showLoad(false); }
+        }
+
+        function submitSignup() { sendData({ action: "signup", crewName: target.name, sessionId: target.sessionId, preferredRole: document.getElementById('s-cat').value, notes: document.getElementById('s-notes').value }); }
+        function submitAlloc() { sendData({ action: "allocate", crewName: target.name, sessionId: target.sessionId, roleType: document.getElementById('a-cat').value, specificRole: document.getElementById('a-role').value }); }
+        function addSession(e) { 
+            e.preventDefault(); 
+            sendData({ action: "addSession", date: document.getElementById('n-date').value, time: document.getElementById('n-time').value, topic: document.getElementById('n-topic').value }); 
+        }
+        function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); }
+    </script>
+</body>
+</html>

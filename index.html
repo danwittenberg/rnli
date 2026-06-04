@@ -5,61 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Station Training Matrix</title>
     <style>
-        :root { --primary: #002366; --secondary: #f05a28; --bg: #f4f7f6; --border: #cbd5e0; }
+        :root { --primary: #002366; --secondary: #f05a28; --bg: #f4f7f6; --border: #cbd5e0; --locked: #64748b; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #2d3748; }
         .hidden { display: none !important; }
 
         /* UI Elements */
         #login-screen { max-width: 400px; margin: 100px auto; text-align: center; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .btn { padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: transform 0.1s; }
-        .btn:active { transform: scale(0.98); }
+        .btn { padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; }
         .btn-secondary { background: var(--secondary); }
-        input, select, textarea { padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; width: 100%; box-sizing: border-box; font-family: inherit; }
+        .btn-danger { background: #dc2626; }
+        .btn-outline { background: white; color: #666; border: 1px solid #ccc; }
 
-        /* Tabs & Table */
+        input, select, textarea { padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; width: 100%; box-sizing: border-box; }
+
+        /* Table & Tabs */
         .controls { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
         .tab { padding: 10px 20px; background: #fff; border: 1px solid #ddd; border-radius: 25px; cursor: pointer; white-space: nowrap; font-weight: 500; }
         .tab.active { background: var(--secondary); color: white; border-color: var(--secondary); }
         .matrix-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
-        th, td { border: 1px solid #edf2f7; padding: 12px; text-align: center; min-width: 150px; vertical-align: top; }
+        th, td { border: 1px solid #edf2f7; padding: 12px; text-align: center; min-width: 160px; vertical-align: top; }
         th:first-child, td:first-child { position: sticky; left: 0; background: #fff; z-index: 10; font-weight: bold; border-right: 2px solid var(--border); text-align: left; }
 
-        /* Cell Styling */
-        .cell-btn { width: 100%; min-height: 90px; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 8px; }
+        /* Tile Styles */
+        .cell-btn { width: 100%; min-height: 95px; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 8px; position: relative; }
         .status-empty { background: #f8fafc; color: #94a3b8; border: 1px dashed #cbd5e0; justify-content: center; }
         .status-pending { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
         .status-allocated { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
-        
-        /* THE NEW STYLES FOR THE TILE LABELS */
-        .role-cat-label { font-size: 0.65rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; opacity: 0.7; margin-bottom: 2px; }
-        .role-title { font-weight: 800; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px; line-height: 1.1; }
-        .note-text { font-style: italic; font-size: 0.7rem; color: #64748b; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .status-locked { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e0; cursor: not-allowed; }
 
-        /* Loading & Modals */
+        .role-cat-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 800; opacity: 0.7; margin-bottom: 2px; }
+        .role-title { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; line-height: 1.1; margin-bottom: 4px; }
+        .note-text { font-style: italic; font-size: 0.7rem; color: #64748b; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .padlock { position: absolute; top: 5px; right: 5px; font-size: 0.7rem; opacity: 0.5; }
+
+        /* Loading & Modal */
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 350px; max-width: 90%; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 350px; max-width: 90%; }
     </style>
 </head>
 <body>
 
-    <div id="loading" class="hidden"><div class="spinner"></div><p id="load-msg" style="margin-top:15px; font-weight:bold; color:var(--primary)">Syncing Matrix...</p></div>
+    <div id="loading" class="hidden"><div class="spinner"></div><p id="load-msg" style="margin-top:15px; font-weight:bold; color:var(--primary)">Processing...</p></div>
 
     <div id="login-screen">
         <h2 style="color:var(--primary); margin-bottom:25px;">Station Training Matrix</h2>
-        <input type="password" id="pass" placeholder="Enter Station Password" onkeydown="if(event.key==='Enter')login()">
+        <input type="password" id="pass" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
         <button class="btn" onclick="login()">Enter System</button>
     </div>
 
     <div id="main-content" class="hidden">
         <div id="admin-panel" class="hidden" style="background:#e2e8f0; padding:20px; border-radius:8px; margin-bottom:20px;">
-            <h3 style="margin:0 0 15px 0">Admin: Session Manager</h3>
+            <h3 style="margin:0 0 10px 0">Admin: New Session</h3>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                 <input type="date" id="n-date"> <input type="time" id="n-time">
-                <input type="text" id="n-topic" placeholder="Session Topic" style="grid-column: span 2">
+                <input type="text" id="n-topic" placeholder="Topic" style="grid-column: span 2">
                 <button onclick="addSession(event)" class="btn">Add Session</button>
             </div>
         </div>
@@ -69,39 +73,43 @@
 
     <div id="modal-signup" class="modal hidden">
         <div class="modal-content">
-            <h3 id="s-title" style="margin:0 0 15px 0"></h3>
-            <label>Preference:</label>
-            <select id="s-cat"><option value="Afloat">Afloat</option><option value="Ashore">Ashore</option><option value="Either">Either</option></select>
-            <label>Notes:</label>
-            <textarea id="s-notes" rows="3" placeholder="Notes or check-off needs..."></textarea>
-            <button onclick="submitSignup()" class="btn btn-secondary">Submit Signup</button>
-            <button onclick="closeModals()" style="width:100%; background:none; border:none; margin-top:15px; color:#666; cursor:pointer;">Cancel</button>
+            <h3 id="s-title" style="margin-bottom:15px;"></h3>
+            <div id="locked-notice" class="hidden" style="color:#dc2626; font-size:0.8rem; margin-bottom:15px; font-weight:bold;">
+                🔒 This role is locked. Contact Admin to change.
+            </div>
+            <div id="signup-fields">
+                <label>Preference:</label>
+                <select id="s-cat"><option value="Afloat">Afloat</option><option value="Ashore">Ashore</option><option value="Either">Either</option></select>
+                <label>Notes:</label>
+                <textarea id="s-notes" rows="3" placeholder="Check-offs needed..."></textarea>
+                <button id="btn-save-signup" onclick="submitSignup()" class="btn btn-secondary">Submit Signup</button>
+                <button id="btn-remove-signup" onclick="submitRemove()" class="btn btn-danger hidden">Remove My Request</button>
+            </div>
+            <button onclick="closeModals()" class="btn btn-outline">Close</button>
         </div>
     </div>
 
     <div id="modal-alloc" class="modal hidden">
         <div class="modal-content">
-            <h3 style="margin:0 0 5px 0">Allocate Role</h3>
+            <h3 style="margin-bottom:5px;">Allocate Role</h3>
             <p id="a-name" style="font-weight:bold; color:var(--primary); margin-bottom:15px;"></p>
-            <div id="a-pref-box" style="font-size:0.8rem; background:#fef3c7; padding:10px; border-radius:6px; margin-bottom:15px; white-space: pre-wrap;"></div>
-            <label>Category:</label><select id="a-cat"><option value="Afloat">Afloat</option><option value="Ashore">Ashore</option></select>
-            <label>Specific Role:</label>
+            <div id="a-pref-box" style="font-size:0.8rem; background:#fef3c7; padding:10px; border-radius:6px; margin-bottom:15px;"></div>
+            <label>Category:</label><select id="a-cat"><option value="">-- Clear Allocation --</option><option value="Afloat">Afloat</option><option value="Ashore">Ashore</option></select>
+            <label>Role:</label>
             <select id="a-role">
+                <option value="">-- Clear Allocation --</option>
                 <option value="ILB Helm">ILB Helm</option><option value="ILB Crew">ILB Crew</option>
                 <option value="ALB Coxswain">ALB Coxswain</option><option value="ALB Mech">ALB Mech</option>
                 <option value="ALB Nav">ALB Nav</option><option value="ALB Crew">ALB Crew</option>
                 <option value="Shore Crew">Shore Crew</option><option value="Head Launcher">Head Launcher</option>
-                <option value="Driver">Driver</option><option value="Winchman">Winchman</option>
             </select>
             <button onclick="submitAlloc()" class="btn">Update Matrix</button>
-            <button onclick="closeModals()" style="width:100%; background:none; border:none; margin-top:15px; color:#666; cursor:pointer;">Cancel</button>
+            <button onclick="closeModals()" class="btn btn-outline">Cancel</button>
         </div>
     </div>
 
     <script>
-        // Update this URL with your current GAS Web App URL
-        const API = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; 
-        
+        const API = "REPLACE_WITH_YOUR_DEPLOYED_URL"; 
         let db = { crew: [], sessions: [], signups: [] }, isAdmin = false, currentMonth = "", target = {};
 
         function showLoad(s, m = "Syncing...") { document.getElementById('load-msg').innerText = m; document.getElementById('loading').classList.toggle('hidden', !s); }
@@ -114,30 +122,28 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
                 refreshData();
-            } else { alert("Incorrect Password"); }
+            } else { alert("Wrong Password"); }
         }
 
         async function refreshData() {
-            showLoad(true, "Fetching data...");
+            showLoad(true);
             try {
                 const response = await fetch(`${API}?t=${new Date().getTime()}`);
                 db = await response.json();
                 const months = [...new Set(db.sessions.map(s => s.month))];
                 if (!currentMonth || !months.includes(currentMonth)) currentMonth = months[0] || "";
                 renderMatrix(months);
-            } catch (err) { alert("Data Fetch Error. Check deployment."); }
+            } catch (err) { alert("Fetch Error"); }
             showLoad(false);
         }
 
         function renderMatrix(months) {
             document.getElementById('tabs').innerHTML = months.map(m => `
-                <div class="tab ${m === currentMonth ? 'active' : ''}" onclick="setMonth('${m}')">${m}</div>
+                <div class="tab ${m === currentMonth ? 'active' : ''}" onclick="currentMonth='${m}'; renderMatrix(['${months.join("','")}'])">${m}</div>
             `).join('');
             
             const sessions = db.sessions.filter(s => s.month === currentMonth);
-            document.getElementById('h-row').innerHTML = `<th>Crew Member</th>` + sessions.map(s => `
-                <th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><small>${s.topic}</small></th>
-            `).join('');
+            document.getElementById('h-row').innerHTML = `<th>Crew</th>` + sessions.map(s => `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><small>${s.topic}</small></th>`).join('');
             
             document.getElementById('b-rows').innerHTML = db.crew.map(name => `
                 <tr>
@@ -147,34 +153,29 @@
             `).join('');
         }
 
-        function setMonth(m) { currentMonth = m; renderMatrix([...new Set(db.sessions.map(s => s.month))]); }
-
-        // THE UPDATED TILE DISPLAY LOGIC
         function getCellHTML(name, sid) {
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
-            const statusClass = !sig ? 'status-empty' : (sig.allocatedCategory ? 'status-allocated' : 'status-pending');
+            const isAllocated = (sig && sig.allocatedCategory && sig.allocatedRole);
             
-            let content = '';
-            if (!sig) {
-                content = '<div class="role-title">Sign Up</div>';
-            } else if (sig.allocatedCategory) {
-                // ALLOCATED: Show Category + Specific Role
-                content = `
-                    <div class="role-cat-label">${sig.allocatedCategory}</div>
-                    <div class="role-title">${sig.allocatedRole}</div>
-                    <div class="note-text">${sig.notes || ""}</div>
-                `;
-            } else {
-                // PENDING: Show "Pending" + Preference
-                content = `
-                    <div class="role-cat-label">Pending</div>
-                    <div class="role-title">${sig.preferred}</div>
-                    <div class="note-text">${sig.notes || ""}</div>
-                `;
+            let statusClass = 'status-empty';
+            let content = '<div class="role-title">Sign Up</div>';
+
+            if (isAllocated) {
+                statusClass = isAdmin ? 'status-allocated' : 'status-locked';
+                content = `<div class="padlock">🔒</div>
+                           <div class="role-cat-label">${sig.allocatedCategory}</div>
+                           <div class="role-title">${sig.allocatedRole}</div>
+                           <div class="note-text">${sig.notes || ""}</div>`;
+            } else if (sig) {
+                statusClass = 'status-pending';
+                content = `<div class="role-cat-label">Pending</div>
+                           <div class="role-title">${sig.preferred}</div>
+                           <div class="note-text">${sig.notes || ""}</div>`;
             }
-            
+
             return `<button class="cell-btn ${statusClass}" 
                     data-name="${name}" data-sid="${sid}" 
+                    data-locked="${isAllocated ? 'true' : 'false'}"
                     onclick="handleCellClick(this)">
                 ${content}
             </button>`;
@@ -183,15 +184,30 @@
         function handleCellClick(btn) {
             const name = btn.getAttribute('data-name');
             const sid = btn.getAttribute('data-sid');
-            if (isAdmin) openAlloc(name, sid); else openSignup(name, sid);
+            const isLocked = btn.getAttribute('data-locked') === 'true';
+
+            if (isAdmin) {
+                openAlloc(name, sid);
+            } else {
+                openSignup(name, sid, isLocked);
+            }
         }
 
-        function openSignup(name, sid) {
+        function openSignup(name, sid, isLocked) {
             target = { name, sessionId: sid };
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
+            
             document.getElementById('s-title').innerText = name;
-            document.getElementById('s-cat').value = sig ? sig.preferred : "Afloat";
-            document.getElementById('s-notes').value = sig ? sig.notes : "";
+            document.getElementById('locked-notice').classList.toggle('hidden', !isLocked);
+            document.getElementById('signup-fields').classList.toggle('hidden', isLocked);
+            
+            // Show Remove button only if they have a request and it's NOT locked
+            document.getElementById('btn-remove-signup').classList.toggle('hidden', (!sig || isLocked));
+            
+            if (sig) {
+                document.getElementById('s-cat').value = sig.preferred;
+                document.getElementById('s-notes').value = sig.notes;
+            }
             document.getElementById('modal-signup').classList.remove('hidden');
         }
 
@@ -199,39 +215,24 @@
             target = { name, sessionId: sid };
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
             document.getElementById('a-name').innerText = name;
-            document.getElementById('a-pref-box').innerText = sig ? `Preference: ${sig.preferred}\nNotes: ${sig.notes || "None"}` : "No signup data (Direct allocation).";
-            
-            // Pre-fill existing data if it exists
-            if (sig && sig.allocatedCategory) {
-                document.getElementById('a-cat').value = sig.allocatedCategory;
-                document.getElementById('a-role').value = sig.allocatedRole;
-            } else {
-                document.getElementById('a-cat').value = "Afloat";
-                document.getElementById('a-role').value = "ILB Crew";
-            }
+            document.getElementById('a-pref-box').innerText = sig ? `Pref: ${sig.preferred}\nNotes: ${sig.notes || "None"}` : "No Request.";
+            document.getElementById('a-cat').value = sig ? sig.allocatedCategory : "";
+            document.getElementById('a-role').value = sig ? sig.allocatedRole : "";
             document.getElementById('modal-alloc').classList.remove('hidden');
         }
 
         async function sendData(payload) {
-            closeModals(); 
-            showLoad(true, "Updating Spreadsheet...");
+            closeModals(); showLoad(true, "Saving...");
             try {
-                // We use 'no-cors' for Google Apps Script POST requests
                 await fetch(API, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
-                // Give Google 3 seconds to process the row before refreshing
                 setTimeout(refreshData, 3000);
-            } catch (err) { alert("Save error occurred."); showLoad(false); }
+            } catch (err) { alert("Save Error"); showLoad(false); }
         }
 
         function submitSignup() { sendData({ action: "signup", crewName: target.name, sessionId: target.sessionId, preferredRole: document.getElementById('s-cat').value, notes: document.getElementById('s-notes').value }); }
+        function submitRemove() { if(confirm("Remove your request?")) sendData({ action: "remove", crewName: target.name, sessionId: target.sessionId }); }
         function submitAlloc() { sendData({ action: "allocate", crewName: target.name, sessionId: target.sessionId, roleType: document.getElementById('a-cat').value, specificRole: document.getElementById('a-role').value }); }
-        function addSession(e) { 
-            e.preventDefault(); 
-            const d = document.getElementById('n-date').value;
-            const t = document.getElementById('n-topic').value;
-            if(!d || !t) return alert("Date and Topic are required");
-            sendData({ action: "addSession", date: d, time: document.getElementById('n-time').value, topic: t }); 
-        }
+        function addSession(e) { e.preventDefault(); sendData({ action: "addSession", date: document.getElementById('n-date').value, time: document.getElementById('n-time').value, topic: document.getElementById('n-topic').value }); }
         function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); }
     </script>
 </body>

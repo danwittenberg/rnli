@@ -3,54 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Station Training Matrix</title>
+    <title>RNLI Training Matrix</title>
     <style>
-        :root { --primary: #002366; --secondary: #f05a28; --bg: #f4f7f6; --border: #cbd5e0; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 8px; color: #2d3748; font-size: 0.8rem; }
+        :root { 
+            --rnli-navy: #002366; 
+            --rnli-orange: #f05a28; 
+            --bg: #f4f7f6; 
+            --border: #cbd5e0; 
+            --green-bg: #dcfce7;
+            --green-text: #166534;
+            --green-border: #86efac;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 8px; color: #2d3748; font-size: 0.8rem; }
         .hidden { display: none !important; }
-        .disabled-field { opacity: 0.5; pointer-events: none; background: #f1f5f9; }
+
+        /* Branding Header */
+        #mode-header-banner { 
+            background: var(--rnli-navy); 
+            color: white; 
+            padding: 12px; 
+            text-align: center; 
+            border-bottom: 4px solid var(--rnli-orange);
+            margin: -8px -8px 10px -8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1.1rem;
+        }
 
         /* Login Screen */
-        #login-screen { max-width: 340px; margin: 80px auto; text-align: center; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .btn { padding: 8px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 8px; font-size: 0.8rem; }
-        .btn-secondary { background: var(--secondary); }
+        #login-screen { max-width: 340px; margin: 80px auto; text-align: center; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid var(--rnli-navy); }
+        .btn { padding: 10px; background: var(--rnli-navy); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 8px; font-size: 0.8rem; }
+        .btn-secondary { background: var(--rnli-orange); }
         .btn-danger { background: #dc2626; }
         .btn-outline { background: white; color: #666; border: 1px solid #ccc; }
+
         input, select, textarea { padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 0.8rem; }
 
-        /* Header Utility */
         .top-utility { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .logout-link { background: none; border: none; color: #e53e3e; cursor: pointer; font-size: 0.7rem; font-weight: bold; text-decoration: underline; padding: 0; }
         #last-update { font-size: 0.65rem; color: #718096; }
-        .controls { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 8px; }
-        .tab { padding: 5px 12px; background: #fff; border: 1px solid #ddd; border-radius: 15px; cursor: pointer; white-space: nowrap; font-weight: 500; font-size: 0.75rem; }
-        .tab.active { background: var(--secondary); color: white; border-color: var(--secondary); }
-        
-        /* TABLE STYLING */
-        .matrix-container { overflow: auto; background: white; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-height: 78vh; }
-        table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 0.78rem; }
-        th { position: sticky; top: 0; background: #fff; z-index: 20; border-bottom: 2px solid var(--border); box-shadow: 0 1px 2px -1px rgba(0,0,0,0.1); padding: 6px; font-weight: 700; }
-        td:first-child { position: sticky; left: 0; background: #fff; z-index: 10; font-weight: bold; border-right: 2px solid var(--border); text-align: left; box-shadow: 1px 0 2px -1px rgba(0,0,0,0.1); padding: 6px; }
-        th:first-child { position: sticky; left: 0; top: 0; z-index: 30; background: #f8fafc; }
-        th, td { border: 1px solid #edf2f7; text-align: center; min-width: 125px; vertical-align: top; padding: 4px; }
 
-        /* Tiles */
-        .cell-btn { width: 100%; min-height: 50px; border: none; border-radius: 3px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px; position: relative; background: #fff; box-sizing: border-box; }
+        .controls { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 8px; }
+        .tab { padding: 6px 14px; background: #fff; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; white-space: nowrap; font-weight: 700; font-size: 0.75rem; color: var(--rnli-navy); }
+        .tab.active { background: var(--rnli-orange); color: white; border-color: var(--rnli-orange); }
+        
+        /* Table Layout */
+        .matrix-container { overflow: auto; background: white; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-height: 75vh; }
+        table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 0.78rem; }
+        th { position: sticky; top: 0; background: #fff; z-index: 20; border-bottom: 2px solid var(--rnli-navy); padding: 8px; font-weight: 800; color: var(--rnli-navy); }
+        td:first-child { position: sticky; left: 0; background: #f8fafc; z-index: 10; font-weight: bold; border-right: 2px solid var(--border); text-align: left; padding: 6px; color: var(--rnli-navy); }
+        th:first-child { position: sticky; left: 0; top: 0; z-index: 30; background: #fff; }
+        th, td { border: 1px solid #edf2f7; text-align: center; min-width: 120px; vertical-align: top; padding: 4px; }
+
+        /* Status Tiles */
+        .cell-btn { width: 100%; min-height: 52px; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px; position: relative; background: #fff; box-sizing: border-box; transition: transform 0.1s; }
+        .cell-btn:active { transform: scale(0.96); }
+        
         .status-empty { background: #f8fafc; color: #cbd5e1; border: 1px dashed #cbd5e0; }
         .status-pending { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
-        .status-allocated { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
-        .status-locked { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e0; cursor: not-allowed; }
-        .status-no-training { background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e0; }
         
-        .role-cat-label { font-size: 0.55rem; text-transform: uppercase; font-weight: 700; opacity: 0.6; line-height: 1; margin-bottom: 1px; }
-        .role-title { font-weight: 700; font-size: 0.75rem; text-transform: uppercase; line-height: 1.1; }
-        .note-text { font-style: italic; font-size: 0.65rem; color: #64748b; line-height: 1.1; margin-top: 1px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-        .padlock { position: absolute; top: 2px; right: 3px; font-size: 0.6rem; opacity: 0.4; }
+        /* Unified Green for Allocated/Locked */
+        .status-allocated, .status-locked { background: var(--green-bg); color: var(--green-text); border: 1px solid var(--green-border); }
+        
+        .status-no-training { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e0; }
+        
+        .role-cat-label { font-size: 0.55rem; text-transform: uppercase; font-weight: 800; opacity: 0.7; line-height: 1; margin-bottom: 2px; }
+        .role-title { font-weight: 800; font-size: 0.72rem; text-transform: uppercase; line-height: 1.1; }
+        .note-text { font-style: italic; font-size: 0.62rem; color: #475569; line-height: 1.1; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .padlock { position: absolute; top: 2px; right: 3px; font-size: 0.6rem; opacity: 0.5; }
 
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 18px; border-radius: 8px; width: 320px; max-width: 90%; }
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 28px; height: 28px; animation: spin 1s linear infinite; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,35,102,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); }
+        .modal-content { background: white; padding: 20px; border-radius: 8px; width: 320px; max-width: 90%; border-top: 4px solid var(--rnli-orange); }
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--rnli-orange); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -59,22 +85,25 @@
     <div id="loading" class="hidden"><div class="spinner"></div></div>
 
     <div id="login-screen">
-        <h3 style="color:var(--primary); margin:0 0 15px 0;">Station Training Matrix</h3>
+        <div style="font-weight: 900; color: var(--rnli-navy); margin-bottom: 5px;">RNLI</div>
+        <h3 style="color:var(--rnli-navy); margin:0 0 15px 0;">Training Matrix</h3>
         <input type="password" id="pass" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
         <button class="btn" onclick="login()">Enter System</button>
     </div>
 
     <div id="main-content" class="hidden">
+        <div id="mode-header-banner">LTC MODE</div>
+        
         <div class="top-utility">
             <button onclick="logout()" class="logout-link">Logout / Change User</button>
             <div id="last-update">Syncing...</div>
         </div>
 
-        <div id="admin-panel" class="hidden" style="background:#e2e8f0; padding:10px; border-radius:6px; margin-bottom:10px;">
+        <div id="admin-panel" class="hidden" style="background:#e2e8f0; padding:10px; border-radius:6px; margin-bottom:10px; border-left: 4px solid var(--rnli-navy);">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
                 <input type="date" id="n-date"> <input type="time" id="n-time">
-                <input type="text" id="n-topic" placeholder="Session Topic" style="grid-column: span 2">
-                <button onclick="addSession(event)" class="btn" style="grid-column: span 2; margin-bottom:0;">Create Session</button>
+                <input type="text" id="n-topic" placeholder="Session Topic (e.g. Navigation)" style="grid-column: span 2">
+                <button onclick="addSession(event)" class="btn btn-secondary" style="grid-column: span 2; margin-bottom:0;">Create New Session</button>
             </div>
         </div>
 
@@ -86,14 +115,14 @@
 
     <div id="modal-signup" class="modal hidden">
         <div class="modal-content">
-            <h4 id="s-title" style="margin:0 0 10px 0;"></h4>
-            <div id="locked-notice" class="hidden" style="color:#dc2626; font-size:0.75rem; margin-bottom:10px; font-weight:bold;">🔒 Role locked by Admin.</div>
+            <h4 id="s-title" style="margin:0 0 10px 0; color:var(--rnli-navy);"></h4>
+            <div id="locked-notice" class="hidden" style="color:#dc2626; font-size:0.75rem; margin-bottom:10px; font-weight:bold;">🔒 Allocation Locked.</div>
             <div id="signup-fields">
                 <label>Preference:</label>
                 <select id="s-cat"><option value="Afloat">Afloat</option><option value="Ashore">Ashore</option><option value="Either">Either</option></select>
-                <label>Notes:</label>
-                <textarea id="s-notes" rows="2" placeholder="Notes... OCF? Away by>"></textarea>
-                <button onclick="submitSignup()" class="btn btn-secondary">Submit Signup</button>
+                <label>Notes (Optional):</label>
+                <textarea id="s-notes" rows="2" placeholder="e.g. Helmet check-off needed"></textarea>
+                <button onclick="submitSignup()" class="btn btn-secondary">Confirm Signup</button>
                 <button id="btn-remove-signup" onclick="submitRemove()" class="btn btn-danger hidden">Remove Request</button>
             </div>
             <button onclick="closeModals()" class="btn btn-outline">Close</button>
@@ -102,8 +131,8 @@
 
     <div id="modal-alloc" class="modal hidden">
         <div class="modal-content">
-            <h4 id="a-name" style="margin:0 0 10px 0; color:var(--primary);"></h4>
-            <div id="a-pref-box" style="font-size:0.75rem; background:#fef3c7; padding:6px; border-radius:4px; margin-bottom:10px;"></div>
+            <h4 id="a-name" style="margin:0 0 10px 0; color:var(--rnli-navy);"></h4>
+            <div id="a-pref-box" style="font-size:0.7rem; background:#fffbeb; padding:8px; border-radius:4px; margin-bottom:10px; border: 1px solid #fcd34d;"></div>
             <label>Category:</label>
             <select id="a-cat" onchange="toggleRoleDisable()"></select>
             <label id="a-role-label">Role:</label>
@@ -114,7 +143,7 @@
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; 
+        const API = "REPLACE_WITH_YOUR_DEPLOYED_URL"; 
         let db = { crew: [], sessions: [], signups: [], roles: [], categories: [] }, isAdmin = false, currentMonth = "", target = {};
         let refreshInterval = null;
 
@@ -130,12 +159,20 @@
                 isAdmin = (p === "ADMIN123");
                 sessionStorage.setItem('matrixRole', isAdmin ? 'admin' : 'crew');
                 initSystem();
-            } else { alert("Wrong Password"); }
+            } else { alert("Incorrect Password"); }
         }
         function logout() { sessionStorage.clear(); location.reload(); }
 
         function initSystem() {
-            if (isAdmin) document.getElementById('admin-panel').classList.remove('hidden');
+            const header = document.getElementById('mode-header-banner');
+            if (isAdmin) {
+                header.innerText = "LTC Mode";
+                header.style.background = "var(--rnli-navy)";
+                document.getElementById('admin-panel').classList.remove('hidden');
+            } else {
+                header.innerText = "Crew Mode";
+                header.style.background = "#2d3748"; // Slightly darker for crew
+            }
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             refreshData();
@@ -146,10 +183,8 @@
             try {
                 const response = await fetch(`${API}?t=${new Date().getTime()}`);
                 db = await response.json();
-                
                 document.getElementById('a-role').innerHTML = '<option value="">-- Clear --</option>' + db.roles.map(r => `<option value="${r}">${r}</option>`).join('');
                 document.getElementById('a-cat').innerHTML = '<option value="">-- Clear --</option>' + db.categories.map(c => `<option value="${c}">${c}</option>`).join('');
-
                 const months = [...new Set(db.sessions.map(s => s.month))];
                 if (!currentMonth || !months.includes(currentMonth)) currentMonth = months[0] || "";
                 renderMatrix(months);
@@ -160,34 +195,32 @@
         function renderMatrix(months) {
             document.getElementById('tabs').innerHTML = months.map(m => `<div class="tab ${m === currentMonth ? 'active' : ''}" onclick="currentMonth='${m}'; renderMatrix(['${months.join("','")}'])">${m}</div>`).join('');
             const sessions = db.sessions.filter(s => s.month === currentMonth);
-            document.getElementById('h-row').innerHTML = `<th>Crew</th>` + sessions.map(s => `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><small>${s.topic}</small></th>`).join('');
+            document.getElementById('h-row').innerHTML = `<th>Crew Member</th>` + sessions.map(s => `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><span style="font-size:0.6rem; font-weight:normal;">${s.topic}</span></th>`).join('');
             document.getElementById('b-rows').innerHTML = db.crew.map(name => `<tr><td>${name}</td>${sessions.map(s => `<td>${getCellHTML(name, s.id)}</td>`).join('')}</tr>`).join('');
         }
 
-function getCellHTML(name, sid) {
-    const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
-    // FIX: Force this to a strict true/false boolean so toggle() doesn't flip-flop
-    const isAllocated = !!(sig && sig.allocatedCategory && sig.allocatedRole); 
-    let statusClass = 'status-empty', content = '<div class="role-title" style="color:#cbd5e1">—</div>';
+        function getCellHTML(name, sid) {
+            const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
+            const isAllocated = !!(sig && sig.allocatedCategory && sig.allocatedRole);
+            let statusClass = 'status-empty', content = '<div class="role-title" style="color:#cbd5e1">—</div>';
 
-    if (isAllocated) {
-        if (sig.allocatedCategory === "No Training") {
-            statusClass = "status-no-training";
-            content = `<div class="padlock">🔒</div><div class="role-title">No Training</div>`;
-        } else {
-            statusClass = isAdmin ? 'status-allocated' : 'status-locked';
-            content = `<div class="padlock">🔒</div><div class="role-cat-label">${sig.allocatedCategory}</div><div class="role-title">${sig.allocatedRole}</div><div class="note-text">${sig.notes || ""}</div>`;
+            if (isAllocated) {
+                if (sig.allocatedCategory === "No Training") {
+                    statusClass = "status-no-training";
+                    content = `<div class="padlock">🔒</div><div class="role-title">No Training</div>`;
+                } else {
+                    // Both Admin and Crew now see the "status-allocated" green style
+                    statusClass = 'status-allocated';
+                    content = `<div class="padlock">🔒</div><div class="role-cat-label">${sig.allocatedCategory}</div><div class="role-title">${sig.allocatedRole}</div><div class="note-text">${sig.notes || ""}</div>`;
+                }
+            } else if (sig) {
+                statusClass = 'status-pending';
+                content = `<div class="role-cat-label">Request</div><div class="role-title">${sig.preferred}</div><div class="note-text">${sig.notes || ""}</div>`;
+            }
+            return `<button class="cell-btn ${statusClass}" onclick="handleCellClick('${name}', '${sid}', ${isAllocated})">${content}</button>`;
         }
-    } else if (sig) {
-        statusClass = 'status-pending';
-        content = `<div class="role-cat-label">Request</div><div class="role-title">${sig.preferred}</div><div class="note-text">${sig.notes || ""}</div>`;
-    }
-    return `<button class="cell-btn ${statusClass}" onclick="handleCellClick('${name}', '${sid}', ${isAllocated})">${content}</button>`;
-}
 
-        function handleCellClick(name, sid, isLocked) {
-            if (isAdmin) openAlloc(name, sid); else openSignup(name, sid, isLocked);
-        }
+        function handleCellClick(name, sid, isAlloc) { if (isAdmin) openAlloc(name, sid); else openSignup(name, sid, isAlloc); }
 
         function openSignup(name, sid, isLocked) {
             target = { name, sessionId: sid };
@@ -205,7 +238,7 @@ function getCellHTML(name, sid) {
             target = { name, sessionId: sid };
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
             document.getElementById('a-name').innerText = name;
-            document.getElementById('a-pref-box').innerText = sig ? `Pref: ${sig.preferred}\nNotes: ${sig.notes || "None"}` : "No Request.";
+            document.getElementById('a-pref-box').innerText = sig ? `Request: ${sig.preferred}\nNotes: ${sig.notes || "None"}` : "No Request.";
             document.getElementById('a-cat').value = sig ? sig.allocatedCategory : "";
             document.getElementById('a-role').value = sig ? sig.allocatedRole : "";
             toggleRoleDisable();
@@ -213,10 +246,9 @@ function getCellHTML(name, sid) {
         }
 
         function toggleRoleDisable() {
-            const isNoTraining = document.getElementById('a-cat').value === "No Training";
-            const roleSelect = document.getElementById('a-role');
-            roleSelect.classList.toggle('disabled-field', isNoTraining);
-            if (isNoTraining) roleSelect.value = "";
+            const isNo = document.getElementById('a-cat').value === "No Training";
+            document.getElementById('a-role').disabled = isNo;
+            if (isNo) document.getElementById('a-role').value = "";
         }
 
         async function sendData(payload) {

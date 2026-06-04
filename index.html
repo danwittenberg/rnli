@@ -48,8 +48,13 @@
         .tab { padding: 6px 14px; background: #fff; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; white-space: nowrap; font-weight: 700; font-size: 0.75rem; color: var(--rnli-navy); }
         .tab.active { background: var(--rnli-orange); color: white; border-color: var(--rnli-orange); }
         
+        /* Filter Controls */
+        .filter-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; background: white; padding: 8px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .filter-group { flex: 1; min-width: 140px; }
+        .filter-group label { font-weight: 700; font-size: 0.68rem; color: var(--rnli-navy); display: block; margin-bottom: 3px; text-transform: uppercase; }
+
         /* Table Layout */
-        .matrix-container { overflow: auto; background: white; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-height: 75vh; }
+        .matrix-container { overflow: auto; background: white; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-height: 70vh; }
         table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 0.78rem; }
         th { position: sticky; top: 0; background: #fff; z-index: 20; border-bottom: 2px solid var(--rnli-navy); padding: 8px; font-weight: 800; color: var(--rnli-navy); }
         td:first-child { position: sticky; left: 0; background: #f8fafc; z-index: 10; font-weight: bold; border-right: 2px solid var(--border); text-align: left; padding: 6px; color: var(--rnli-navy); }
@@ -62,10 +67,7 @@
         
         .status-empty { background: #f8fafc; color: #cbd5e1; border: 1px dashed #cbd5e0; }
         .status-pending { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
-        
-        /* Unified Green for Allocated/Locked */
         .status-allocated, .status-locked { background: var(--green-bg); color: var(--green-text); border: 1px solid var(--green-border); }
-        
         .status-no-training { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e0; }
         
         .role-cat-label { font-size: 0.55rem; text-transform: uppercase; font-weight: 800; opacity: 0.7; line-height: 1; margin-bottom: 2px; }
@@ -99,6 +101,7 @@
             <div id="last-update">Syncing...</div>
         </div>
 
+        <!-- Admin Entry Panel -->
         <div id="admin-panel" class="hidden" style="background:#e2e8f0; padding:10px; border-radius:6px; margin-bottom:10px; border-left: 4px solid var(--rnli-navy);">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
                 <input type="date" id="n-date"> <input type="time" id="n-time">
@@ -108,11 +111,25 @@
         </div>
 
         <div class="controls" id="tabs"></div>
+
+        <!-- Dynamic Filter Row -->
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="crew-filter">Horizontal Filter (Crew Member)</label>
+                <select id="crew-filter" onchange="triggerMatrixRender()" style="margin-bottom:0;"></select>
+            </div>
+            <div class="filter-group hidden" id="session-filter-container">
+                <label for="session-filter">Vertical Filter (Active Session)</label>
+                <select id="session-filter" onchange="triggerMatrixRender()" style="margin-bottom:0;"></select>
+            </div>
+        </div>
+
         <div class="matrix-container">
             <table><thead><tr id="h-row"></tr></thead><tbody id="b-rows"></tbody></table>
         </div>
     </div>
 
+    <!-- Modals -->
     <div id="modal-signup" class="modal hidden">
         <div class="modal-content">
             <h4 id="s-title" style="margin:0 0 10px 0; color:var(--rnli-navy);"></h4>
@@ -144,7 +161,8 @@
 
     <script>
         const API = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; 
-        let db = { crew: [], sessions: [], signups: [], roles: [], categories: [] }, isAdmin = false, currentMonth = "", target = {};
+        let db = { crew: [], sessions: [], signups: [], roles: [], categories: [] };
+        let isAdmin = false, currentMonth = "", target = {}, availableMonths = [];
         let refreshInterval = null;
 
         window.onload = () => {
@@ -153,6 +171,7 @@
         };
 
         function showLoad(s) { document.getElementById('loading').classList.toggle('hidden', !s); }
+        
         function login() {
             const p = document.getElementById('pass').value;
             if (p === "RNLI" || p === "ADMIN123") {
@@ -161,17 +180,22 @@
                 initSystem();
             } else { alert("Incorrect Password"); }
         }
+        
         function logout() { sessionStorage.clear(); location.reload(); }
 
         function initSystem() {
             const header = document.getElementById('mode-header-banner');
+            const sessionFilterCont = document.getElementById('session-filter-container');
             if (isAdmin) {
                 header.innerText = "LTC Mode";
                 header.style.background = "var(--rnli-navy)";
                 document.getElementById('admin-panel').classList.remove('hidden');
+                sessionFilterCont.classList.remove('hidden');
             } else {
                 header.innerText = "Crew Mode";
-                header.style.background = "#2d3748"; // Slightly darker for crew
+                header.style.background = "#2d3748";
+                document.getElementById('admin-panel').classList.add('hidden');
+                sessionFilterCont.classList.add('hidden');
             }
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-content').classList.remove('hidden');
@@ -183,20 +207,95 @@
             try {
                 const response = await fetch(`${API}?t=${new Date().getTime()}`);
                 db = await response.json();
+                
                 document.getElementById('a-role').innerHTML = '<option value="">-- Clear --</option>' + db.roles.map(r => `<option value="${r}">${r}</option>`).join('');
                 document.getElementById('a-cat').innerHTML = '<option value="">-- Clear --</option>' + db.categories.map(c => `<option value="${c}">${c}</option>`).join('');
-                const months = [...new Set(db.sessions.map(s => s.month))];
-                if (!currentMonth || !months.includes(currentMonth)) currentMonth = months[0] || "";
-                renderMatrix(months);
+                
+                availableMonths = [...new Set(db.sessions.map(s => s.month))];
+                if (!currentMonth || !availableMonths.includes(currentMonth)) currentMonth = availableMonths[0] || "";
+                
+                populateFilterDropdowns();
+                renderMatrix();
                 document.getElementById('last-update').innerText = "Live • " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             } catch (err) { document.getElementById('last-update').innerText = "Sync Error..."; }
         }
 
-        function renderMatrix(months) {
-            document.getElementById('tabs').innerHTML = months.map(m => `<div class="tab ${m === currentMonth ? 'active' : ''}" onclick="currentMonth='${m}'; renderMatrix(['${months.join("','")}'])">${m}</div>`).join('');
-            const sessions = db.sessions.filter(s => s.month === currentMonth);
-            document.getElementById('h-row').innerHTML = `<th>Crew Member</th>` + sessions.map(s => `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><span style="font-size:0.6rem; font-weight:normal;">${s.topic}</span></th>`).join('');
-            document.getElementById('b-rows').innerHTML = db.crew.map(name => `<tr><td>${name}</td>${sessions.map(s => `<td>${getCellHTML(name, s.id)}</td>`).join('')}</tr>`).join('');
+        function populateFilterDropdowns() {
+            const crewFilter = document.getElementById('crew-filter');
+            const sessionFilter = document.getElementById('session-filter');
+            
+            const prevCrew = crewFilter.value;
+            const prevSession = sessionFilter.value;
+            
+            // Populate Horizontal Filter Options
+            crewFilter.innerHTML = '<option value="">-- All Crew (Show All Sessions) --</option>' + 
+                db.crew.map(c => `<option value="${c}">${c}</option>`).join('');
+            if (db.crew.includes(prevCrew)) crewFilter.value = prevCrew;
+            
+            // Populate Vertical Filter Options based on selected month
+            const monthSessions = db.sessions.filter(s => s.month === currentMonth);
+            sessionFilter.innerHTML = '<option value="">-- All Sessions (Show All Crew) --</option>' + 
+                monthSessions.map(s => {
+                    const d = new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+                    return `<option value="${s.id}">${d} - ${s.topic}</option>`;
+                }).join('');
+                
+            if (monthSessions.some(s => s.id === prevSession)) {
+                sessionFilter.value = prevSession;
+            } else {
+                sessionFilter.value = "";
+            }
+        }
+
+        function triggerMatrixRender() {
+            renderMatrix();
+        }
+
+        function switchMonth(m) {
+            currentMonth = m;
+            populateFilterDropdowns();
+            renderMatrix();
+        }
+
+        function renderMatrix() {
+            // Re-render Tab layout
+            document.getElementById('tabs').innerHTML = availableMonths.map(m => 
+                `<div class="tab ${m === currentMonth ? 'active' : ''}" onclick="switchMonth('${m}')">${m}</div>`
+            ).join('');
+            
+            let sessions = db.sessions.filter(s => s.month === currentMonth);
+            let crewList = [...db.crew];
+            
+            const activeCrewFilter = document.getElementById('crew-filter').value;
+            const activeSessionFilter = document.getElementById('session-filter').value;
+            
+            // 1. Horizontal Filter Calculation (Filter Columns)
+            if (activeCrewFilter) {
+                sessions = sessions.filter(s => 
+                    db.signups.some(x => x.name === activeCrewFilter && x.sessionId === s.id && (x.allocatedCategory || x.preferred))
+                );
+            }
+            
+            // 2. Vertical Filter Calculation (Filter Rows)
+            if (activeSessionFilter) {
+                crewList = crewList.filter(name => 
+                    db.signups.some(x => x.name === name && x.sessionId === activeSessionFilter && (x.allocatedCategory || x.preferred))
+                );
+            }
+            
+            // Inject structural headers
+            document.getElementById('h-row').innerHTML = `<th>Crew Member</th>` + sessions.map(s => 
+                `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><span style="font-size:0.6rem; font-weight:normal;">${s.topic}</span></th>`
+            ).join('');
+            
+            // Inject rows
+            if (crewList.length === 0) {
+                document.getElementById('b-rows').innerHTML = `<tr><td colspan="${sessions.length + 1}" style="padding:20px; color:#718096; text-align:center;">No active personnel found matching selection.</td></tr>`;
+            } else {
+                document.getElementById('b-rows').innerHTML = crewList.map(name => 
+                    `<tr><td>${name}</td>${sessions.map(s => `<td>${getCellHTML(name, s.id)}</td>`).join('')}</tr>`
+                ).join('');
+            }
         }
 
         function getCellHTML(name, sid) {
@@ -209,7 +308,6 @@
                     statusClass = "status-no-training";
                     content = `<div class="padlock">🔒</div><div class="role-title">No Training</div>`;
                 } else {
-                    // Both Admin and Crew now see the "status-allocated" green style
                     statusClass = 'status-allocated';
                     content = `<div class="padlock">🔒</div><div class="role-cat-label">${sig.allocatedCategory}</div><div class="role-title">${sig.allocatedRole}</div><div class="note-text">${sig.notes || ""}</div>`;
                 }

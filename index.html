@@ -8,6 +8,7 @@
         :root { --primary: #002366; --secondary: #f05a28; --bg: #f4f7f6; --border: #cbd5e0; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 8px; color: #2d3748; font-size: 0.8rem; }
         .hidden { display: none !important; }
+        .disabled-field { opacity: 0.5; pointer-events: none; background: #f1f5f9; }
 
         /* Login Screen */
         #login-screen { max-width: 340px; margin: 80px auto; text-align: center; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -17,37 +18,35 @@
         .btn-outline { background: white; color: #666; border: 1px solid #ccc; }
         input, select, textarea { padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 0.8rem; }
 
-        /* Utility Bars */
+        /* Header Utility */
         .top-utility { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .logout-link { background: none; border: none; color: #e53e3e; cursor: pointer; font-size: 0.7rem; font-weight: bold; text-decoration: underline; padding: 0; }
         #last-update { font-size: 0.65rem; color: #718096; }
-        .header-flex { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
-        .controls { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+        .controls { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 8px; }
         .tab { padding: 5px 12px; background: #fff; border: 1px solid #ddd; border-radius: 15px; cursor: pointer; white-space: nowrap; font-weight: 500; font-size: 0.75rem; }
         .tab.active { background: var(--secondary); color: white; border-color: var(--secondary); }
         
-        /* STREAMLINED FREEZE FRAME TABLE */
+        /* TABLE STYLING */
         .matrix-container { overflow: auto; background: white; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-height: 78vh; }
         table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 0.78rem; }
-        
         th { position: sticky; top: 0; background: #fff; z-index: 20; border-bottom: 2px solid var(--border); box-shadow: 0 1px 2px -1px rgba(0,0,0,0.1); padding: 6px; font-weight: 700; }
         td:first-child { position: sticky; left: 0; background: #fff; z-index: 10; font-weight: bold; border-right: 2px solid var(--border); text-align: left; box-shadow: 1px 0 2px -1px rgba(0,0,0,0.1); padding: 6px; }
         th:first-child { position: sticky; left: 0; top: 0; z-index: 30; background: #f8fafc; }
         th, td { border: 1px solid #edf2f7; text-align: center; min-width: 125px; vertical-align: top; padding: 4px; }
 
-        /* High-Density Compact Tiles */
-        .cell-btn { width: 100%; min-height: 48px; border: none; border-radius: 3px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px; position: relative; background: #fff; box-sizing: border-box; }
+        /* Tiles */
+        .cell-btn { width: 100%; min-height: 50px; border: none; border-radius: 3px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px; position: relative; background: #fff; box-sizing: border-box; }
         .status-empty { background: #f8fafc; color: #cbd5e1; border: 1px dashed #cbd5e0; }
         .status-pending { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
         .status-allocated { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
         .status-locked { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e0; cursor: not-allowed; }
+        .status-no-training { background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e0; }
         
         .role-cat-label { font-size: 0.55rem; text-transform: uppercase; font-weight: 700; opacity: 0.6; line-height: 1; margin-bottom: 1px; }
         .role-title { font-weight: 700; font-size: 0.75rem; text-transform: uppercase; line-height: 1.1; }
         .note-text { font-style: italic; font-size: 0.65rem; color: #64748b; line-height: 1.1; margin-top: 1px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
         .padlock { position: absolute; top: 2px; right: 3px; font-size: 0.6rem; opacity: 0.4; }
 
-        /* Modal & UI Feedback */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: white; padding: 18px; border-radius: 8px; width: 320px; max-width: 90%; }
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; }
@@ -71,24 +70,20 @@
             <div id="last-update">Syncing...</div>
         </div>
 
-        <!-- High-Density Admin Entry Panel -->
         <div id="admin-panel" class="hidden" style="background:#e2e8f0; padding:10px; border-radius:6px; margin-bottom:10px;">
-            <h5 style="margin:0 0 6px 0">Admin: Add Session</h5>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
-                <input type="date" id="n-date" style="margin-bottom:0"> <input type="time" id="n-time" style="margin-bottom:0">
-                <input type="text" id="n-topic" placeholder="Session Topic" style="grid-column: span 2; margin-bottom:0">
-                <button onclick="addSession(event)" class="btn" style="grid-column: span 2; margin-bottom:0; padding:6px;">Create Session</button>
+                <input type="date" id="n-date"> <input type="time" id="n-time">
+                <input type="text" id="n-topic" placeholder="Session Topic" style="grid-column: span 2">
+                <button onclick="addSession(event)" class="btn" style="grid-column: span 2; margin-bottom:0;">Create Session</button>
             </div>
         </div>
 
-        <div class="header-flex"><div class="controls" id="tabs"></div></div>
-        
+        <div class="controls" id="tabs"></div>
         <div class="matrix-container">
             <table><thead><tr id="h-row"></tr></thead><tbody id="b-rows"></tbody></table>
         </div>
     </div>
 
-    <!-- Crew Signup Modal -->
     <div id="modal-signup" class="modal hidden">
         <div class="modal-content">
             <h4 id="s-title" style="margin:0 0 10px 0;"></h4>
@@ -98,23 +93,23 @@
                 <select id="s-cat"><option value="Afloat">Afloat</option><option value="Ashore">Ashore</option><option value="Either">Either</option></select>
                 <label>Notes:</label>
                 <textarea id="s-notes" rows="2" placeholder="Check-offs needed..."></textarea>
-                <button id="btn-save-signup" onclick="submitSignup()" class="btn btn-secondary">Submit Signup</button>
+                <button onclick="submitSignup()" class="btn btn-secondary">Submit Signup</button>
                 <button id="btn-remove-signup" onclick="submitRemove()" class="btn btn-danger hidden">Remove Request</button>
             </div>
-            <button onclick="closeModals()" class="btn btn-outline" style="margin-bottom:0">Close</button>
+            <button onclick="closeModals()" class="btn btn-outline">Close</button>
         </div>
     </div>
 
-    <!-- Admin Allocation Modal -->
     <div id="modal-alloc" class="modal hidden">
         <div class="modal-content">
-            <h4 style="margin:0 0 2px 0;">Allocate Role</h4>
-            <p id="a-name" style="font-weight:bold; color:var(--primary); margin:0 0 10px 0;"></p>
-            <div id="a-pref-box" style="font-size:0.75rem; background:#fef3c7; padding:6px; border-radius:4px; margin-bottom:10px; white-space: pre-wrap;"></div>
-            <label>Category:</label><select id="a-cat"></select>
-            <label>Role:</label><select id="a-role"></select>
+            <h4 id="a-name" style="margin:0 0 10px 0; color:var(--primary);"></h4>
+            <div id="a-pref-box" style="font-size:0.75rem; background:#fef3c7; padding:6px; border-radius:4px; margin-bottom:10px;"></div>
+            <label>Category:</label>
+            <select id="a-cat" onchange="toggleRoleDisable()"></select>
+            <label id="a-role-label">Role:</label>
+            <select id="a-role"></select>
             <button onclick="submitAlloc()" class="btn">Update Matrix</button>
-            <button onclick="closeModals()" class="btn btn-outline" style="margin-bottom:0">Cancel</button>
+            <button onclick="closeModals()" class="btn btn-outline">Cancel</button>
         </div>
     </div>
 
@@ -152,47 +147,44 @@
                 const response = await fetch(`${API}?t=${new Date().getTime()}`);
                 db = await response.json();
                 
-                const roleSelect = document.getElementById('a-role');
-                if (db.roles) {
-                    roleSelect.innerHTML = '<option value="">-- Clear --</option>' + db.roles.map(r => `<option value="${r}">${r}</option>`).join('');
-                }
-                const catSelect = document.getElementById('a-cat');
-                if (db.categories) {
-                    catSelect.innerHTML = '<option value="">-- Clear --</option>' + db.categories.map(c => `<option value="${c}">${c}</option>`).join('');
-                }
+                document.getElementById('a-role').innerHTML = '<option value="">-- Clear --</option>' + db.roles.map(r => `<option value="${r}">${r}</option>`).join('');
+                document.getElementById('a-cat').innerHTML = '<option value="">-- Clear --</option>' + db.categories.map(c => `<option value="${c}">${c}</option>`).join('');
 
                 const months = [...new Set(db.sessions.map(s => s.month))];
                 if (!currentMonth || !months.includes(currentMonth)) currentMonth = months[0] || "";
                 renderMatrix(months);
                 document.getElementById('last-update').innerText = "Live • " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            } catch (err) { document.getElementById('last-update').innerText = "Sync Error - Retrying..."; }
+            } catch (err) { document.getElementById('last-update').innerText = "Sync Error..."; }
         }
 
         function renderMatrix(months) {
             document.getElementById('tabs').innerHTML = months.map(m => `<div class="tab ${m === currentMonth ? 'active' : ''}" onclick="currentMonth='${m}'; renderMatrix(['${months.join("','")}'])">${m}</div>`).join('');
             const sessions = db.sessions.filter(s => s.month === currentMonth);
-            
-            document.getElementById('h-row').innerHTML = `<th>Crew Member</th>` + sessions.map(s => `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><small>${s.topic}</small></th>`).join('');
+            document.getElementById('h-row').innerHTML = `<th>Crew</th>` + sessions.map(s => `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><small>${s.topic}</small></th>`).join('');
             document.getElementById('b-rows').innerHTML = db.crew.map(name => `<tr><td>${name}</td>${sessions.map(s => `<td>${getCellHTML(name, s.id)}</td>`).join('')}</tr>`).join('');
         }
 
         function getCellHTML(name, sid) {
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
             const isAllocated = (sig && sig.allocatedCategory && sig.allocatedRole);
-            let statusClass = 'status-empty', content = '<div class="role-title" style="color:#cbd5e1; font-weight:normal;">—</div>';
+            let statusClass = 'status-empty', content = '<div class="role-title" style="color:#cbd5e1">—</div>';
 
             if (isAllocated) {
-                statusClass = isAdmin ? 'status-allocated' : 'status-locked';
-                content = `<div class="padlock">🔒</div><div class="role-cat-label">${sig.allocatedCategory}</div><div class="role-title">${sig.allocatedRole}</div><div class="note-text">${sig.notes || ""}</div>`;
+                if (sig.allocatedCategory === "No Training") {
+                    statusClass = "status-no-training";
+                    content = `<div class="padlock">🔒</div><div class="role-title">No Training</div>`;
+                } else {
+                    statusClass = isAdmin ? 'status-allocated' : 'status-locked';
+                    content = `<div class="padlock">🔒</div><div class="role-cat-label">${sig.allocatedCategory}</div><div class="role-title">${sig.allocatedRole}</div><div class="note-text">${sig.notes || ""}</div>`;
+                }
             } else if (sig) {
                 statusClass = 'status-pending';
                 content = `<div class="role-cat-label">Request</div><div class="role-title">${sig.preferred}</div><div class="note-text">${sig.notes || ""}</div>`;
             }
-            return `<button class="cell-btn ${statusClass}" data-name="${name}" data-sid="${sid}" data-locked="${isAllocated ? 'true' : 'false'}" onclick="handleCellClick(this)">${content}</button>`;
+            return `<button class="cell-btn ${statusClass}" onclick="handleCellClick('${name}', '${sid}', ${isAllocated})">${content}</button>`;
         }
 
-        function handleCellClick(btn) {
-            const name = btn.getAttribute('data-name'), sid = btn.getAttribute('data-sid'), isLocked = btn.getAttribute('data-locked') === 'true';
+        function handleCellClick(name, sid, isLocked) {
             if (isAdmin) openAlloc(name, sid); else openSignup(name, sid, isLocked);
         }
 
@@ -215,7 +207,15 @@
             document.getElementById('a-pref-box').innerText = sig ? `Pref: ${sig.preferred}\nNotes: ${sig.notes || "None"}` : "No Request.";
             document.getElementById('a-cat').value = sig ? sig.allocatedCategory : "";
             document.getElementById('a-role').value = sig ? sig.allocatedRole : "";
+            toggleRoleDisable();
             document.getElementById('modal-alloc').classList.remove('hidden');
+        }
+
+        function toggleRoleDisable() {
+            const isNoTraining = document.getElementById('a-cat').value === "No Training";
+            const roleSelect = document.getElementById('a-role');
+            roleSelect.classList.toggle('disabled-field', isNoTraining);
+            if (isNoTraining) roleSelect.value = "";
         }
 
         async function sendData(payload) {

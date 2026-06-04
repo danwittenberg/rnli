@@ -164,25 +164,26 @@
             document.getElementById('b-rows').innerHTML = db.crew.map(name => `<tr><td>${name}</td>${sessions.map(s => `<td>${getCellHTML(name, s.id)}</td>`).join('')}</tr>`).join('');
         }
 
-        function getCellHTML(name, sid) {
-            const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
-            const isAllocated = (sig && sig.allocatedCategory && sig.allocatedRole);
-            let statusClass = 'status-empty', content = '<div class="role-title" style="color:#cbd5e1">—</div>';
+function getCellHTML(name, sid) {
+    const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
+    // FIX: Force this to a strict true/false boolean so toggle() doesn't flip-flop
+    const isAllocated = !!(sig && sig.allocatedCategory && sig.allocatedRole); 
+    let statusClass = 'status-empty', content = '<div class="role-title" style="color:#cbd5e1">—</div>';
 
-            if (isAllocated) {
-                if (sig.allocatedCategory === "No Training") {
-                    statusClass = "status-no-training";
-                    content = `<div class="padlock">🔒</div><div class="role-title">No Training</div>`;
-                } else {
-                    statusClass = isAdmin ? 'status-allocated' : 'status-locked';
-                    content = `<div class="padlock">🔒</div><div class="role-cat-label">${sig.allocatedCategory}</div><div class="role-title">${sig.allocatedRole}</div><div class="note-text">${sig.notes || ""}</div>`;
-                }
-            } else if (sig) {
-                statusClass = 'status-pending';
-                content = `<div class="role-cat-label">Request</div><div class="role-title">${sig.preferred}</div><div class="note-text">${sig.notes || ""}</div>`;
-            }
-            return `<button class="cell-btn ${statusClass}" onclick="handleCellClick('${name}', '${sid}', ${isAllocated})">${content}</button>`;
+    if (isAllocated) {
+        if (sig.allocatedCategory === "No Training") {
+            statusClass = "status-no-training";
+            content = `<div class="padlock">🔒</div><div class="role-title">No Training</div>`;
+        } else {
+            statusClass = isAdmin ? 'status-allocated' : 'status-locked';
+            content = `<div class="padlock">🔒</div><div class="role-cat-label">${sig.allocatedCategory}</div><div class="role-title">${sig.allocatedRole}</div><div class="note-text">${sig.notes || ""}</div>`;
         }
+    } else if (sig) {
+        statusClass = 'status-pending';
+        content = `<div class="role-cat-label">Request</div><div class="role-title">${sig.preferred}</div><div class="note-text">${sig.notes || ""}</div>`;
+    }
+    return `<button class="cell-btn ${statusClass}" onclick="handleCellClick('${name}', '${sid}', ${isAllocated})">${content}</button>`;
+}
 
         function handleCellClick(name, sid, isLocked) {
             if (isAdmin) openAlloc(name, sid); else openSignup(name, sid, isLocked);

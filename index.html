@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -19,7 +19,8 @@
         input, select, textarea { padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; width: 100%; box-sizing: border-box; }
 
         /* Table & Tabs */
-        .controls { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .controls { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
         .tab { padding: 10px 20px; background: #fff; border: 1px solid #ddd; border-radius: 25px; cursor: pointer; white-space: nowrap; font-weight: 500; }
         .tab.active { background: var(--secondary); color: white; border-color: var(--secondary); }
         .matrix-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
@@ -37,12 +38,13 @@
         .role-cat-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 800; opacity: 0.7; margin-bottom: 2px; }
         .role-title { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; line-height: 1.1; margin-bottom: 4px; }
         .note-text { font-style: italic; font-size: 0.7rem; color: #64748b; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        
         .padlock { position: absolute; top: 5px; right: 5px; font-size: 0.7rem; opacity: 0.5; }
 
+        #last-update { font-size: 0.7rem; color: #718096; text-align: right; margin-top: 5px; }
+
         /* Loading & Modal */
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: white; padding: 25px; border-radius: 12px; width: 350px; max-width: 90%; }
@@ -50,7 +52,7 @@
 </head>
 <body>
 
-    <div id="loading" class="hidden"><div class="spinner"></div><p id="load-msg" style="margin-top:15px; font-weight:bold; color:var(--primary)">Processing...</p></div>
+    <div id="loading" class="hidden"><div class="spinner"></div></div>
 
     <div id="login-screen">
         <h2 style="color:var(--primary); margin-bottom:25px;">Station Training Matrix</h2>
@@ -67,8 +69,14 @@
                 <button onclick="addSession(event)" class="btn">Add Session</button>
             </div>
         </div>
-        <div class="controls" id="tabs"></div>
+
+        <div class="header-flex">
+            <div class="controls" id="tabs"></div>
+            <div id="last-update">Syncing...</div>
+        </div>
+        
         <div class="matrix-container"><table><thead><tr id="h-row"></tr></thead><tbody id="b-rows"></tbody></table></div>
+        <button onclick="logout()" style="margin-top:20px; background:none; border:none; color:#666; cursor:pointer; font-size:0.8rem;">Log Out / Switch User</button>
     </div>
 
     <div id="modal-signup" class="modal hidden">
@@ -111,30 +119,53 @@
     <script>
         const API = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; 
         let db = { crew: [], sessions: [], signups: [] }, isAdmin = false, currentMonth = "", target = {};
+        let refreshInterval = null;
 
-        function showLoad(s, m = "Syncing...") { document.getElementById('load-msg').innerText = m; document.getElementById('loading').classList.toggle('hidden', !s); }
+        // On Load: Check if we are already logged in
+        window.onload = () => {
+            const savedRole = sessionStorage.getItem('matrixRole');
+            if (savedRole) {
+                isAdmin = (savedRole === 'admin');
+                initSystem();
+            }
+        };
+
+        function showLoad(s) { document.getElementById('loading').classList.toggle('hidden', !s); }
 
         function login() {
             const p = document.getElementById('pass').value;
             if (p === "RNLI" || p === "ADMIN123") {
                 isAdmin = (p === "ADMIN123");
-                if (isAdmin) document.getElementById('admin-panel').classList.remove('hidden');
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                refreshData();
+                sessionStorage.setItem('matrixRole', isAdmin ? 'admin' : 'crew');
+                initSystem();
             } else { alert("Wrong Password"); }
         }
 
+        function logout() {
+            sessionStorage.clear();
+            location.reload();
+        }
+
+        function initSystem() {
+            if (isAdmin) document.getElementById('admin-panel').classList.remove('hidden');
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            refreshData();
+            // Start Background Polling (Every 30 seconds)
+            if (!refreshInterval) refreshInterval = setInterval(refreshData, 30000);
+        }
+
         async function refreshData() {
-            showLoad(true);
             try {
                 const response = await fetch(`${API}?t=${new Date().getTime()}`);
                 db = await response.json();
                 const months = [...new Set(db.sessions.map(s => s.month))];
                 if (!currentMonth || !months.includes(currentMonth)) currentMonth = months[0] || "";
                 renderMatrix(months);
-            } catch (err) { alert("Fetch Error"); }
-            showLoad(false);
+                document.getElementById('last-update').innerText = "Live • Last Sync: " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            } catch (err) { 
+                document.getElementById('last-update').innerText = "Connection Error - Retrying...";
+            }
         }
 
         function renderMatrix(months) {
@@ -156,7 +187,6 @@
         function getCellHTML(name, sid) {
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
             const isAllocated = (sig && sig.allocatedCategory && sig.allocatedRole);
-            
             let statusClass = 'status-empty';
             let content = '<div class="role-title">Sign Up</div>';
 
@@ -185,25 +215,16 @@
             const name = btn.getAttribute('data-name');
             const sid = btn.getAttribute('data-sid');
             const isLocked = btn.getAttribute('data-locked') === 'true';
-
-            if (isAdmin) {
-                openAlloc(name, sid);
-            } else {
-                openSignup(name, sid, isLocked);
-            }
+            if (isAdmin) openAlloc(name, sid); else openSignup(name, sid, isLocked);
         }
 
         function openSignup(name, sid, isLocked) {
             target = { name, sessionId: sid };
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
-            
             document.getElementById('s-title').innerText = name;
             document.getElementById('locked-notice').classList.toggle('hidden', !isLocked);
             document.getElementById('signup-fields').classList.toggle('hidden', isLocked);
-            
-            // Show Remove button only if they have a request and it's NOT locked
             document.getElementById('btn-remove-signup').classList.toggle('hidden', (!sig || isLocked));
-            
             if (sig) {
                 document.getElementById('s-cat').value = sig.preferred;
                 document.getElementById('s-notes').value = sig.notes;
@@ -222,15 +243,17 @@
         }
 
         async function sendData(payload) {
-            closeModals(); showLoad(true, "Saving...");
+            closeModals(); showLoad(true);
             try {
                 await fetch(API, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
-                setTimeout(refreshData, 3000);
-            } catch (err) { alert("Save Error"); showLoad(false); }
+                // Refresh slightly faster after a manual action
+                setTimeout(refreshData, 2500);
+            } catch (err) { alert("Save Error"); }
+            setTimeout(() => showLoad(false), 2500);
         }
 
         function submitSignup() { sendData({ action: "signup", crewName: target.name, sessionId: target.sessionId, preferredRole: document.getElementById('s-cat').value, notes: document.getElementById('s-notes').value }); }
-        function submitRemove() { if(confirm("Remove your request?")) sendData({ action: "remove", crewName: target.name, sessionId: target.sessionId }); }
+        function submitRemove() { if(confirm("Remove request?")) sendData({ action: "remove", crewName: target.name, sessionId: target.sessionId }); }
         function submitAlloc() { sendData({ action: "allocate", crewName: target.name, sessionId: target.sessionId, roleType: document.getElementById('a-cat').value, specificRole: document.getElementById('a-role').value }); }
         function addSession(e) { e.preventDefault(); sendData({ action: "addSession", date: document.getElementById('n-date').value, time: document.getElementById('n-time').value, topic: document.getElementById('n-topic').value }); }
         function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); }

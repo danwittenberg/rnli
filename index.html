@@ -27,7 +27,7 @@
     }
 
     * {
-      box-spacing: border-box;
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -429,15 +429,16 @@
 
   <script>
     // CRUCIAL STEP: Replace with your actual deployment script URL
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec";
+    const WEB_APP_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
     // Application Global State Context Data Container
     let state = {
       crew: [],
       sessions: [],
-      categories: [],
-      roles: [],
-      subCategories: [],
+      categories: [],       // Column A (Used for User Preference Options)
+      adminCategories: [],  // Column D (Used for Admin Allocation Categories)
+      roles: [],            // Column B
+      subCategories: [],    // Column C
       signups: [],
       activeMonth: "",
       selectedCrew: "",
@@ -490,6 +491,7 @@
       state.crew = response.crew || [];
       state.sessions = response.sessions || [];
       state.categories = response.categories || [];
+      state.adminCategories = response.adminCategories || []; // Pulls custom Column D stream
       state.roles = response.roles || [];
       state.subCategories = response.subCategories || [];
       state.signups = response.signups || [];
@@ -509,15 +511,17 @@
      * Populates drop-down selectors inside the configuration modal cards.
      */
     function populateDropdownLists() {
-      populateSelectElement("selectCategory", state.categories);
+      // Admin Category dropdown menu bound to Column D array (falls back to column A safely if missing)
+      const adminCatSource = (state.adminCategories && state.adminCategories.length > 0) ? state.adminCategories : state.categories;
+      populateSelectElement("selectCategory", adminCatSource);
+      
       populateSelectElement("selectRole", state.roles);
       populateSelectElement("selectSubCategory", state.subCategories);
       
-      // Build the User Preference dropdown menu bounded to the Config Categories
+      // Build User Preference dropdown menu bounded to Config Column A Categories
       const prefSelect = document.getElementById("selectPrefRole");
       prefSelect.innerHTML = "";
       
-      // Inject 'Any' as the default structural rule choice
       const filteredCategories = state.categories.filter(cat => cat !== "No Training");
       const prefOptions = ["Any", ...filteredCategories];
       

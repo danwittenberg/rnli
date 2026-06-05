@@ -443,11 +443,11 @@
   <div class="container">
     <header>
       <div>
-        <h1>Crew Allocation Matrix</h1>
+        <h1 id="uiDashboardTitle">Crew Allocation Matrix</h1>
       </div>
       <div class="header-actions">
         <button id="globalAdminBtn" class="global-admin-btn" onclick="toggleGlobalAdminMode()" title="Unlock Admin Allocation Mode">⚙️</button>
-        <button class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
+        <button id="uiRefreshBtn" class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
       </div>
     </header>
 
@@ -467,43 +467,43 @@
 
       <div id="formSectionSignup">
         <div class="form-group">
-          <label>Preference Choice (Config Column A)</label>
+          <label id="uiPrefChoiceLabel">Preference Choice</label>
           <select id="selectPrefRole"></select>
         </div>
         <div class="form-group">
-          <label>Notes / Availability Details</label>
+          <label id="uiNotesLabel">Notes / Availability Details</label>
           <textarea id="inputNotes" placeholder="Any specific scheduling notes..."></textarea>
         </div>
         <div class="modal-actions">
-          <button class="btn btn-danger" onclick="executeAction('remove')">Clear / Withdraw</button>
-          <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-          <button class="btn btn-primary" onclick="executeAction('signup')">Save Preference</button>
+          <button id="uiSignupRemoveBtn" class="btn btn-danger" onclick="executeAction('remove')">Clear / Withdraw</button>
+          <button id="uiSignupCancelBtn" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button id="uiSignupSaveBtn" class="btn btn-primary" onclick="executeAction('signup')">Save Preference</button>
         </div>
       </div>
 
       <div id="formSectionAllocate" style="display: none;">
         <div class="form-group">
-          <label>Submitted Crew Availability Notes</label>
+          <label id="uiSubmittedNotesLabel">Submitted Crew Availability Notes</label>
           <div id="adminNotesViewBox" class="admin-notes-callout">None</div>
         </div>
 
         <div class="form-group">
-          <label>Allocated Category (Config Column D)</label>
+          <label id="uiAllocCategoryLabel">Allocated Category</label>
           <select id="selectCategory" onchange="checkNoTrainingRule(this)"></select>
         </div>
         <div class="form-group">
-          <label>Allocated Role (Config Column B)</label>
+          <label id="uiAllocRoleLabel">Allocated Role</label>
           <select id="selectRole"></select>
         </div>
         <div class="form-group">
-          <label>Allocated Activity / Sub-Category (Config Column E)</label>
+          <label id="uiAllocActivityLabel">Allocated Activity / Sub-Category</label>
           <input type="text" id="selectSubCategory" list="subCategoryOptions" placeholder="Select or type custom activity...">
           <datalist id="subCategoryOptions"></datalist>
         </div>
         <div class="modal-actions">
-          <button class="btn btn-danger" onclick="executeAction('remove')">Remove Allocation</button>
-          <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-          <button class="btn btn-primary" style="background-color: #dd6b20;" onclick="executeAction('allocate')">Commit Allocation</button>
+          <button id="uiAllocRemoveBtn" class="btn btn-danger" onclick="executeAction('remove')">Remove Allocation</button>
+          <button id="uiAllocCancelBtn" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button id="uiAllocCommitBtn" class="btn btn-primary" style="background-color: #dd6b20;" onclick="executeAction('allocate')">Commit Allocation</button>
         </div>
       </div>
     </div>
@@ -512,15 +512,15 @@
   <div class="modal-overlay" id="narrativeModal">
     <div class="modal-card" style="max-width: 500px;">
       <div class="modal-header-wrapper">
-        <div class="modal-title">Generated Session Narrative</div>
+        <div id="uiNarrativeTitle" class="modal-title">Generated Session Narrative</div>
         <div class="modal-subtitle" id="narrativeModalSubtitle">Overview Breakdown</div>
       </div>
       <div class="form-group">
         <textarea id="narrativeOutputText" class="narrative-textarea" readonly></textarea>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-secondary" onclick="closeNarrativeModal()">Close</button>
-        <button class="btn btn-primary" onclick="copyNarrativeToClipboard()">Copy to Clipboard</button>
+        <button id="uiNarrativeCloseBtn" class="btn btn-secondary" onclick="closeNarrativeModal()">Close</button>
+        <button id="uiNarrativeCopyBtn" class="btn btn-primary" onclick="copyNarrativeToClipboard()">Copy to Clipboard</button>
       </div>
     </div>
   </div>
@@ -528,6 +528,71 @@
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec";
     const ADMIN_PASSWORD = "admin"; 
+
+    // Centralized Dictionary for Easy Text Adjustments
+    const UI_TEXT = {
+      // Main Application Interface Labels
+      dashboardTitle: "Training Plan Calendar",
+      adminUnlockTooltip: "Unlock LTC Mode",
+      adminLockTooltip: "Lock LTC Mode",
+      refreshBtn: "Refresh",
+      initialLoading: "Loading data...",
+
+      // Real-time Loading & Operational Feedback
+      loadingFetch: "Loading data...",
+      loadingWrite: "Writing to database...",
+      loadingTimeoutError: "Pipeline Execution Timeout or Configuration Error. Check Apps Script logs.",
+      urlConfigError: "Configuration Error: Please paste your script deployment URL into the WEB_APP_URL constant.",
+
+      // Matrix Grid View Dynamic Copy
+      noSessionDates: "No session dates found.",
+      noSessionsForMonth: "No sessions mapped to this month tab context.",
+      noPersonnelCrew: "No personnel listed in Crew worksheet.",
+      tileModify: "+ Click to Modify",
+      tileSignUp: "+ Sign Up",
+      tileFallbackCategory: "Preference",
+      tileFallbackRole: "Unassigned",
+      fallbackDayName: "Training Day",
+      crewTableHeaderLabel: "Crew Member",
+
+      // Interaction Modals General Buttons
+      cancelBtn: "Cancel",
+      removeBtn: "Withdraw",
+      removeAllocBtn: "Remove Allocation",
+
+      // Personnel Signup Modal Panel
+      crewMemberFallback: "Crew Member",
+      sessionSpecificsFallback: "Session Context Data Record",
+      prefChoiceLabel: "Preference",
+      notesLabel: "Notes...",
+      notesPlaceholder: "Something you need to do? OCF?",
+      savePrefBtn: "Save",
+
+      // Admin Allocation Modal Panel
+      submittedNotesLabel: "Notes",
+      noNotesAdminView: "No notes for this session.",
+      allocCategoryLabel: "Afloat/Ashore/Alongside?",
+      allocRoleLabel: "Role",
+      allocActivityLabel: "Activity",
+      allocActivityPlaceholder: "Select or type activity...",
+      commitAllocBtn: "Commit",
+
+      // Automated Narrative Output Modal
+      narrativeTitle: "Narrative",
+      narrativeSubtitleFallback: "Overview Breakdown",
+      closeBtn: "Close",
+      copyClipboardBtn: "Copy to Clipboard",
+      
+      // Dialog / Prompt System Warnings
+      narrativeSuccessAlert: "Copied to clipboard successfully!",
+      narrativeErrorAlert: "Cannot generate narrative dialogue.\nThe following crew members have signed up but have unallocated roles:\n\n",
+      narrativeTemplateSegment1: "'s training will comprise of ",
+      narrativeTemplateSegment2: " session(s).\n\n",
+      narrativeSessionLabel: "Session",
+      adminPromptChallenge: "Enter LTC Password:",
+      adminInvalidCredentials: "Invalid password. Access Denied.",
+      submissionDelayedAlert: "Submission Delayed: "
+    };
 
     let state = {
       crew: [],
@@ -544,11 +609,43 @@
     };
 
     window.addEventListener("DOMContentLoaded", () => {
+      applyStaticUIText();
       fetchMatrixData();
     });
 
+    // Injects Centralized Config Text maps into DOM Structure layout directly
+    function applyStaticUIText() {
+      document.getElementById("uiDashboardTitle").textContent = UI_TEXT.dashboardTitle;
+      document.getElementById("globalAdminBtn").title = UI_TEXT.adminUnlockTooltip;
+      document.getElementById("uiRefreshBtn").textContent = UI_TEXT.refreshBtn;
+      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.initialLoading}</div>`;
+      
+      // Signup view panel bindings
+      document.getElementById("uiPrefChoiceLabel").textContent = UI_TEXT.prefChoiceLabel;
+      document.getElementById("uiNotesLabel").textContent = UI_TEXT.notesLabel;
+      document.getElementById("inputNotes").placeholder = UI_TEXT.notesPlaceholder;
+      document.getElementById("uiSignupRemoveBtn").textContent = UI_TEXT.removeBtn;
+      document.getElementById("uiSignupCancelBtn").textContent = UI_TEXT.cancelBtn;
+      document.getElementById("uiSignupSaveBtn").textContent = UI_TEXT.savePrefBtn;
+      
+      // Allocation view panel bindings
+      document.getElementById("uiSubmittedNotesLabel").textContent = UI_TEXT.submittedNotesLabel;
+      document.getElementById("uiAllocCategoryLabel").textContent = UI_TEXT.allocCategoryLabel;
+      document.getElementById("uiAllocRoleLabel").textContent = UI_TEXT.allocRoleLabel;
+      document.getElementById("uiAllocActivityLabel").textContent = UI_TEXT.allocActivityLabel;
+      document.getElementById("selectSubCategory").placeholder = UI_TEXT.allocActivityPlaceholder;
+      document.getElementById("uiAllocRemoveBtn").textContent = UI_TEXT.removeAllocBtn;
+      document.getElementById("uiAllocCancelBtn").textContent = UI_TEXT.cancelBtn;
+      document.getElementById("uiAllocCommitBtn").textContent = UI_TEXT.commitAllocBtn;
+      
+      // Narrative modal panel bindings
+      document.getElementById("uiNarrativeTitle").textContent = UI_TEXT.narrativeTitle;
+      document.getElementById("uiNarrativeCloseBtn").textContent = UI_TEXT.closeBtn;
+      document.getElementById("uiNarrativeCopyBtn").textContent = UI_TEXT.copyClipboardBtn;
+    }
+
     function fetchMatrixData() {
-      document.getElementById("dashboardView").innerHTML = '<div class="loading-shield">Pulling real-time parameters from Google Sheets...</div>';
+      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingFetch}</div>`;
       
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
@@ -557,7 +654,7 @@
           .doGet();
       } else {
         if(WEB_APP_URL.includes("YOUR_APPS_SCRIPT")) {
-          document.getElementById("dashboardView").innerHTML = '<div class="loading-shield" style="color:red;">Configuration Error: Please paste your script deployment URL into the WEB_APP_URL constant.</div>';
+          document.getElementById("dashboardView").innerHTML = `<div class="loading-shield" style="color:red;">${UI_TEXT.urlConfigError}</div>`;
           return;
         }
         fetch(WEB_APP_URL)
@@ -569,7 +666,7 @@
 
     function handleNetworkError(err) {
       console.error(err);
-      document.getElementById("dashboardView").innerHTML = '<div class="loading-shield" style="color:red;">Pipeline Execution Timeout or Configuration Error. Check Apps Script logs.</div>';
+      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield" style="color:red;">${UI_TEXT.loadingTimeoutError}</div>`;
     }
 
     function processServerPayload(response) {
@@ -638,7 +735,7 @@
       panel.innerHTML = "";
 
       if(months.length === 0) {
-        panel.innerHTML = '<div style="font-style:italic; padding:10px;">No session dates found.</div>';
+        panel.innerHTML = `<div style="font-style:italic; padding:10px;">${UI_TEXT.noSessionDates}</div>`;
         return;
       }
 
@@ -660,7 +757,7 @@
       const activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
 
       if (activeSessions.length === 0) {
-        view.innerHTML = '<div class="loading-shield">No sessions mapped to this month tab context.</div>';
+        view.innerHTML = `<div class="loading-shield">${UI_TEXT.noSessionsForMonth}</div>`;
         return;
       }
 
@@ -669,7 +766,7 @@
           <table>
             <thead>
               <tr>
-                <th>Crew Member</th>
+                <th>${UI_TEXT.crewTableHeaderLabel}</th>
       `;
 
       activeSessions.forEach(sess => {
@@ -691,7 +788,7 @@
       `;
 
       if(state.crew.length === 0) {
-        html += `<tr><td colspan="${activeSessions.length + 1}" style="text-align:center; font-style:italic;">No personnel listed in Crew worksheet.</td></tr>`;
+        html += `<tr><td colspan="${activeSessions.length + 1}" style="text-align:center; font-style:italic;">${UI_TEXT.noPersonnelCrew}</td></tr>`;
       }
 
       state.crew.forEach(crewName => {
@@ -717,7 +814,7 @@
                     <div class="tile-category">${escapeHtml(match.allocatedCategory)}</div>
                     ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
                   </div>
-                  <div class="tile-role">${escapeHtml(match.allocatedRole || 'Unassigned')}</div>
+                  <div class="tile-role">${escapeHtml(match.allocatedRole || UI_TEXT.tileFallbackRole)}</div>
                   ${match.allocatedSubCategory ? `<div class="tile-subcat" title="${escapeHtml(match.allocatedSubCategory)}">${escapeHtml(match.allocatedSubCategory)}</div>` : ''}
                 </div>
               `;
@@ -736,17 +833,17 @@
               html += `
                 <div class="tile-box preferred">
                   <div class="tile-category-wrapper">
-                    <div class="tile-category">Preference</div>
+                    <div class="tile-category">${UI_TEXT.tileFallbackCategory}</div>
                     ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
                   </div>
                   <div class="tile-role">${escapeHtml(match.preferred)}</div>
                 </div>
               `;
             } else {
-              html += `<div class="empty-tile">+ Click to Modify</div>`;
+              html += `<div class="empty-tile">${UI_TEXT.tileModify}</div>`;
             }
           } else {
-            html += `<div class="empty-tile">+ Sign Up</div>`;
+            html += `<div class="empty-tile">${UI_TEXT.tileSignUp}</div>`;
           }
 
           html += `</td>`;
@@ -773,12 +870,12 @@
       
       if (unallocatedCrew.length > 0) {
         const namesList = unallocatedCrew.map(c => c.name).join(", ");
-        alert(`Cannot generate narrative dialogue.\nThe following crew members have signed up but have unallocated roles:\n\n${namesList}`);
+        alert(`${UI_TEXT.narrativeErrorAlert}${namesList}`);
         return;
       }
 
       const validAllocated = sessionSignups.filter(s => s.allocatedCategory && s.allocatedCategory !== "No Training" && s.allocatedCategory.trim() !== "");
-      let dayName = targetSess.dayName || "Training Day";
+      let dayName = targetSess.dayName || UI_TEXT.fallbackDayName;
 
       const allocationGroups = {};
       validAllocated.forEach(person => {
@@ -798,11 +895,11 @@
       const uniqueCategoryKeys = Object.keys(allocationGroups);
       const N = uniqueCategoryKeys.length;
 
-      let textOutput = `${dayName}'s training will comprise of ${N} sessions.\n\n`;
+      let textOutput = `${dayName}${UI_TEXT.narrativeTemplateSegment1}${N}${UI_TEXT.narrativeTemplateSegment2}`;
 
       uniqueCategoryKeys.forEach((categoryName, index) => {
         const currentGroup = allocationGroups[categoryName];
-        textOutput += `Session ${index + 1}: ${categoryName} (${currentGroup.subCategory})\n`;
+        textOutput += `${UI_TEXT.narrativeSessionLabel} ${index + 1}: ${categoryName} (${currentGroup.subCategory})\n`;
         
         currentGroup.crewList.forEach(crewMember => {
           textOutput += `${crewMember.name} (${crewMember.role})\n`;
@@ -825,14 +922,13 @@
       copyTextEl.select();
       copyTextEl.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(copyTextEl.value);
-      alert("Narrative text block copied to clipboard successfully!");
+      alert(UI_TEXT.narrativeSuccessAlert);
     }
 
     function openInteractionModal(crewName, sessionId) {
       state.selectedCrew = crewName;
       state.selectedSessionId = sessionId;
 
-      // Automatically determine which panel to display based on the Global Admin State
       if (state.isGlobalAdminUnlocked) {
         document.getElementById("formSectionSignup").style.display = "none";
         document.getElementById("formSectionAllocate").style.display = "block";
@@ -844,8 +940,8 @@
       const targetSess = state.sessions.find(s => s.id == sessionId);
       const existingMatch = state.signups.find(s => s.name === crewName && s.sessionId == sessionId);
 
-      document.getElementById("mCrewName").textContent = crewName;
-      document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${targetSess.date} @ ${targetSess.time})` : "Session Context Data Record";
+      document.getElementById("mCrewName").textContent = crewName || UI_TEXT.crewMemberFallback;
+      document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${targetSess.date} @ ${targetSess.time})` : UI_TEXT.sessionSpecificsFallback;
 
       const adminBox = document.getElementById("adminNotesViewBox");
       if (existingMatch && existingMatch.notes && existingMatch.notes.trim() !== "") {
@@ -853,7 +949,7 @@
         adminBox.style.fontStyle = "normal";
         adminBox.style.color = "#c05621";
       } else {
-        adminBox.textContent = "No notes provided by crew member for this session.";
+        adminBox.textContent = UI_TEXT.noNotesAdminView;
         adminBox.style.fontStyle = "italic";
         adminBox.style.color = "#718096";
       }
@@ -876,19 +972,17 @@
       const btn = document.getElementById("globalAdminBtn");
       
       if (state.isGlobalAdminUnlocked) {
-        // Relock immediately
         state.isGlobalAdminUnlocked = false;
         btn.classList.remove("unlocked");
-        btn.title = "Unlock Admin Allocation Mode";
+        btn.title = UI_TEXT.adminUnlockTooltip;
       } else {
-        // Request authorization challenge
-        const inputPass = prompt("Enter Administration System Password:");
+        const inputPass = prompt(UI_TEXT.adminPromptChallenge);
         if (inputPass === ADMIN_PASSWORD) {
           state.isGlobalAdminUnlocked = true;
           btn.classList.add("unlocked");
-          btn.title = "Lock Admin Mode";
+          btn.title = UI_TEXT.adminLockTooltip;
         } else if (inputPass !== null) {
-          alert("Invalid administrative credentials. Access Denied.");
+          alert(UI_TEXT.adminInvalidCredentials);
         }
       }
     }
@@ -918,11 +1012,16 @@
       }
 
       closeModal();
-      document.getElementById("dashboardView").innerHTML = '<div class="loading-shield">Writing metrics to Google Sheets database ledger...</div>';
+      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingWrite}</div>`;
 
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
-          .withSuccessHandler(() => { fetchMatrixData(); })
+          .withSuccessHandler((result) => { 
+            if (result && result.status === "error") {
+              alert(UI_TEXT.submissionDelayedAlert + result.message + "\n\nPlease try again in a few moments.");
+            }
+            fetchMatrixData(); 
+          })
           .withFailureHandler(handleNetworkError)
           .doPost(JSON.stringify(payload));
       } else {
@@ -932,7 +1031,12 @@
           headers: { "Content-Type": "text/plain;charset=utf-8" }
         })
         .then(res => res.json())
-        .then(() => { fetchMatrixData(); })
+        .then((result) => { 
+          if (result && result.status === "error") {
+            alert(UI_TEXT.submissionDelayedAlert + result.message + "\n\nPlease try again in a few moments.");
+          }
+          fetchMatrixData(); 
+        })
         .catch(handleNetworkError);
       }
     }

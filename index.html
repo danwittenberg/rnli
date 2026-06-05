@@ -83,12 +83,14 @@
       background-color: var(--primary-hover);
     }
 
-    /* Global Header Gear Button */
+    /* LTC Mode Text Button Styling */
     .global-admin-btn {
       background: white;
       border: 1px solid #cbd5e0;
-      font-size: 1.1rem;
-      padding: 5px 8px;
+      color: #4a5568;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
       display: flex;
@@ -104,6 +106,7 @@
     .global-admin-btn.unlocked {
       background-color: #feebc8;
       border-color: #f6ad55;
+      color: #c05621;
       box-shadow: 0 0 0 2px rgba(246, 173, 85, 0.4);
     }
 
@@ -446,7 +449,7 @@
         <h1 id="uiDashboardTitle">Crew Allocation Matrix</h1>
       </div>
       <div class="header-actions">
-        <button id="globalAdminBtn" class="global-admin-btn" onclick="toggleGlobalAdminMode()" title="Unlock Admin Allocation Mode">⚙️</button>
+        <button id="globalAdminBtn" class="global-admin-btn" onclick="toggleGlobalAdminMode()">LTC Mode</button>
         <button id="uiRefreshBtn" class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
       </div>
     </header>
@@ -532,15 +535,16 @@
     // Centralized Dictionary for Easy Text Adjustments
     const UI_TEXT = {
       // Main Application Interface Labels
-      dashboardTitle: "Training Plan Calendar",
+      dashboardTitle: "Crew Allocation Matrix",
+      adminBtnText: "LTC Mode",
       adminUnlockTooltip: "Unlock LTC Mode",
       adminLockTooltip: "Lock LTC Mode",
-      refreshBtn: "Refresh",
-      initialLoading: "Loading data...",
+      refreshBtn: "Refresh Dashboard",
+      initialLoading: "Assembling core data feeds...",
 
       // Real-time Loading & Operational Feedback
-      loadingFetch: "Loading data...",
-      loadingWrite: "Writing to database...",
+      loadingFetch: "Pulling real-time parameters from Google Sheets...",
+      loadingWrite: "Writing metrics to Google Sheets database ledger...",
       loadingTimeoutError: "Pipeline Execution Timeout or Configuration Error. Check Apps Script logs.",
       urlConfigError: "Configuration Error: Please paste your script deployment URL into the WEB_APP_URL constant.",
 
@@ -557,40 +561,40 @@
 
       // Interaction Modals General Buttons
       cancelBtn: "Cancel",
-      removeBtn: "Withdraw",
+      removeBtn: "Clear / Withdraw",
       removeAllocBtn: "Remove Allocation",
 
       // Personnel Signup Modal Panel
       crewMemberFallback: "Crew Member",
       sessionSpecificsFallback: "Session Context Data Record",
-      prefChoiceLabel: "Preference",
-      notesLabel: "Notes...",
-      notesPlaceholder: "Something you need to do? OCF?",
-      savePrefBtn: "Save",
+      prefChoiceLabel: "Preference Choice",
+      notesLabel: "Notes / Availability Details",
+      notesPlaceholder: "Any specific scheduling notes...",
+      savePrefBtn: "Save Preference",
 
       // Admin Allocation Modal Panel
-      submittedNotesLabel: "Notes",
-      noNotesAdminView: "No notes for this session.",
-      allocCategoryLabel: "Afloat/Ashore/Alongside?",
-      allocRoleLabel: "Role",
-      allocActivityLabel: "Activity",
-      allocActivityPlaceholder: "Select or type activity...",
-      commitAllocBtn: "Commit",
+      submittedNotesLabel: "Submitted Crew Availability Notes",
+      noNotesAdminView: "No notes provided by crew member for this session.",
+      allocCategoryLabel: "Allocated Category",
+      allocRoleLabel: "Allocated Role",
+      allocActivityLabel: "Allocated Activity / Sub-Category",
+      allocActivityPlaceholder: "Select or type custom activity...",
+      commitAllocBtn: "Commit Allocation",
 
       // Automated Narrative Output Modal
-      narrativeTitle: "Narrative",
+      narrativeTitle: "Generated Session Narrative",
       narrativeSubtitleFallback: "Overview Breakdown",
       closeBtn: "Close",
       copyClipboardBtn: "Copy to Clipboard",
       
       // Dialog / Prompt System Warnings
-      narrativeSuccessAlert: "Copied to clipboard successfully!",
+      narrativeSuccessAlert: "Narrative text block copied to clipboard successfully!",
       narrativeErrorAlert: "Cannot generate narrative dialogue.\nThe following crew members have signed up but have unallocated roles:\n\n",
       narrativeTemplateSegment1: "'s training will comprise of ",
-      narrativeTemplateSegment2: " session(s).\n\n",
+      narrativeTemplateSegment2: " sessions.\n\n",
       narrativeSessionLabel: "Session",
-      adminPromptChallenge: "Enter LTC Password:",
-      adminInvalidCredentials: "Invalid password. Access Denied.",
+      adminPromptChallenge: "Enter Administration System Password:",
+      adminInvalidCredentials: "Invalid administrative credentials. Access Denied.",
       submissionDelayedAlert: "Submission Delayed: "
     };
 
@@ -616,7 +620,11 @@
     // Injects Centralized Config Text maps into DOM Structure layout directly
     function applyStaticUIText() {
       document.getElementById("uiDashboardTitle").textContent = UI_TEXT.dashboardTitle;
-      document.getElementById("globalAdminBtn").title = UI_TEXT.adminUnlockTooltip;
+      
+      const adminBtn = document.getElementById("globalAdminBtn");
+      adminBtn.textContent = UI_TEXT.adminBtnText;
+      adminBtn.title = UI_TEXT.adminUnlockTooltip;
+      
       document.getElementById("uiRefreshBtn").textContent = UI_TEXT.refreshBtn;
       document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.initialLoading}</div>`;
       

@@ -700,8 +700,8 @@
       selectedCrew: "",
       selectedSessionId: "",
       isGlobalAdminUnlocked: false,
-      activeSessionFilterId: null, // Tracks currently isolated column
-      activeCrewFilterName: null    // Tracks currently isolated row
+      activeSessionFilterId: null, 
+      activeCrewFilterName: null    
     };
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -881,7 +881,6 @@
         return;
       }
 
-      // If a crew member row filter is active, determine which columns stay visible
       let hiddenSessionIds = [];
       if (state.activeCrewFilterName) {
         activeSessions.forEach(sess => {
@@ -928,11 +927,10 @@
       }
 
       state.crew.forEach(crewName => {
-        // If a session column filter is active, look ahead to see if row has signups
         if (state.activeSessionFilterId) {
           const match = state.signups.find(s => s.name === crewName && s.sessionId == state.activeSessionFilterId);
           const hasRecord = match && (match.preferred || match.allocatedCategory);
-          if (!hasRecord) return; // Drop row from output
+          if (!hasRecord) return; 
         }
 
         const crewFilterClass = state.activeCrewFilterName === crewName ? "crew-filter-btn active-filter" : "crew-filter-btn";
@@ -1108,7 +1106,9 @@
       
       document.getElementById("selectCategory").value = (existingMatch && existingMatch.allocatedCategory) ? existingMatch.allocatedCategory : "No Training";
       document.getElementById("selectRole").value = (existingMatch && existingMatch.allocatedRole) ? existingMatch.allocatedRole : "No Training";
-      document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "No Training";
+      
+      // Default activity to blank if no historical allocation exists, instead of forcing "No Training"
+      document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "";
 
       document.getElementById("actionModal").classList.add("open");
     }

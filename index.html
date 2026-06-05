@@ -479,7 +479,7 @@
   </div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec";
+    const WEB_APP_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
     let state = {
       crew: [],
@@ -536,7 +536,8 @@
       state.subCategories = response.subCategories || [];
       state.signups = response.signups || [];
 
-      const distinctMonths = [...new Set(state.sessions.map(s => s.month))];
+      // Isolate perfectly grouped months from the display value cache
+      const distinctMonths = [...new Set(state.sessions.map(s => s.month).filter(Boolean))];
 
       if (distinctMonths.length > 0 && (!state.activeMonth || !distinctMonths.includes(state.activeMonth))) {
         state.activeMonth = distinctMonths[0];
@@ -708,16 +709,15 @@
     }
 
     /**
-     * Narrative Generator Engine Core Engine Action
+     * Narrative Generator Engine Core Action
      */
     function triggerSessionNarrative(sessionId) {
       const targetSess = state.sessions.find(s => s.id == sessionId);
       if(!targetSess) return;
 
-      // Filter to all current sheet interaction traces for this targeted sheet index row
       const sessionSignups = state.signups.filter(s => s.sessionId == sessionId);
       
-      // Look up if any user entries exist where a signup exists, but admin allocations have been left blank
+      // Validation check: Verify if any active sign-up has not been handled by an admin yet
       const unallocatedCrew = sessionSignups.filter(s => s.preferred && (!s.allocatedCategory || s.allocatedCategory.trim() === ""));
       
       if (unallocatedCrew.length > 0) {
@@ -726,19 +726,13 @@
         return;
       }
 
-      // Isolate legitimate active configurations (ignore "No Training" choices)
+      // Isolate allocations (skipping "No Training" choices)
       const validAllocated = sessionSignups.filter(s => s.allocatedCategory && s.allocatedCategory !== "No Training" && s.allocatedCategory.trim() !== "");
 
-      // Resolve Day of the Week String name conversion handling
-      let dayName = "Training Day";
-      if(targetSess.date) {
-        const parsedDate = new Date(targetSess.date);
-        if(!isNaN(parsedDate.getTime())) {
-          dayName = parsedDate.toLocaleDateString('en-US', { weekday: 'long' });
-        }
-      }
+      // Pull day name safely pre-computed by the backend engine
+      let dayName = targetSess.dayName || "Training Day";
 
-      // Group entities natively by unique Allocation category arrays
+      // Group people dynamically by unique Allocation category arrays
       const allocationGroups = {};
       validAllocated.forEach(person => {
         const catKey = person.allocatedCategory;
@@ -757,7 +751,7 @@
       const uniqueCategoryKeys = Object.keys(allocationGroups);
       const N = uniqueCategoryKeys.length;
 
-      // Compile raw structural dialogue narrative format output parameters
+      // Compile raw structural narrative layout
       let textOutput = `${dayName}'s training will comprise of ${N} sessions.\n\n`;
 
       uniqueCategoryKeys.forEach((categoryName, index) => {
@@ -771,7 +765,6 @@
         textOutput += `\n`;
       });
 
-      // Inject text block arrays and project structural frame onto GUI view modal layout properties
       document.getElementById("narrativeModalSubtitle").textContent = `${targetSess.topic || 'Session'} Summary`;
       document.getElementById("narrativeOutputText").value = textOutput.trim();
       document.getElementById("narrativeModal").classList.add("open");
@@ -784,7 +777,7 @@
     function copyNarrativeToClipboard() {
       const copyTextEl = document.getElementById("narrativeOutputText");
       copyTextEl.select();
-      copyTextEl.setSelectionRange(0, 99999); // Mobile compatibility
+      copyTextEl.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(copyTextEl.value);
       alert("Narrative text block copied to clipboard successfully!");
     }
@@ -874,10 +867,7 @@
     }
 
     function formatDisplayDate(dateStr) {
-      if(!dateStr) return "";
-      const d = new Date(dateStr);
-      if(isNaN(d.getTime())) return dateStr;
-      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      return dateStr || ""; // Respects exact format used in the spreadsheet column
     }
 
     function escapeHtml(str) {

@@ -514,6 +514,8 @@
         <h1 id="uiDashboardTitle">Crew Allocation Matrix</h1>
       </div>
       <div class="header-actions">
+        <!-- Google Sheet database quick-link (dynamically visible in LTC mode) -->
+        <button id="globalSheetBtn" class="global-admin-btn" style="display: none;" onclick="window.open('https://docs.google.com/spreadsheets/d/1pShwO5f9OiTReD3llwWMkrfHc1z405q3PP-m0-AbPIk/edit?usp=sharing', '_blank')">🟢 View Database</button>
         <button id="globalAdminBtn" class="global-admin-btn" onclick="toggleGlobalAdminMode()">LTC Mode</button>
         <button id="uiRefreshBtn" class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
       </div>
@@ -1023,17 +1025,20 @@
 
     function toggleGlobalAdminMode() {
       const btn = document.getElementById("globalAdminBtn");
+      const sheetBtn = document.getElementById("globalSheetBtn");
       
       if (state.isGlobalAdminUnlocked) {
         state.isGlobalAdminUnlocked = false;
         btn.classList.remove("unlocked");
         btn.title = UI_TEXT.adminUnlockTooltip;
+        sheetBtn.style.display = "none";
       } else {
         const inputPass = prompt(UI_TEXT.adminPromptChallenge);
         if (inputPass === ADMIN_PASSWORD) {
           state.isGlobalAdminUnlocked = true;
           btn.classList.add("unlocked");
           btn.title = UI_TEXT.adminLockTooltip;
+          sheetBtn.style.display = "inline-flex";
         } else if (inputPass !== null) {
           alert(UI_TEXT.adminInvalidCredentials);
         }

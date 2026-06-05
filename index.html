@@ -187,9 +187,9 @@
     th:first-child, td:first-child {
       position: sticky;
       left: 0;
-      width: 130px;      
-      min-width: 130px;  
-      max-width: 130px;  
+      width: 155px;      
+      min-width: 155px;  
+      max-width: 155px;  
       background-color: #fff;
       z-index: 11;
       border-right: 3px solid var(--rnli-navy);
@@ -218,15 +218,17 @@
       margin-bottom: 8px;
     }
 
-    .narrative-btn-wrapper {
-      margin-top: 2px;
+    .action-btn-row {
+      margin-top: 4px;
+      display: flex;
+      gap: 4px;
     }
 
-    .narrative-btn {
+    .narrative-btn, .filter-arrow-btn {
       background-color: rgba(255, 255, 255, 0.15);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: white;
-      padding: 3px 8px;
+      padding: 3px 6px;
       font-size: 0.72rem;
       font-weight: 700;
       border-radius: 3px;
@@ -238,9 +240,15 @@
       transition: all 0.2s;
     }
 
-    .narrative-btn:hover {
+    .narrative-btn:hover, .filter-arrow-btn:hover {
       background-color: var(--rnli-orange);
       border-color: var(--rnli-orange);
+    }
+
+    .filter-arrow-btn.active-filter {
+      background-color: var(--rnli-orange);
+      border-color: #FFF;
+      animation: pulse-border 2s infinite;
     }
 
     .crew-name-cell {
@@ -249,6 +257,33 @@
       font-size: 0.85rem; 
       line-height: 1.3;
       background-color: #FFF;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .crew-filter-btn {
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      padding: 1px 4px;
+      color: var(--rnli-navy);
+      transition: all 0.2s;
+    }
+
+    .crew-filter-btn:hover {
+      background-color: var(--rnli-orange);
+      color: white;
+      border-color: var(--rnli-orange);
+    }
+
+    .crew-filter-btn.active-filter {
+      background-color: var(--rnli-navy);
+      color: white;
+      border-color: var(--rnli-navy);
     }
 
     tr:hover td.crew-name-cell {
@@ -343,6 +378,11 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    /* Column-hiding runtime classes */
+    .hide-column {
+      display: none !important;
     }
 
     .modal-overlay {
@@ -514,7 +554,6 @@
         <h1 id="uiDashboardTitle">Crew Allocation Matrix</h1>
       </div>
       <div class="header-actions">
-        <!-- Google Sheet database quick-link (dynamically visible in LTC mode) -->
         <button id="globalSheetBtn" class="global-admin-btn" style="display: none;" onclick="window.open('https://docs.google.com/spreadsheets/d/1pShwO5f9OiTReD3llwWMkrfHc1z405q3PP-m0-AbPIk/edit?usp=sharing', '_blank')">🟢 View Database</button>
         <button id="globalAdminBtn" class="global-admin-btn" onclick="toggleGlobalAdminMode()">LTC Mode</button>
         <button id="uiRefreshBtn" class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
@@ -660,7 +699,9 @@
       activeMonth: "",
       selectedCrew: "",
       selectedSessionId: "",
-      isGlobalAdminUnlocked: false
+      isGlobalAdminUnlocked: false,
+      activeSessionFilterId: null, // Tracks currently isolated column
+      activeCrewFilterName: null    // Tracks currently isolated row
     };
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -701,6 +742,8 @@
 
     function fetchMatrixData() {
       document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingFetch}</div>`;
+      state.activeSessionFilterId = null;
+      state.activeCrewFilterName = null;
       
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
@@ -800,11 +843,33 @@
         btn.textContent = m;
         btn.onclick = () => {
           state.activeMonth = m;
+          state.activeSessionFilterId = null; 
+          state.activeCrewFilterName = null;
           renderMonthTabs(months);
           renderMatrixGrid();
         };
         panel.appendChild(btn);
       });
+    }
+
+    function toggleSessionFilter(sessionId) {
+      if (state.activeSessionFilterId == sessionId) {
+        state.activeSessionFilterId = null; 
+      } else {
+        state.activeSessionFilterId = sessionId;
+        state.activeCrewFilterName = null; 
+      }
+      renderMatrixGrid();
+    }
+
+    function toggleCrewFilter(crewName) {
+      if (state.activeCrewFilterName === crewName) {
+        state.activeCrewFilterName = null;
+      } else {
+        state.activeCrewFilterName = crewName;
+        state.activeSessionFilterId = null; 
+      }
+      renderMatrixGrid();
     }
 
     function renderMatrixGrid() {
@@ -816,6 +881,18 @@
         return;
       }
 
+      // If a crew member row filter is active, determine which columns stay visible
+      let hiddenSessionIds = [];
+      if (state.activeCrewFilterName) {
+        activeSessions.forEach(sess => {
+          const match = state.signups.find(s => s.name === state.activeCrewFilterName && s.sessionId == sess.id);
+          const hasRecord = match && (match.preferred || match.allocatedCategory);
+          if (!hasRecord) {
+            hiddenSessionIds.push(sess.id);
+          }
+        });
+      }
+
       let html = `
         <div class="matrix-wrapper">
           <table>
@@ -825,12 +902,16 @@
       `;
 
       activeSessions.forEach(sess => {
+        const isColHidden = hiddenSessionIds.includes(sess.id);
+        const filterClass = state.activeSessionFilterId == sess.id ? "filter-arrow-btn active-filter" : "filter-arrow-btn";
+        
         html += `
-          <th>
+          <th class="${isColHidden ? 'hide-column' : ''}">
             <div class="session-header-title">${sess.topic || "Unnamed Session"}</div>
             <div class="session-header-meta">${sess.date} @ ${sess.time}</div>
-            <div class="narrative-btn-wrapper">
+            <div class="action-btn-row">
               <button class="narrative-btn" onclick="triggerSessionNarrative('${sess.id}')">📋 Narrative</button>
+              <button class="${filterClass}" title="Filter signups for this session" onclick="toggleSessionFilter('${sess.id}')">▼ Filter</button>
             </div>
           </th>
         `;
@@ -847,16 +928,29 @@
       }
 
       state.crew.forEach(crewName => {
+        // If a session column filter is active, look ahead to see if row has signups
+        if (state.activeSessionFilterId) {
+          const match = state.signups.find(s => s.name === crewName && s.sessionId == state.activeSessionFilterId);
+          const hasRecord = match && (match.preferred || match.allocatedCategory);
+          if (!hasRecord) return; // Drop row from output
+        }
+
+        const crewFilterClass = state.activeCrewFilterName === crewName ? "crew-filter-btn active-filter" : "crew-filter-btn";
+
         html += `
           <tr>
-            <td class="crew-name-cell">${crewName}</td>
+            <td class="crew-name-cell">
+              <span>${crewName}</span>
+              <button class="${crewFilterClass}" title="Isolate this crew's timeline" onclick="toggleCrewFilter('${escapeHtml(crewName)}')">▶</button>
+            </td>
         `;
 
         activeSessions.forEach(sess => {
+          const isColHidden = hiddenSessionIds.includes(sess.id);
           const match = state.signups.find(s => s.name === crewName && s.sessionId == sess.id);
 
           html += `
-            <td class="matrix-cell" onclick="openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')">
+            <td class="matrix-cell ${isColHidden ? 'hide-column' : ''}" onclick="openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')">
           `;
 
           if (match) {

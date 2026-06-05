@@ -378,15 +378,43 @@
             document.getElementById('a-name').innerText = name;
             document.getElementById('a-pref-box').innerText = sig ? `Request: ${sig.preferred}\nNotes: ${sig.notes || "None"}` : "No Request.";
             document.getElementById('a-cat').value = sig ? sig.allocatedCategory : "";
-            document.getElementById('a-role').value = sig ? sig.allocatedRole : "";
+            
+            // Sync UI rules before matching existing roles
             toggleRoleDisable();
+            
+            if (sig && sig.allocatedCategory !== "No Training") {
+                document.getElementById('a-role').value = sig.allocatedRole || "";
+            }
             document.getElementById('modal-alloc').classList.remove('hidden');
         }
 
         function toggleRoleDisable() {
-            const isNo = document.getElementById('a-cat').value === "No Training";
-            document.getElementById('a-role').disabled = isNo;
-            if (isNo) document.getElementById('a-role').value = "";
+            const catSelect = document.getElementById('a-cat');
+            const roleSelect = document.getElementById('a-role');
+            const isNoTraining = catSelect.value === "No Training";
+            
+            // Clean dynamic helper options to avoid visual cluttering
+            for (let i = 0; i < roleSelect.options.length; i++) {
+                if (roleSelect.options[i].value === "No Training") {
+                    roleSelect.remove(i);
+                    break;
+                }
+            }
+
+            if (isNoTraining) {
+                // Generate and inject static confirmation entry
+                const opt = document.createElement('option');
+                opt.value = "No Training";
+                opt.text = "No Training";
+                roleSelect.add(opt);
+                roleSelect.value = "No Training";
+                roleSelect.disabled = true;
+            } else {
+                roleSelect.disabled = false;
+                if (roleSelect.value === "No Training") {
+                    roleSelect.value = "";
+                }
+            }
         }
 
         async function sendData(payload) {

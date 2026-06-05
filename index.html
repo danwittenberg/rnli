@@ -44,6 +44,11 @@
         .logout-link { background: none; border: none; color: #e53e3e; cursor: pointer; font-size: 0.7rem; font-weight: bold; text-decoration: underline; padding: 0; }
         #last-update { font-size: 0.65rem; color: #718096; }
 
+        /* Admin High Level Navigation Tabs */
+        .admin-nav { display: flex; gap: 6px; margin-bottom: 12px; background: white; padding: 6px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid var(--rnli-navy); }
+        .admin-nav-tab { flex: 1; text-align: center; padding: 8px; background: #f1f5f9; color: var(--rnli-navy); font-weight: 700; border-radius: 4px; cursor: pointer; font-size: 0.75rem; border: 1px solid #e2e8f0; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .admin-nav-tab.active { background: var(--rnli-navy); color: white; border-color: var(--rnli-navy); }
+
         .controls { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 8px; }
         .tab { padding: 6px 14px; background: #fff; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; white-space: nowrap; font-weight: 700; font-size: 0.75rem; color: var(--rnli-navy); }
         .tab.active { background: var(--rnli-orange); color: white; border-color: var(--rnli-orange); }
@@ -54,7 +59,7 @@
         .filter-group label { font-weight: 700; font-size: 0.68rem; color: var(--rnli-navy); display: block; margin-bottom: 3px; text-transform: uppercase; }
 
         /* Table Layout */
-        .matrix-container { overflow: auto; background: white; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-height: 70vh; }
+        .matrix-container { overflow: auto; background: white; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-height: 65vh; }
         table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 0.78rem; }
         th { position: sticky; top: 0; background: #fff; z-index: 20; border-bottom: 2px solid var(--rnli-navy); padding: 8px; font-weight: 800; color: var(--rnli-navy); }
         td:first-child { position: sticky; left: 0; background: #f8fafc; z-index: 10; font-weight: bold; border-right: 2px solid var(--border); text-align: left; padding: 6px; color: var(--rnli-navy); }
@@ -101,35 +106,50 @@
             <div id="last-update">Syncing...</div>
         </div>
 
-        <!-- Admin Entry Panel -->
-        <div id="admin-panel" class="hidden" style="background:#e2e8f0; padding:10px; border-radius:6px; margin-bottom:10px; border-left: 4px solid var(--rnli-navy);">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
-                <input type="date" id="n-date"> <input type="time" id="n-time">
-                <input type="text" id="n-topic" placeholder="Session Topic (e.g. Navigation)" style="grid-column: span 2">
-                <button onclick="addSession(event)" class="btn btn-secondary" style="grid-column: span 2; margin-bottom:0;">Create New Session</button>
+        <div id="admin-nav-bar" class="admin-nav hidden">
+            <div id="admin-tab-matrix" class="admin-nav-tab active" onclick="switchAdminView('matrix')">📊 Training Matrix</div>
+            <div id="admin-tab-session" class="admin-nav-tab" onclick="switchAdminView('session')">📅 Manage Sessions</div>
+        </div>
+
+        <div id="admin-panel" class="hidden" style="background:white; padding:15px; border-radius:8px; margin-bottom:10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 4px solid var(--rnli-orange);">
+            <h3 style="color: var(--rnli-navy); margin-top:0; margin-bottom:12px;">Create New Training Session</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <div>
+                    <label style="font-weight:bold; font-size:0.7rem; color:var(--rnli-navy);">SESSION DATE:</label>
+                    <input type="date" id="n-date">
+                </div>
+                <div>
+                    <label style="font-weight:bold; font-size:0.7rem; color:var(--rnli-navy);">SESSION TIME:</label>
+                    <input type="time" id="n-time">
+                </div>
+                <div style="grid-column: span 2">
+                    <label style="font-weight:bold; font-size:0.7rem; color:var(--rnli-navy);">TOPIC / DESCRIPTION:</label>
+                    <input type="text" id="n-topic" placeholder="e.g. Navigation check-off or Boat Handling">
+                </div>
+                <button onclick="addSession(event)" class="btn btn-secondary" style="grid-column: span 2; margin-bottom:0; margin-top:5px;">Create Session & Update Spreadsheet</button>
             </div>
         </div>
 
-        <div class="controls" id="tabs"></div>
+        <div id="matrix-view-container">
+            <div class="controls" id="tabs"></div>
 
-        <!-- Dynamic Filter Row -->
-        <div class="filter-row">
-            <div class="filter-group">
-                <label for="crew-filter">Horizontal Filter (Crew Member)</label>
-                <select id="crew-filter" onchange="triggerMatrixRender()" style="margin-bottom:0;"></select>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="crew-filter">Horizontal Filter (Crew Member)</label>
+                    <select id="crew-filter" onchange="triggerMatrixRender()" style="margin-bottom:0;"></select>
+                </div>
+                <div class="filter-group hidden" id="session-filter-container">
+                    <label for="session-filter">Vertical Filter (Active Session)</label>
+                    <select id="session-filter" onchange="triggerMatrixRender()" style="margin-bottom:0;"></select>
+                </div>
             </div>
-            <div class="filter-group hidden" id="session-filter-container">
-                <label for="session-filter">Vertical Filter (Active Session)</label>
-                <select id="session-filter" onchange="triggerMatrixRender()" style="margin-bottom:0;"></select>
-            </div>
-        </div>
 
-        <div class="matrix-container">
-            <table><thead><tr id="h-row"></tr></thead><tbody id="b-rows"></tbody></table>
+            <div class="matrix-container">
+                <table><thead><tr id="h-row"></tr></thead><tbody id="b-rows"></tbody></table>
+            </div>
         </div>
     </div>
 
-    <!-- Modals -->
     <div id="modal-signup" class="modal hidden">
         <div class="modal-content">
             <h4 id="s-title" style="margin:0 0 10px 0; color:var(--rnli-navy);"></h4>
@@ -185,22 +205,43 @@
 
         function initSystem() {
             const header = document.getElementById('mode-header-banner');
-            const sessionFilterCont = document.getElementById('session-filter-container');
+            const adminNavBar = document.getElementById('admin-nav-bar');
+            
             if (isAdmin) {
                 header.innerText = "LTC Mode";
                 header.style.background = "var(--rnli-navy)";
-                document.getElementById('admin-panel').classList.remove('hidden');
-                sessionFilterCont.classList.remove('hidden');
+                adminNavBar.classList.remove('hidden');
+                switchAdminView('matrix'); // Default to view the matrix
             } else {
                 header.innerText = "Crew Mode";
                 header.style.background = "#2d3748";
+                adminNavBar.classList.add('hidden');
                 document.getElementById('admin-panel').classList.add('hidden');
-                sessionFilterCont.classList.add('hidden');
+                document.getElementById('matrix-view-container').classList.remove('hidden');
             }
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             refreshData();
             if (!refreshInterval) refreshInterval = setInterval(refreshData, 30000);
+        }
+
+        function switchAdminView(view) {
+            const tabMatrix = document.getElementById('admin-tab-matrix');
+            const tabSession = document.getElementById('admin-tab-session');
+            const adminPanel = document.getElementById('admin-panel');
+            const matrixView = document.getElementById('matrix-view-container');
+
+            if (view === 'matrix') {
+                tabMatrix.classList.add('active');
+                tabSession.classList.remove('active');
+                adminPanel.classList.add('hidden');
+                matrixView.classList.remove('hidden');
+            } else if (view === 'session') {
+                tabMatrix.classList.remove('active');
+                tabSession.classList.add('active');
+                adminPanel.classList.remove('hidden');
+                matrixView.classList.add('hidden');
+            }
         }
 
         async function refreshData() {
@@ -223,6 +264,7 @@
         function populateFilterDropdowns() {
             const crewFilter = document.getElementById('crew-filter');
             const sessionFilter = document.getElementById('session-filter');
+            const sessionFilterCont = document.getElementById('session-filter-container');
             
             const prevCrew = crewFilter.value;
             const prevSession = sessionFilter.value;
@@ -232,18 +274,23 @@
                 db.crew.map(c => `<option value="${c}">${c}</option>`).join('');
             if (db.crew.includes(prevCrew)) crewFilter.value = prevCrew;
             
-            // Populate Vertical Filter Options based on selected month
-            const monthSessions = db.sessions.filter(s => s.month === currentMonth);
-            sessionFilter.innerHTML = '<option value="">-- All Sessions (Show All Crew) --</option>' + 
-                monthSessions.map(s => {
-                    const d = new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
-                    return `<option value="${s.id}">${d} - ${s.topic}</option>`;
-                }).join('');
-                
-            if (monthSessions.some(s => s.id === prevSession)) {
-                sessionFilter.value = prevSession;
+            // Display Vertical Session Filter inside LTC Mode context exclusively
+            if (isAdmin) {
+                sessionFilterCont.classList.remove('hidden');
+                const monthSessions = db.sessions.filter(s => s.month === currentMonth);
+                sessionFilter.innerHTML = '<option value="">-- All Sessions (Show All Crew) --</option>' + 
+                    monthSessions.map(s => {
+                        const d = new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+                        return `<option value="${s.id}">${d} - ${s.topic}</option>`;
+                    }).join('');
+                    
+                if (monthSessions.some(s => s.id === prevSession)) {
+                    sessionFilter.value = prevSession;
+                } else {
+                    sessionFilter.value = "";
+                }
             } else {
-                sessionFilter.value = "";
+                sessionFilterCont.classList.add('hidden');
             }
         }
 
@@ -258,7 +305,6 @@
         }
 
         function renderMatrix() {
-            // Re-render Tab layout
             document.getElementById('tabs').innerHTML = availableMonths.map(m => 
                 `<div class="tab ${m === currentMonth ? 'active' : ''}" onclick="switchMonth('${m}')">${m}</div>`
             ).join('');
@@ -269,26 +315,22 @@
             const activeCrewFilter = document.getElementById('crew-filter').value;
             const activeSessionFilter = document.getElementById('session-filter').value;
             
-            // 1. Horizontal Filter Calculation (Filter Columns)
             if (activeCrewFilter) {
                 sessions = sessions.filter(s => 
                     db.signups.some(x => x.name === activeCrewFilter && x.sessionId === s.id && (x.allocatedCategory || x.preferred))
                 );
             }
             
-            // 2. Vertical Filter Calculation (Filter Rows)
-            if (activeSessionFilter) {
+            if (isAdmin && activeSessionFilter) {
                 crewList = crewList.filter(name => 
                     db.signups.some(x => x.name === name && x.sessionId === activeSessionFilter && (x.allocatedCategory || x.preferred))
                 );
             }
             
-            // Inject structural headers
             document.getElementById('h-row').innerHTML = `<th>Crew Member</th>` + sessions.map(s => 
                 `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><span style="font-size:0.6rem; font-weight:normal;">${s.topic}</span></th>`
             ).join('');
             
-            // Inject rows
             if (crewList.length === 0) {
                 document.getElementById('b-rows').innerHTML = `<tr><td colspan="${sessions.length + 1}" style="padding:20px; color:#718096; text-align:center;">No active personnel found matching selection.</td></tr>`;
             } else {
@@ -361,7 +403,29 @@
         function submitSignup() { sendData({ action: "signup", crewName: target.name, sessionId: target.sessionId, preferredRole: document.getElementById('s-cat').value, notes: document.getElementById('s-notes').value }); }
         function submitRemove() { if(confirm("Remove request?")) sendData({ action: "remove", crewName: target.name, sessionId: target.sessionId }); }
         function submitAlloc() { sendData({ action: "allocate", crewName: target.name, sessionId: target.sessionId, roleType: document.getElementById('a-cat').value, specificRole: document.getElementById('a-role').value }); }
-        function addSession(e) { e.preventDefault(); sendData({ action: "addSession", date: document.getElementById('n-date').value, time: document.getElementById('n-time').value, topic: document.getElementById('n-topic').value }); }
+        
+        function addSession(e) { 
+            e.preventDefault(); 
+            const dInput = document.getElementById('n-date').value;
+            const tInput = document.getElementById('n-time').value;
+            const topicInput = document.getElementById('n-topic').value;
+            
+            if(!dInput || !tInput) {
+                alert("Please specify a Date and Time for the new session.");
+                return;
+            }
+            
+            sendData({ action: "addSession", date: dInput, time: tInput, topic: topicInput });
+            
+            // Flush input parameters clear
+            document.getElementById('n-date').value = "";
+            document.getElementById('n-time').value = "";
+            document.getElementById('n-topic').value = "";
+            
+            // Automatically switch view focus back to Matrix seamlessly
+            setTimeout(() => { switchAdminView('matrix'); }, 2600);
+        }
+        
         function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); }
     </script>
 </body>

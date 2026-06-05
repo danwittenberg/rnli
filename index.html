@@ -340,11 +340,15 @@
 
         function getCellHTML(name, sid) {
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
-            const isAllocated = !!(sig && sig.allocatedCategory && sig.allocatedRole);
+            
+            // Comprehensive rule matching intercepting 'No Training' even if one field returns empty from sheet
+            const isNoTraining = sig && (sig.allocatedCategory === "No Training" || sig.allocatedRole === "No Training");
+            const isAllocated = isNoTraining || !!(sig && sig.allocatedCategory && sig.allocatedRole);
+            
             let statusClass = 'status-empty', content = '<div class="role-title" style="color:#cbd5e1">—</div>';
 
             if (isAllocated) {
-                if (sig.allocatedCategory === "No Training") {
+                if (isNoTraining) {
                     statusClass = "status-no-training";
                     content = `<div class="padlock">🔒</div><div class="role-title">No Training</div>`;
                 } else {
@@ -377,13 +381,26 @@
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
             document.getElementById('a-name').innerText = name;
             document.getElementById('a-pref-box').innerText = sig ? `Request: ${sig.preferred}\nNotes: ${sig.notes || "None"}` : "No Request.";
-            document.getElementById('a-cat').value = sig ? sig.allocatedCategory : "";
             
-            // Sync UI rules before matching existing roles
-            toggleRoleDisable();
+            const catSelect = document.getElementById('a-cat');
+            const roleSelect = document.getElementById('a-role');
             
-            if (sig && sig.allocatedCategory !== "No Training") {
-                document.getElementById('a-role').value = sig.allocatedRole || "";
+            if (sig) {
+                if (sig.allocatedCategory === "No Training" || sig.allocatedRole === "No Training") {
+                    catSelect.value = "No Training";
+                } else {
+                    catSelect.value = sig.allocatedCategory || "";
+                }
+                
+                toggleRoleDisable();
+                
+                if (catSelect.value !== "No Training") {
+                    roleSelect.value = sig.allocatedRole || "";
+                }
+            } else {
+                catSelect.value = "";
+                roleSelect.value = "";
+                toggleRoleDisable();
             }
             document.getElementById('modal-alloc').classList.remove('hidden');
         }
@@ -393,16 +410,14 @@
             const roleSelect = document.getElementById('a-role');
             const isNoTraining = catSelect.value === "No Training";
             
-            // Clean dynamic helper options to avoid visual cluttering
-            for (let i = 0; i < roleSelect.options.length; i++) {
+            // Clean helper instances backwards to avoid mutation skip bugs
+            for (let i = roleSelect.options.length - 1; i >= 0; i--) {
                 if (roleSelect.options[i].value === "No Training") {
                     roleSelect.remove(i);
-                    break;
                 }
             }
 
             if (isNoTraining) {
-                // Generate and inject static confirmation entry
                 const opt = document.createElement('option');
                 opt.value = "No Training";
                 opt.text = "No Training";
@@ -411,9 +426,6 @@
                 roleSelect.disabled = true;
             } else {
                 roleSelect.disabled = false;
-                if (roleSelect.value === "No Training") {
-                    roleSelect.value = "";
-                }
             }
         }
 
@@ -433,7 +445,6 @@
             const cat = document.getElementById('a-cat').value;
             let role = document.getElementById('a-role').value;
             
-            // Explicit override enforcement ensuring 'No Training' is logged into both spreadsheet columns safely
             if (cat === "No Training") {
                 role = "No Training";
             }

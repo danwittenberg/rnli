@@ -428,7 +428,18 @@
 
         function submitSignup() { sendData({ action: "signup", crewName: target.name, sessionId: target.sessionId, preferredRole: document.getElementById('s-cat').value, notes: document.getElementById('s-notes').value }); }
         function submitRemove() { if(confirm("Remove request?")) sendData({ action: "remove", crewName: target.name, sessionId: target.sessionId }); }
-        function submitAlloc() { sendData({ action: "allocate", crewName: target.name, sessionId: target.sessionId, roleType: document.getElementById('a-cat').value, specificRole: document.getElementById('a-role').value }); }
+        
+        function submitAlloc() { 
+            const cat = document.getElementById('a-cat').value;
+            let role = document.getElementById('a-role').value;
+            
+            // Explicit override enforcement ensuring 'No Training' is logged into both spreadsheet columns safely
+            if (cat === "No Training") {
+                role = "No Training";
+            }
+            
+            sendData({ action: "allocate", crewName: target.name, sessionId: target.sessionId, roleType: cat, specificRole: role }); 
+        }
         
         function addSession(e) { 
             e.preventDefault(); 

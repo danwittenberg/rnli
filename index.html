@@ -35,7 +35,7 @@
     body {
       background-color: var(--bg-main);
       color: var(--text-main);
-      padding: 12px; /* Margins narrowed slightly for mobile panels */
+      padding: 12px;
     }
 
     .container {
@@ -61,6 +61,12 @@
       color: #1a202c;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .refresh-btn {
       background-color: var(--primary-color);
       color: white;
@@ -75,6 +81,30 @@
 
     .refresh-btn:hover {
       background-color: var(--primary-hover);
+    }
+
+    /* Global Header Gear Button */
+    .global-admin-btn {
+      background: white;
+      border: 1px solid #cbd5e0;
+      font-size: 1.1rem;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .global-admin-btn:hover {
+      background-color: #edf2f7;
+    }
+
+    .global-admin-btn.unlocked {
+      background-color: #feebc8;
+      border-color: #f6ad55;
+      box-shadow: 0 0 0 2px rgba(246, 173, 85, 0.4);
     }
 
     .tabs-container {
@@ -123,7 +153,6 @@
       border-bottom: 1px solid var(--border-color);
       border-right: 1px solid var(--border-color);
       text-align: left;
-      /* NARROWED SESSIONS: Shifted down from 190px to fit significantly more columns */
       min-width: 140px; 
     }
 
@@ -136,17 +165,16 @@
       z-index: 10;
     }
 
-    /* COMPACT STICKY CREW COLUMN: Structural tuning for mobile viewing */
     th:first-child, td:first-child {
       position: sticky;
       left: 0;
-      width: 110px;      /* Downsized from 180px */
-      min-width: 110px;  /* Downsized from 180px */
+      width: 110px;      
+      min-width: 110px;  
       max-width: 110px;  
       background-color: #fff;
       z-index: 11;
       border-right: 2px solid var(--border-color);
-      word-break: break-word; /* Forces long names to break and wrap nicely vertically */
+      word-break: break-word; 
       hyphens: auto;
     }
 
@@ -196,7 +224,7 @@
     .crew-name-cell {
       font-weight: 600;
       color: #2d3748;
-      font-size: 0.8rem; /* Slightly reduced text scale to match compact footprint */
+      font-size: 0.8rem; 
       line-height: 1.3;
     }
 
@@ -226,6 +254,7 @@
       border-radius: 4px;
       border: 1px solid var(--border-color);
       font-size: 0.8rem;
+      position: relative;
     }
 
     .tile-box.preferred {
@@ -246,12 +275,25 @@
       color: var(--cat-notraining-text);
     }
 
+    .tile-category-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
     .tile-category {
       font-weight: 700;
       font-size: 0.78rem;
       margin-bottom: 2px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
+    }
+
+    .tile-tooltip-indicator {
+      font-size: 0.75rem;
+      cursor: help;
+      opacity: 0.8;
     }
 
     .tile-role {
@@ -266,18 +308,6 @@
       padding-top: 3px;
       border-top: 1px dashed rgba(0, 0, 0, 0.08);
       opacity: 0.9;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .tile-note-line {
-      font-size: 0.7rem;
-      font-weight: 500;
-      color: #4a5568;
-      margin-top: 3px;
-      padding-top: 3px;
-      border-top: 1px dotted rgba(0, 0, 0, 0.15);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -314,8 +344,10 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
 
-    .modal-header {
-      margin-bottom: 12px;
+    .modal-header-wrapper {
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
     }
 
     .modal-title {
@@ -329,21 +361,14 @@
       margin-top: 2px;
     }
 
-    .modal-notes-banner {
+    .admin-notes-callout {
       background-color: #fffaf0;
-      border-left: 4px solid #f6ad55;
-      padding: 8px 10px;
-      margin-bottom: 12px;
+      border: 1px dashed #f6ad55;
+      padding: 8px;
       border-radius: 4px;
       font-size: 0.82rem;
-      line-height: 1.4;
       color: #c05621;
-    }
-    
-    .modal-notes-banner.empty {
-      background-color: #f7fafc;
-      border-left: 4px solid #cbd5e0;
-      color: #718096;
+      line-height: 1.3;
     }
 
     .form-group {
@@ -369,29 +394,6 @@
     textarea {
       resize: vertical;
       height: 55px;
-    }
-
-    .modal-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 12px;
-    }
-
-    .modal-tab-btn {
-      flex: 1;
-      padding: 8px;
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.85rem;
-      color: #718096;
-    }
-
-    .modal-tab-btn.active {
-      color: var(--primary-color);
-      border-bottom-color: var(--primary-color);
     }
 
     .modal-actions {
@@ -443,7 +445,10 @@
       <div>
         <h1>Crew Allocation Matrix</h1>
       </div>
-      <button class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
+      <div class="header-actions">
+        <button id="globalAdminBtn" class="global-admin-btn" onclick="toggleGlobalAdminMode()" title="Unlock Admin Allocation Mode">⚙️</button>
+        <button class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
+      </div>
     </header>
 
     <div class="tabs-container" id="monthTabsPanel"></div>
@@ -455,16 +460,9 @@
 
   <div class="modal-overlay" id="actionModal">
     <div class="modal-card">
-      <div class="modal-header">
+      <div class="modal-header-wrapper">
         <div class="modal-title" id="mCrewName">Crew Member</div>
         <div class="modal-subtitle" id="mSessionTitle">Session Specifics</div>
-      </div>
-
-      <div id="modalNotesBanner" class="modal-notes-banner"></div>
-
-      <div class="modal-tabs">
-        <button class="modal-tab-btn active" onclick="switchModalTab('signup')">Sign Up/Preference</button>
-        <button class="modal-tab-btn" onclick="switchModalTab('allocate')">Allocation (Admin)</button>
       </div>
 
       <div id="formSectionSignup">
@@ -485,6 +483,11 @@
 
       <div id="formSectionAllocate" style="display: none;">
         <div class="form-group">
+          <label>Submitted Crew Availability Notes</label>
+          <div id="adminNotesViewBox" class="admin-notes-callout">None</div>
+        </div>
+
+        <div class="form-group">
           <label>Allocated Category (Config Column D)</label>
           <select id="selectCategory" onchange="checkNoTrainingRule(this)"></select>
         </div>
@@ -500,7 +503,7 @@
         <div class="modal-actions">
           <button class="btn btn-danger" onclick="executeAction('remove')">Remove Allocation</button>
           <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-          <button class="btn btn-primary" onclick="executeAction('allocate')">Commit Allocation</button>
+          <button class="btn btn-primary" style="background-color: #dd6b20;" onclick="executeAction('allocate')">Commit Allocation</button>
         </div>
       </div>
     </div>
@@ -508,7 +511,7 @@
 
   <div class="modal-overlay" id="narrativeModal">
     <div class="modal-card" style="max-width: 500px;">
-      <div class="modal-header">
+      <div class="modal-header-wrapper">
         <div class="modal-title">Generated Session Narrative</div>
         <div class="modal-subtitle" id="narrativeModalSubtitle">Overview Breakdown</div>
       </div>
@@ -523,7 +526,8 @@
   </div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec";
+    const WEB_APP_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+    const ADMIN_PASSWORD = "admin"; 
 
     let state = {
       crew: [],
@@ -535,7 +539,8 @@
       signups: [],
       activeMonth: "",
       selectedCrew: "",
-      selectedSessionId: ""
+      selectedSessionId: "",
+      isGlobalAdminUnlocked: false
     };
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -708,27 +713,33 @@
               
               html += `
                 <div class="tile-box ${styleClass}">
-                  <div class="tile-category">${escapeHtml(match.allocatedCategory)}</div>
+                  <div class="tile-category-wrapper">
+                    <div class="tile-category">${escapeHtml(match.allocatedCategory)}</div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                  </div>
                   <div class="tile-role">${escapeHtml(match.allocatedRole || 'Unassigned')}</div>
                   ${match.allocatedSubCategory ? `<div class="tile-subcat" title="${escapeHtml(match.allocatedSubCategory)}">${escapeHtml(match.allocatedSubCategory)}</div>` : ''}
-                  ${match.notes ? `<div class="tile-note-line" title="Crew Note: ${escapeHtml(match.notes)}">📝 ${escapeHtml(match.notes)}</div>` : ''}
                 </div>
               `;
             } 
             else if (match.allocatedCategory === "No Training") {
               html += `
                 <div class="tile-box notraining">
-                  <div class="tile-category">No Training</div>
-                  ${match.notes ? `<div class="tile-note-line" title="Crew Note: ${escapeHtml(match.notes)}">📝 ${escapeHtml(match.notes)}</div>` : ''}
+                  <div class="tile-category-wrapper">
+                    <div class="tile-category">No Training</div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                  </div>
                 </div>
               `;
             }
             else if (match.preferred) {
               html += `
                 <div class="tile-box preferred">
-                  <div class="tile-category">Preference</div>
+                  <div class="tile-category-wrapper">
+                    <div class="tile-category">Preference</div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                  </div>
                   <div class="tile-role">${escapeHtml(match.preferred)}</div>
-                  ${match.notes ? `<div class="tile-subcat" title="${escapeHtml(match.notes)}">Notes: ${escapeHtml(match.notes)}</div>` : ''}
                 </div>
               `;
             } else {
@@ -821,19 +832,30 @@
       state.selectedCrew = crewName;
       state.selectedSessionId = sessionId;
 
+      // Automatically determine which panel to display based on the Global Admin State
+      if (state.isGlobalAdminUnlocked) {
+        document.getElementById("formSectionSignup").style.display = "none";
+        document.getElementById("formSectionAllocate").style.display = "block";
+      } else {
+        document.getElementById("formSectionSignup").style.display = "block";
+        document.getElementById("formSectionAllocate").style.display = "none";
+      }
+
       const targetSess = state.sessions.find(s => s.id == sessionId);
       const existingMatch = state.signups.find(s => s.name === crewName && s.sessionId == sessionId);
 
       document.getElementById("mCrewName").textContent = crewName;
       document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${targetSess.date} @ ${targetSess.time})` : "Session Context Data Record";
 
-      const notesBanner = document.getElementById("modalNotesBanner");
+      const adminBox = document.getElementById("adminNotesViewBox");
       if (existingMatch && existingMatch.notes && existingMatch.notes.trim() !== "") {
-        notesBanner.className = "modal-notes-banner";
-        notesBanner.innerHTML = `<strong>Crew Member Notes:</strong> "${escapeHtml(existingMatch.notes)}"`;
+        adminBox.textContent = `"${existingMatch.notes}"`;
+        adminBox.style.fontStyle = "normal";
+        adminBox.style.color = "#c05621";
       } else {
-        notesBanner.className = "modal-notes-banner empty";
-        notesBanner.innerHTML = `<strong>Crew Member Notes:</strong> None provided for this session`;
+        adminBox.textContent = "No notes provided by crew member for this session.";
+        adminBox.style.fontStyle = "italic";
+        adminBox.style.color = "#718096";
       }
 
       document.getElementById("selectPrefRole").value = (existingMatch && existingMatch.preferred) ? existingMatch.preferred : "Any";
@@ -843,7 +865,6 @@
       document.getElementById("selectRole").value = (existingMatch && existingMatch.allocatedRole) ? existingMatch.allocatedRole : "No Training";
       document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "No Training";
 
-      switchModalTab('signup');
       document.getElementById("actionModal").classList.add("open");
     }
 
@@ -851,18 +872,24 @@
       document.getElementById("actionModal").classList.remove("open");
     }
 
-    function switchModalTab(tab) {
-      const tabButtons = document.querySelectorAll(".modal-tab-btn");
-      if(tab === 'signup') {
-        tabButtons[0].classList.add("active");
-        tabButtons[1].classList.remove("active");
-        document.getElementById("formSectionSignup").style.display = "block";
-        document.getElementById("formSectionAllocate").style.display = "none";
+    function toggleGlobalAdminMode() {
+      const btn = document.getElementById("globalAdminBtn");
+      
+      if (state.isGlobalAdminUnlocked) {
+        // Relock immediately
+        state.isGlobalAdminUnlocked = false;
+        btn.classList.remove("unlocked");
+        btn.title = "Unlock Admin Allocation Mode";
       } else {
-        tabButtons[0].classList.remove("active");
-        tabButtons[1].classList.add("active");
-        document.getElementById("formSectionSignup").style.display = "none";
-        document.getElementById("formSectionAllocate").style.display = "block";
+        // Request authorization challenge
+        const inputPass = prompt("Enter Administration System Password:");
+        if (inputPass === ADMIN_PASSWORD) {
+          state.isGlobalAdminUnlocked = true;
+          btn.classList.add("unlocked");
+          btn.title = "Lock Admin Mode";
+        } else if (inputPass !== null) {
+          alert("Invalid administrative credentials. Access Denied.");
+        }
       }
     }
 
@@ -910,7 +937,6 @@
       }
     }
 
-    // Secure sanitizer utility
     function escapeHtml(str) {
       if(!str) return "";
       return str.toString()

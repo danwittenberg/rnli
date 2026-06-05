@@ -12,7 +12,6 @@
       --border-color: #e2e8f0;
       --text-main: #2d3748;
       
-      /* Allocation Category Colors */
       --cat-preferred-bg: #fffaf0;
       --cat-preferred-border: #f6ad55;
       --cat-preferred-text: #dd6b20;
@@ -77,7 +76,6 @@
       background-color: var(--primary-hover);
     }
 
-    /* Tabs Panel */
     .tabs-container {
       display: flex;
       gap: 8px;
@@ -104,7 +102,6 @@
       border-color: var(--primary-color);
     }
 
-    /* Table Matrix Grid Configuration */
     .matrix-wrapper {
       overflow-x: auto;
       max-height: 650px;
@@ -136,7 +133,6 @@
       z-index: 10;
     }
 
-    /* Sticky First Column (Crew Names) */
     th:first-child, td:first-child {
       position: sticky;
       left: 0;
@@ -168,7 +164,6 @@
       color: #2d3748;
     }
 
-    /* Allocation Interaction Tiles */
     .matrix-cell {
       cursor: pointer;
       transition: background 0.2s;
@@ -239,7 +234,6 @@
       text-overflow: ellipsis;
     }
 
-    /* Modal / Action Dialog Box Window */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -391,7 +385,7 @@
 
       <div id="formSectionSignup">
         <div class="form-group">
-          <label>Preference</label>
+          <label>Preference Choice (Config Column A)</label>
           <select id="selectPrefRole"></select>
         </div>
         <div class="form-group">
@@ -407,16 +401,17 @@
 
       <div id="formSectionAllocate" style="display: none;">
         <div class="form-group">
-          <label>Allocated Category</label>
+          <label>Allocated Category (Config Column D)</label>
           <select id="selectCategory" onchange="checkNoTrainingRule(this)"></select>
         </div>
         <div class="form-group">
-          <label>Allocated Role</label>
+          <label>Allocated Role (Config Column B)</label>
           <select id="selectRole"></select>
         </div>
         <div class="form-group">
-          <label>Allocated Activity (Sub-Category)</label>
-          <select id="selectSubCategory"></select>
+          <label>Allocated Activity / Sub-Category (Config Column E - Type or Select)</label>
+          <input type="text" id="selectSubCategory" list="subCategoryOptions" placeholder="Select or type custom activity...">
+          <datalist id="subCategoryOptions"></datalist>
         </div>
         <div class="modal-actions">
           <button class="btn btn-danger" onclick="executeAction('remove')">Remove Allocation</button>
@@ -428,33 +423,26 @@
   </div>
 
   <script>
-    // CRUCIAL STEP: Replace with your actual deployment script URL
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec";
+    // Replace with your actual deployment script URL if running outside Google Sheets UI frame
+    const WEB_APP_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
-    // Application Global State Context Data Container
     let state = {
       crew: [],
       sessions: [],
-      categories: [],       // Column A (Used for User Preference Options)
-      adminCategories: [],  // Column D (Used for Admin Allocation Categories)
+      categories: [],       // Column A
       roles: [],            // Column B
-      subCategories: [],    // Column C
+      adminCategories: [],  // Column D
+      subCategories: [],    // Column E
       signups: [],
       activeMonth: "",
       selectedCrew: "",
       selectedSessionId: ""
     };
 
-    /**
-     * Initializes engine and requests sheets state parameters.
-     */
     window.addEventListener("DOMContentLoaded", () => {
       fetchMatrixData();
     });
 
-    /**
-     * Dispatches network pull to fetch the state matrix payload.
-     */
     function fetchMatrixData() {
       document.getElementById("dashboardView").innerHTML = '<div class="loading-shield">Pulling real-time parameters from Google Sheets...</div>';
       
@@ -465,7 +453,7 @@
           .doGet();
       } else {
         if(WEB_APP_URL.includes("YOUR_APPS_SCRIPT")) {
-          document.getElementById("dashboardView").innerHTML = '<div class="loading-shield" style="color:red;">Configuration Error: Please paste your script deployment URL into the WEB_APP_URL string constant at the top of the HTML file.</div>';
+          document.getElementById("dashboardView").innerHTML = '<div class="loading-shield" style="color:red;">Configuration Error: Please paste your script deployment URL into the WEB_APP_URL constant at the top of the HTML file.</div>';
           return;
         }
         fetch(WEB_APP_URL)
@@ -480,9 +468,6 @@
       document.getElementById("dashboardView").innerHTML = '<div class="loading-shield" style="color:red;">Pipeline Execution Timeout or Configuration Error. Check Apps Script logs.</div>';
     }
 
-    /**
-     * Processes JSON responses and dynamically isolates distinct calendar months.
-     */
     function processServerPayload(response) {
       if (typeof response === "string") {
         response = JSON.parse(response);
@@ -491,8 +476,8 @@
       state.crew = response.crew || [];
       state.sessions = response.sessions || [];
       state.categories = response.categories || [];
-      state.adminCategories = response.adminCategories || []; // Pulls custom Column D stream
       state.roles = response.roles || [];
+      state.adminCategories = response.adminCategories || []; 
       state.subCategories = response.subCategories || [];
       state.signups = response.signups || [];
 
@@ -507,24 +492,28 @@
       renderMatrixGrid();
     }
 
-    /**
-     * Populates drop-down selectors inside the configuration modal cards.
-     */
     function populateDropdownLists() {
-      // Admin Category dropdown menu bound to Column D array (falls back to column A safely if missing)
-      const adminCatSource = (state.adminCategories && state.adminCategories.length > 0) ? state.adminCategories : state.categories;
-      populateSelectElement("selectCategory", adminCatSource);
+      // 1. Allocated Category from Config Column D
+      populateSelectElement("selectCategory", state.adminCategories);
       
+      // 2. Allocated Role from Config Column B
       populateSelectElement("selectRole", state.roles);
-      populateSelectElement("selectSubCategory", state.subCategories);
       
-      // Build User Preference dropdown menu bounded to Config Column A Categories
+      // 3. Allocated Activity from Config Column E (Built into a searchable datalist picker)
+      const dl = document.getElementById("subCategoryOptions");
+      dl.innerHTML = "";
+      const activityTrackingList = state.subCategories.includes("No Training") ? state.subCategories : ["No Training", ...state.subCategories];
+      activityTrackingList.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        dl.appendChild(option);
+      });
+      
+      // 4. User Preference choices from Config Column A
       const prefSelect = document.getElementById("selectPrefRole");
       prefSelect.innerHTML = "";
-      
       const filteredCategories = state.categories.filter(cat => cat !== "No Training");
       const prefOptions = ["Any", ...filteredCategories];
-      
       prefOptions.forEach(item => {
         const option = document.createElement("option");
         option.value = item;
@@ -536,9 +525,7 @@
     function populateSelectElement(id, list) {
       const select = document.getElementById(id);
       select.innerHTML = "";
-      
       const trackingList = list.includes("No Training") ? list : ["No Training", ...list];
-      
       trackingList.forEach(item => {
         const option = document.createElement("option");
         option.value = item;
@@ -547,9 +534,6 @@
       });
     }
 
-    /**
-     * Renders top month navigation tabs.
-     */
     function renderMonthTabs(months) {
       const panel = document.getElementById("monthTabsPanel");
       panel.innerHTML = "";
@@ -572,15 +556,12 @@
       });
     }
 
-    /**
-     * Generates the cross-reference grid table for the active month.
-     */
     function renderMatrixGrid() {
       const view = document.getElementById("dashboardView");
       const activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
 
       if (activeSessions.length === 0) {
-        view.innerHTML = '<div class="loading-shield">No sessions discovered mapping to this month tab context index parameters.</div>';
+        view.innerHTML = '<div class="loading-shield">No sessions mapped to this month tab context.</div>';
         return;
       }
 
@@ -673,9 +654,6 @@
       view.innerHTML = html;
     }
 
-    /**
-     * Opens interface action wizard window card.
-     */
     function openInteractionModal(crewName, sessionId) {
       state.selectedCrew = crewName;
       state.selectedSessionId = sessionId;
@@ -686,7 +664,6 @@
       document.getElementById("mCrewName").textContent = crewName;
       document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${formatDisplayDate(targetSess.date)} @ ${targetSess.time})` : "Session Context Data Record";
 
-      // Hydrate forms with existing spreadsheet values or defaults
       document.getElementById("selectPrefRole").value = (existingMatch && existingMatch.preferred) ? existingMatch.preferred : "Any";
       document.getElementById("inputNotes").value = (existingMatch && existingMatch.notes) ? existingMatch.notes : "";
       
@@ -724,9 +701,6 @@
       }
     }
 
-    /**
-     * Package and transmit transaction data payloads to the backend API macro scripts.
-     */
     function executeAction(actionType) {
       let payload = {
         action: actionType,
@@ -741,11 +715,11 @@
       else if (actionType === "allocate") {
         payload.roleType = document.getElementById("selectCategory").value;
         payload.specificRole = document.getElementById("selectRole").value;
-        payload.subCategory = document.getElementById("selectSubCategory").value;
+        payload.subCategory = document.getElementById("selectSubCategory").value.trim(); // Reads text directly
       }
 
       closeModal();
-      document.getElementById("dashboardView").innerHTML = '<div class="loading-shield">Writing execution metrics to Google Sheets ledger...</div>';
+      document.getElementById("dashboardView").innerHTML = '<div class="loading-shield">Writing metrics to Google Sheets database ledger...</div>';
 
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run

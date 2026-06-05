@@ -315,24 +315,22 @@
             const activeCrewFilter = document.getElementById('crew-filter').value;
             const activeSessionFilter = document.getElementById('session-filter').value;
             
+            // Apply Crew Filter: Isolate row data strictly by hiding all other crew members
             if (activeCrewFilter) {
-                sessions = sessions.filter(s => 
-                    db.signups.some(x => x.name === activeCrewFilter && x.sessionId === s.id && (x.allocatedCategory || x.preferred))
-                );
+                crewList = crewList.filter(name => name === activeCrewFilter);
             }
             
+            // Apply Session Filter: Isolate column data strictly by hiding all other session entries
             if (isAdmin && activeSessionFilter) {
-                crewList = crewList.filter(name => 
-                    db.signups.some(x => x.name === name && x.sessionId === activeSessionFilter && (x.allocatedCategory || x.preferred))
-                );
+                sessions = sessions.filter(s => s.id === activeSessionFilter);
             }
             
             document.getElementById('h-row').innerHTML = `<th>Crew Member</th>` + sessions.map(s => 
                 `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><span style="font-size:0.6rem; font-weight:normal;">${s.topic}</span></th>`
             ).join('');
             
-            if (crewList.length === 0) {
-                document.getElementById('b-rows').innerHTML = `<tr><td colspan="${sessions.length + 1}" style="padding:20px; color:#718096; text-align:center;">No active personnel found matching selection.</td></tr>`;
+            if (crewList.length === 0 || sessions.length === 0) {
+                document.getElementById('b-rows').innerHTML = `<tr><td colspan="${sessions.length + 1}" style="padding:20px; color:#718096; text-align:center;">No active personnel or sessions found matching selection.</td></tr>`;
             } else {
                 document.getElementById('b-rows').innerHTML = crewList.map(name => 
                     `<tr><td>${name}</td>${sessions.map(s => `<td>${getCellHTML(name, s.id)}</td>`).join('')}</tr>`

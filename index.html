@@ -165,6 +165,7 @@
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
+      table-layout: fixed; /* Enforces strict layout boundaries across elements */
     }
 
     th, td {
@@ -172,7 +173,10 @@
       border-bottom: 1px solid var(--border-color);
       border-right: 1px solid var(--border-color);
       text-align: left;
-      min-width: 150px; 
+      width: 160px;
+      min-width: 160px;
+      max-width: 160px;
+      overflow: hidden; /* Stops horizontal bleed-through */
     }
 
     th {
@@ -181,76 +185,82 @@
       font-weight: 700;
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 100;
+      height: 115px; /* Unified top header height alignment */
+      vertical-align: top;
     }
 
-    /* Structured Header Layout for Uniform Vertical Alignment */
+    /* Absolute Placement Structure for Header Buttons alignment */
     .session-header-container {
+      position: relative;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      height: 100%;
-      min-height: 90px;
-      justify-content: space-between;
     }
 
     .session-header-top {
-      margin-bottom: 8px;
+      margin-bottom: 35px; /* reserves precise baseline room for buttons */
     }
 
-    /* Sticky First Column Overhaul - Narrower and Higher Layers */
+    /* Fixed Sticky Column Dimensions and Solid Masking */
     th:first-child, td:first-child {
       position: sticky;
       left: 0;
       width: 115px;      
       min-width: 115px;  
       max-width: 115px;  
-      background-color: #ffffff !important; /* Forces solid background masking tiles scrolling behind */
-      z-index: 20; /* Elevates layer over standard rows */
+      background-color: #ffffff !important;
+      z-index: 200; /* High index bounds clean cutting matrix content sliding underneath */
       border-right: 3px solid var(--rnli-navy);
-      word-break: break-word; 
-      hyphens: auto;
+      word-break: break-all;
     }
 
     th:first-child {
-      z-index: 30; /* Keeps corner title above top headers and left content */
+      z-index: 300; /* Corner anchor sits above all dimensions */
       background-color: var(--rnli-navy) !important;
       color: white;
     }
 
     .session-header-title {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 700;
       line-height: 1.2;
       text-transform: uppercase;
       letter-spacing: 0.3px;
+      word-break: break-word;
     }
 
     .session-header-meta {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: #A4B9D0;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .action-btn-row {
-      margin-top: auto; /* Pushes the button array flat along the cell floor */
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
       display: flex;
       gap: 4px;
+      background-color: var(--rnli-navy);
     }
 
     .narrative-btn, .filter-arrow-btn {
       background-color: rgba(255, 255, 255, 0.15);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: white;
-      padding: 3px 6px;
-      font-size: 0.72rem;
+      padding: 4px 5px;
+      font-size: 0.68rem;
       font-weight: 700;
       border-radius: 3px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       text-transform: uppercase;
-      transition: all 0.2s;
+      flex: 1;
+      justify-content: center;
     }
 
     .narrative-btn:hover, .filter-arrow-btn:hover {
@@ -261,15 +271,13 @@
     .filter-arrow-btn.active-filter {
       background-color: var(--rnli-orange);
       border-color: #FFF;
-      animation: pulse-border 2s infinite;
     }
 
     .crew-name-cell {
       font-weight: 700;
       color: var(--rnli-navy);
-      font-size: 0.78rem; /* Scaled down slightly to fit narrower mobile dimensions */
+      font-size: 0.78rem; 
       line-height: 1.3;
-      background-color: #ffffff;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -281,10 +289,10 @@
       border: 1px solid var(--border-color);
       border-radius: 3px;
       cursor: pointer;
-      font-size: 0.7rem;
-      padding: 1px 4px;
+      font-size: 0.65rem;
+      padding: 1px 3px;
       color: var(--rnli-navy);
-      transition: all 0.2s;
+      flex-shrink: 0;
     }
 
     .crew-filter-btn:hover {
@@ -308,7 +316,6 @@
       transition: background 0.2s;
       vertical-align: top;
       background-color: #FFF;
-      z-index: 5; /* Lower layer ensuring table cards slide behind the crew panel */
     }
 
     .matrix-cell:hover {
@@ -317,7 +324,7 @@
 
     .empty-tile {
       color: #8A9CAE;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-style: italic;
       display: flex;
       align-items: center;
@@ -330,9 +337,10 @@
       padding: 8px;
       border-radius: 4px;
       border: 1px solid var(--border-color);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       position: relative;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      width: 100%;
     }
 
     .tile-box.preferred {
@@ -365,25 +373,25 @@
 
     .tile-category {
       font-weight: 800;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       margin-bottom: 3px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
 
     .tile-tooltip-indicator {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       cursor: help;
       opacity: 0.9;
     }
 
     .tile-role {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 600;
     }
 
     .tile-subcat {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-style: italic;
       margin-top: 4px;
       padding-top: 4px;
@@ -394,7 +402,6 @@
       text-overflow: ellipsis;
     }
 
-    /* Column-hiding runtime classes */
     .hide-column {
       display: none !important;
     }
@@ -410,7 +417,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 100;
+      z-index: 1000;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s;

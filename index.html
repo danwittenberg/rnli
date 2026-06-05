@@ -1,496 +1,786 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RNLI Training Matrix</title>
-    <style>
-        :root { 
-            --rnli-navy: #002366; 
-            --rnli-orange: #f05a28; 
-            --bg: #f4f7f6; 
-            --border: #cbd5e0; 
-            --green-bg: #dcfce7;
-            --green-text: #166534;
-            --green-border: #86efac;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 8px; color: #2d3748; font-size: 0.8rem; }
-        .hidden { display: none !important; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crew Allocation & Signup Matrix</title>
+  <style>
+    :root {
+      --primary-color: #2b6cb0;
+      --primary-hover: #2c5282;
+      --bg-main: #f7fafc;
+      --border-color: #e2e8f0;
+      --text-main: #2d3748;
+      
+      /* Allocation Category Colors */
+      --cat-preferred-bg: #fffaf0;
+      --cat-preferred-border: #f6ad55;
+      --cat-preferred-text: #dd6b20;
+      
+      --cat-allocated-bg: #ebf8ff;
+      --cat-allocated-border: #4299e1;
+      --cat-allocated-text: #2b6cb0;
+      
+      --cat-notraining-bg: #edf2f7;
+      --cat-notraining-border: #cbd5e0;
+      --cat-notraining-text: #718096;
+    }
 
-        /* Branding Header */
-        #mode-header-banner { 
-            background: var(--rnli-navy); 
-            color: white; 
-            padding: 12px; 
-            text-align: center; 
-            border-bottom: 4px solid var(--rnli-orange);
-            margin: -8px -8px 10px -8px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 1.1rem;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-        /* Login Screen */
-        #login-screen { max-width: 340px; margin: 80px auto; text-align: center; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid var(--rnli-navy); }
-        .btn { padding: 10px; background: var(--rnli-navy); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 8px; font-size: 0.8rem; }
-        .btn-secondary { background: var(--rnli-orange); }
-        .btn-danger { background: #dc2626; }
-        .btn-outline { background: white; color: #666; border: 1px solid #ccc; }
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      padding: 20px;
+    }
 
-        input, select, textarea { padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 0.8rem; }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
 
-        .top-utility { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .logout-link { background: none; border: none; color: #e53e3e; cursor: pointer; font-size: 0.7rem; font-weight: bold; text-decoration: underline; padding: 0; }
-        #last-update { font-size: 0.65rem; color: #718096; }
+    header {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 15px;
+    }
 
-        /* Admin High Level Navigation Tabs */
-        .admin-nav { display: flex; gap: 6px; margin-bottom: 12px; background: white; padding: 6px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid var(--rnli-navy); }
-        .admin-nav-tab { flex: 1; text-align: center; padding: 8px; background: #f1f5f9; color: var(--rnli-navy); font-weight: 700; border-radius: 4px; cursor: pointer; font-size: 0.75rem; border: 1px solid #e2e8f0; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
-        .admin-nav-tab.active { background: var(--rnli-navy); color: white; border-color: var(--rnli-navy); }
+    h1 {
+      font-size: 1.5rem;
+      color: #1a202c;
+    }
 
-        .controls { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 8px; }
-        .tab { padding: 6px 14px; background: #fff; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; white-space: nowrap; font-weight: 700; font-size: 0.75rem; color: var(--rnli-navy); }
-        .tab.active { background: var(--rnli-orange); color: white; border-color: var(--rnli-orange); }
-        
-        /* Filter Controls */
-        .filter-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; background: white; padding: 8px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .filter-group { flex: 1; min-width: 140px; }
-        .filter-group label { font-weight: 700; font-size: 0.68rem; color: var(--rnli-navy); display: block; margin-bottom: 3px; text-transform: uppercase; }
+    .refresh-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
 
-        /* Table Layout */
-        .matrix-container { overflow: auto; background: white; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-height: 65vh; }
-        table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 0.78rem; }
-        th { position: sticky; top: 0; background: #fff; z-index: 20; border-bottom: 2px solid var(--rnli-navy); padding: 8px; font-weight: 800; color: var(--rnli-navy); }
-        td:first-child { position: sticky; left: 0; background: #f8fafc; z-index: 10; font-weight: bold; border-right: 2px solid var(--border); text-align: left; padding: 6px; color: var(--rnli-navy); }
-        th:first-child { position: sticky; left: 0; top: 0; z-index: 30; background: #fff; }
-        th, td { border: 1px solid #edf2f7; text-align: center; min-width: 120px; vertical-align: top; padding: 4px; }
+    .refresh-btn:hover {
+      background-color: var(--primary-hover);
+    }
 
-        /* Status Tiles */
-        .cell-btn { width: 100%; min-height: 52px; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px; position: relative; background: #fff; box-sizing: border-box; transition: transform 0.1s; }
-        .cell-btn:active { transform: scale(0.96); }
-        
-        .status-empty { background: #f8fafc; color: #cbd5e1; border: 1px dashed #cbd5e0; }
-        .status-pending { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
-        .status-allocated, .status-locked { background: var(--green-bg); color: var(--green-text); border: 1px solid var(--green-border); }
-        .status-no-training { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e0; }
-        
-        .role-cat-label { font-size: 0.55rem; text-transform: uppercase; font-weight: 800; opacity: 0.7; line-height: 1; margin-bottom: 2px; }
-        .role-title { font-weight: 800; font-size: 0.72rem; text-transform: uppercase; line-height: 1.1; }
-        .note-text { font-style: italic; font-size: 0.62rem; color: #475569; line-height: 1.1; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-        .padlock { position: absolute; top: 2px; right: 3px; font-size: 0.6rem; opacity: 0.5; }
+    /* Tabs Panel */
+    .tabs-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+    }
 
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,35,102,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); }
-        .modal-content { background: white; padding: 20px; border-radius: 8px; width: 320px; max-width: 90%; border-top: 4px solid var(--rnli-orange); }
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--rnli-orange); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+    .tab-btn {
+      padding: 10px 20px;
+      background-color: #edf2f7;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      color: #4a5568;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    /* Table Matrix Grid Configuration */
+    .matrix-wrapper {
+      overflow-x: auto;
+      max-height: 650px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      text-align: left;
+      min-width: 180px;
+    }
+
+    th {
+      background-color: #f7fafc;
+      font-weight: 600;
+      color: #4a5568;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    /* Sticky First Column (Crew Names) */
+    th:first-child, td:first-child {
+      position: sticky;
+      left: 0;
+      width: 180px;
+      min-width: 180px;
+      background-color: #fff;
+      z-index: 11;
+      border-right: 2px solid var(--border-color);
+    }
+
+    th:first-child {
+      z-index: 12;
+      background-color: #f7fafc;
+    }
+
+    .session-header-title {
+      font-size: 0.95rem;
+      color: #1a202c;
+    }
+
+    .session-header-meta {
+      font-size: 0.75rem;
+      color: #718096;
+      margin-top: 4px;
+    }
+
+    .crew-name-cell {
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    /* Allocation Interaction Tiles */
+    .matrix-cell {
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .matrix-cell:hover {
+      background-color: #f7fafc;
+    }
+
+    .empty-tile {
+      color: #a0aec0;
+      font-size: 0.8rem;
+      font-style: italic;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 50px;
+    }
+
+    .tile-box {
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      font-size: 0.85rem;
+    }
+
+    .tile-box.preferred {
+      background-color: var(--cat-preferred-bg);
+      border-color: var(--cat-preferred-border);
+      color: var(--cat-preferred-text);
+    }
+
+    .tile-box.allocated {
+      background-color: var(--cat-allocated-bg);
+      border-color: var(--cat-allocated-border);
+      color: var(--cat-allocated-text);
+    }
+
+    .tile-box.notraining {
+      background-color: var(--cat-notraining-bg);
+      border-color: var(--cat-notraining-border);
+      color: var(--cat-notraining-text);
+    }
+
+    .tile-category {
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tile-role {
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .tile-subcat {
+      font-size: 0.75rem;
+      font-style: italic;
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px dashed rgba(0, 0, 0, 0.08);
+      opacity: 0.9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Modal / Action Dialog Box Window */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .modal-header {
+      margin-bottom: 15px;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .modal-subtitle {
+      font-size: 0.85rem;
+      color: #718096;
+      margin-top: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #4a5568;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    textarea {
+      resize: vertical;
+      height: 60px;
+    }
+
+    .modal-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 15px;
+    }
+
+    .modal-tab-btn {
+      flex: 1;
+      padding: 8px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: #718096;
+    }
+
+    .modal-tab-btn.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .btn-secondary { background-color: #edf2f7; color: #4a5568; }
+    .btn-primary { background-color: var(--primary-color); color: white; }
+    .btn-danger { background-color: #e53e3e; color: white; }
+
+    .loading-shield {
+      text-align: center;
+      padding: 40px;
+      font-size: 1.1rem;
+      color: #718096;
+    }
+  </style>
 </head>
 <body>
 
-    <div id="loading" class="hidden"><div class="spinner"></div></div>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Crew Allocation Matrix</h1>
+      </div>
+      <button class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
+    </header>
 
-    <div id="login-screen">
-        <div style="font-weight: 900; color: var(--rnli-navy); margin-bottom: 5px;">RNLI</div>
-        <h3 style="color:var(--rnli-navy); margin:0 0 15px 0;">Training Matrix</h3>
-        <input type="password" id="pass" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
-        <button class="btn" onclick="login()">Enter System</button>
+    <div class="tabs-container" id="monthTabsPanel"></div>
+
+    <div id="dashboardView">
+      <div class="loading-shield">Assembling core data feeds...</div>
     </div>
+  </div>
 
-    <div id="main-content" class="hidden">
-        <div id="mode-header-banner">LTC MODE</div>
-        
-        <div class="top-utility">
-            <button onclick="logout()" class="logout-link">Logout / Change User</button>
-            <div id="last-update">Syncing...</div>
+  <div class="modal-overlay" id="actionModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="mCrewName">Crew Member</div>
+        <div class="modal-subtitle" id="mSessionTitle">Session Specifics</div>
+      </div>
+
+      <div class="modal-tabs">
+        <button class="modal-tab-btn active" onclick="switchModalTab('signup')">Sign Up/Preference</button>
+        <button class="modal-tab-btn" onclick="switchModalTab('allocate')">Allocation (Admin)</button>
+      </div>
+
+      <div id="formSectionSignup">
+        <div class="form-group">
+          <label>Preferred Role / Choice</label>
+          <input type="text" id="inputPrefRole" placeholder="e.g. Primary Lead, Support, Backup">
         </div>
-
-        <!-- Admin High-Level Sub Navigation Bar -->
-        <div id="admin-nav-bar" class="admin-nav hidden">
-            <div id="admin-tab-matrix" class="admin-nav-tab active" onclick="switchAdminView('matrix')">📊 Training Matrix</div>
-            <div id="admin-tab-session" class="admin-nav-tab" onclick="switchAdminView('session')">📅 Manage Sessions</div>
+        <div class="form-group">
+          <label>Notes / Availability Details</label>
+          <textarea id="inputNotes" placeholder="Any specific scheduling notes..."></textarea>
         </div>
-
-        <!-- Admin Entry Panel Tab Content -->
-        <div id="admin-panel" class="hidden" style="background:white; padding:15px; border-radius:8px; margin-bottom:10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 4px solid var(--rnli-orange);">
-            <h3 style="color: var(--rnli-navy); margin-top:0; margin-bottom:12px;">Create New Training Session</h3>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                <div>
-                    <label style="font-weight:bold; font-size:0.7rem; color:var(--rnli-navy);">SESSION DATE:</label>
-                    <input type="date" id="n-date">
-                </div>
-                <div>
-                    <label style="font-weight:bold; font-size:0.7rem; color:var(--rnli-navy);">SESSION TIME:</label>
-                    <input type="time" id="n-time">
-                </div>
-                <div style="grid-column: span 2">
-                    <label style="font-weight:bold; font-size:0.7rem; color:var(--rnli-navy);">TOPIC / DESCRIPTION:</label>
-                    <input type="text" id="n-topic" placeholder="e.g. Navigation check-off or Boat Handling">
-                </div>
-                <button onclick="addSession(event)" class="btn btn-secondary" style="grid-column: span 2; margin-bottom:0; margin-top:5px;">Create Session & Update Spreadsheet</button>
-            </div>
+        <div class="modal-actions">
+          <button class="btn btn-danger" onclick="executeAction('remove')">Clear / Withdraw</button>
+          <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="executeAction('signup')">Save Preference</button>
         </div>
+      </div>
 
-        <!-- Matrix & Filtering View Wrapper -->
-        <div id="matrix-view-container">
-            <div class="controls" id="tabs"></div>
-
-            <!-- Dynamic Filter Row -->
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label for="crew-filter">Horizontal Filter (Crew Member)</label>
-                    <select id="crew-filter" onchange="triggerMatrixRender()" style="margin-bottom:0;"></select>
-                </div>
-                <div class="filter-group hidden" id="session-filter-container">
-                    <label for="session-filter">Vertical Filter (Active Session)</label>
-                    <select id="session-filter" onchange="triggerMatrixRender()" style="margin-bottom:0;"></select>
-                </div>
-            </div>
-
-            <div class="matrix-container">
-                <table><thead><tr id="h-row"></tr></thead><tbody id="b-rows"></tbody></table>
-            </div>
+      <div id="formSectionAllocate" style="display: none;">
+        <div class="form-group">
+          <label>Allocated Category</label>
+          <select id="selectCategory" onchange="checkNoTrainingRule(this)"></select>
         </div>
+        <div class="form-group">
+          <label>Allocated Role</label>
+          <select id="selectRole"></select>
+        </div>
+        <div class="form-group">
+          <label>Allocated Activity (Sub-Category)</label>
+          <select id="selectSubCategory"></select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-danger" onclick="executeAction('remove')">Remove Allocation</button>
+          <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="executeAction('allocate')">Commit Allocation</button>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Modals -->
-    <div id="modal-signup" class="modal hidden">
-        <div class="modal-content">
-            <h4 id="s-title" style="margin:0 0 10px 0; color:var(--rnli-navy);"></h4>
-            <div id="locked-notice" class="hidden" style="color:#dc2626; font-size:0.75rem; margin-bottom:10px; font-weight:bold;">🔒 Allocation Locked.</div>
-            <div id="signup-fields">
-                <label>Preference:</label>
-                <select id="s-cat"><option value="Afloat">Afloat</option><option value="Ashore">Ashore</option><option value="Either">Either</option></select>
-                <label>Notes (Optional):</label>
-                <textarea id="s-notes" rows="2" placeholder="e.g. Helmet check-off needed"></textarea>
-                <button onclick="submitSignup()" class="btn btn-secondary">Confirm Signup</button>
-                <button id="btn-remove-signup" onclick="submitRemove()" class="btn btn-danger hidden">Remove Request</button>
-            </div>
-            <button onclick="closeModals()" class="btn btn-outline">Close</button>
-        </div>
-    </div>
+  <script>
+    // CRUCIAL STEP: Replace with your actual deployment script URL
+    const WEB_APP_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
-    <div id="modal-alloc" class="modal hidden">
-        <div class="modal-content">
-            <h4 id="a-name" style="margin:0 0 10px 0; color:var(--rnli-navy);"></h4>
-            <div id="a-pref-box" style="font-size:0.7rem; background:#fffbeb; padding:8px; border-radius:4px; margin-bottom:10px; border: 1px solid #fcd34d;"></div>
-            
-            <label>Category:</label>
-            <select id="a-cat" onchange="toggleRoleDisable()"></select>
-            
-            <label id="a-role-label">Role:</label>
-            <select id="a-role"></select>
+    // Application Global State Context Data Container
+    let state = {
+      crew: [],
+      sessions: [],
+      categories: [],
+      roles: [],
+      subCategories: [],
+      signups: [],
+      activeMonth: "",
+      selectedCrew: "",
+      selectedSessionId: ""
+    };
 
-            <!-- Hybrid Predefined Dropdown & Free Text Sub-Category Component -->
-            <label id="a-subcat-label">Sub-Category (Predefined or Custom):</label>
-            <input type="text" id="a-subcat" list="subcat-options" placeholder="Select from list or type custom text...">
-            <datalist id="subcat-options"></datalist>
+    /**
+     * Initializes engine and requests sheets state parameters.
+     */
+    window.addEventListener("DOMContentLoaded", () => {
+      fetchMatrixData();
+    });
 
-            <button onclick="submitAlloc()" class="btn" style="margin-top: 10px;">Update Matrix</button>
-            <button onclick="closeModals()" class="btn btn-outline">Cancel</button>
-        </div>
-    </div>
+    /**
+     * Dispatches network pull to fetch the state matrix payload.
+     */
+    function fetchMatrixData() {
+      document.getElementById("dashboardView").innerHTML = '<div class="loading-shield">Pulling real-time parameters from Google Sheets...</div>';
+      
+      // Dynamic execution context detection (works whether hosted inside Apps Script frame or externally)
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(processServerPayload)
+          .withFailureHandler(handleNetworkError)
+          .doGet();
+      } else {
+        // External local sandbox fallback method
+        if(WEB_APP_URL.includes("YOUR_APPS_SCRIPT")) {
+          document.getElementById("dashboardView").innerHTML = '<div class="loading-shield" style="color:red;">Configuration Error: Please paste your script deployment URL into the WEB_APP_URL string constant at the top of the HTML file.</div>';
+          return;
+        }
+        fetch(WEB_APP_URL)
+          .then(res => res.json())
+          .then(processServerPayload)
+          .catch(handleNetworkError);
+      }
+    }
 
-    <script>
-        const API = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; 
-        let db = { crew: [], sessions: [], signups: [], roles: [], categories: [], subCategories: [] };
-        let isAdmin = false, currentMonth = "", target = {}, availableMonths = [];
-        let refreshInterval = null;
+    function handleNetworkError(err) {
+      console.error(err);
+      document.getElementById("dashboardView").innerHTML = '<div class="loading-shield" style="color:red;">Pipeline Execution Timeout or Configuration Error. Check Apps Script logs.</div>';
+    }
 
-        window.onload = () => {
-            const savedRole = sessionStorage.getItem('matrixRole');
-            if (savedRole) { isAdmin = (savedRole === 'admin'); initSystem(); }
+    /**
+     * Processes JSON responses and dynamically isolates distinct calendar months.
+     */
+    function processServerPayload(response) {
+      if (typeof response === "string") {
+        response = JSON.parse(response);
+      }
+      
+      state.crew = response.crew || [];
+      state.sessions = response.sessions || [];
+      state.categories = response.categories || [];
+      state.roles = response.roles || [];
+      state.subCategories = response.subCategories || [];
+      state.signups = response.signups || [];
+
+      // Extract unique list of months derived from row dates
+      const distinctMonths = [...new Set(state.sessions.map(s => s.month))];
+
+      // Auto-focus on the first available month tab block context
+      if (distinctMonths.length > 0 && (!state.activeMonth || !distinctMonths.includes(state.activeMonth))) {
+        state.activeMonth = distinctMonths[0];
+      }
+
+      populateDropdownLists();
+      renderMonthTabs(distinctMonths);
+      renderMatrixGrid();
+    }
+
+    /**
+     * Populates drop-down selectors inside the configuration modal cards.
+     */
+    function populateDropdownLists() {
+      populateSelectElement("selectCategory", state.categories);
+      populateSelectElement("selectRole", state.roles);
+      populateSelectElement("selectSubCategory", state.subCategories);
+    }
+
+    function populateSelectElement(id, list) {
+      const select = document.getElementById(id);
+      select.innerHTML = "";
+      
+      // Standard dynamic addition of the 'No Training' structural exception override rules
+      const trackingList = list.includes("No Training") ? list : ["No Training", ...list];
+      
+      trackingList.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        select.appendChild(option);
+      });
+    }
+
+    /**
+     * Renders top month navigation tabs.
+     */
+    function renderMonthTabs(months) {
+      const panel = document.getElementById("monthTabsPanel");
+      panel.innerHTML = "";
+
+      if(months.length === 0) {
+        panel.innerHTML = '<div style="font-style:italic; padding:10px;">No session dates found.</div>';
+        return;
+      }
+
+      months.forEach(m => {
+        const btn = document.createElement("button");
+        btn.className = `tab-btn ${state.activeMonth === m ? 'active' : ''}`;
+        btn.textContent = m;
+        btn.onclick = () => {
+          state.activeMonth = m;
+          renderMonthTabs(months);
+          renderMatrixGrid();
         };
+        panel.appendChild(btn);
+      });
+    }
 
-        function showLoad(s) { document.getElementById('loading').classList.toggle('hidden', !s); }
-        
-        function login() {
-            const p = document.getElementById('pass').value;
-            if (p === "RNLI" || p === "ADMIN123") {
-                isAdmin = (p === "ADMIN123");
-                sessionStorage.setItem('matrixRole', isAdmin ? 'admin' : 'crew');
-                initSystem();
-            } else { alert("Incorrect Password"); }
-        }
-        
-        function logout() { sessionStorage.clear(); location.reload(); }
+    /**
+     * Generates the cross-reference grid table for the active month.
+     */
+    function renderMatrixGrid() {
+      const view = document.getElementById("dashboardView");
+      
+      // Filter sessions that belong to the active month
+      const activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
 
-        function initSystem() {
-            const header = document.getElementById('mode-header-banner');
-            const adminNavBar = document.getElementById('admin-nav-bar');
-            
-            if (isAdmin) {
-                header.innerText = "LTC Mode";
-                header.style.background = "var(--rnli-navy)";
-                adminNavBar.classList.remove('hidden');
-                switchAdminView('matrix');
+      if (activeSessions.length === 0) {
+        view.innerHTML = '<div class="loading-shield">No sessions discovered mapping to this month tab context index parameters.</div>';
+        return;
+      }
+
+      let html = `
+        <div class="matrix-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Crew Member</th>
+      `;
+
+      // Build out session headers
+      activeSessions.forEach(sess => {
+        html += `
+          <th>
+            <div class="session-header-title">${sess.topic || "Unnamed Session"}</div>
+            <div class="session-header-meta">${formatDisplayDate(sess.date)} @ ${sess.time}</div>
+          </th>
+        `;
+      });
+
+      html += `
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      if(state.crew.length === 0) {
+        html += `<tr><td colspan="${activeSessions.length + 1}" style="text-align:center; font-style:italic;">No personnel listed in Crew worksheet.</td></tr>`;
+      }
+
+      // Loop through crew members (Rows)
+      state.crew.forEach(crewName => {
+        html += `
+          <tr>
+            <td class="crew-name-cell">${crewName}</td>
+        `;
+
+        // Loop through sessions for the active month (Columns)
+        activeSessions.forEach(sess => {
+          // Check if there is an existing signup or allocation matching this crew member and session ID
+          const match = state.signups.find(s => s.name === crewName && s.sessionId == sess.id);
+
+          html += `
+            <td class="matrix-cell" onclick="openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')">
+          `;
+
+          if (match) {
+            // Priority 1: Has explicit allocation
+            if (match.allocatedCategory && match.allocatedCategory !== "No Training") {
+              const styleClass = match.allocatedCategory.toLowerCase().replace(/[^a-z0-9]/g, "") === "notraining" ? "notraining" : "allocated";
+              
+              html += `
+                <div class="tile-box ${styleClass}">
+                  <div class="tile-category">${escapeHtml(match.allocatedCategory)}</div>
+                  <div class="tile-role">${escapeHtml(match.allocatedRole || 'Unassigned')}</div>
+                  ${match.allocatedSubCategory ? `<div class="tile-subcat" title="${escapeHtml(match.allocatedSubCategory)}">${escapeHtml(match.allocatedSubCategory)}</div>` : ''}
+                </div>
+              `;
+            } 
+            // Fallback 1: Explicitly assigned to "No Training" status
+            else if (match.allocatedCategory === "No Training") {
+              html += `
+                <div class="tile-box notraining">
+                  <div class="tile-category">No Training</div>
+                </div>
+              `;
+            }
+            // Priority 2: Has a preference signup, but not allocated yet
+            else if (match.preferred) {
+              html += `
+                <div class="tile-box preferred">
+                  <div class="tile-category">Preference</div>
+                  <div class="tile-role">${escapeHtml(match.preferred)}</div>
+                  ${match.notes ? `<div class="tile-subcat" title="${escapeHtml(match.notes)}">Notes: ${escapeHtml(match.notes)}</div>` : ''}
+                </div>
+              `;
             } else {
-                header.innerText = "Crew Mode";
-                header.style.background = "#2d3748";
-                adminNavBar.classList.add('hidden');
-                document.getElementById('admin-panel').classList.add('hidden');
-                document.getElementById('matrix-view-container').classList.remove('hidden');
+              html += `<div class="empty-tile">+ Click to Modify</div>`;
             }
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-            refreshData();
-            if (!refreshInterval) refreshInterval = setInterval(refreshData, 30000);
-        }
+          } else {
+            html += `<div class="empty-tile">+ Sign Up</div>`;
+          }
 
-        function switchAdminView(view) {
-            const tabMatrix = document.getElementById('admin-tab-matrix');
-            const tabSession = document.getElementById('admin-tab-session');
-            const adminPanel = document.getElementById('admin-panel');
-            const matrixView = document.getElementById('matrix-view-container');
+          html += `</td>`;
+        });
 
-            if (view === 'matrix') {
-                tabMatrix.classList.add('active');
-                tabSession.classList.remove('active');
-                adminPanel.classList.add('hidden');
-                matrixView.classList.remove('hidden');
-            } else if (view === 'session') {
-                tabMatrix.classList.remove('active');
-                tabSession.classList.add('active');
-                adminPanel.classList.remove('hidden');
-                matrixView.classList.add('hidden');
-            }
-        }
+        html += `</tr>`;
+      });
 
-        async function refreshData() {
-            try {
-                const response = await fetch(`${API}?t=${new Date().getTime()}`);
-                db = await response.json();
-                
-                document.getElementById('a-role').innerHTML = '<option value="">-- Clear --</option>' + db.roles.map(r => `<option value="${r}">${r}</option>`).join('');
-                document.getElementById('a-cat').innerHTML = '<option value="">-- Clear --</option>' + db.categories.map(c => `<option value="${c}">${c}</option>`).join('');
-                
-                // Bind Predefined Options from Config Sheet Column E to the Datalist
-                if (db.subCategories) {
-                    document.getElementById('subcat-options').innerHTML = db.subCategories.map(s => `<option value="${s}"></option>`).join('');
-                }
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
 
-                availableMonths = [...new Set(db.sessions.map(s => s.month))];
-                if (!currentMonth || !availableMonths.includes(currentMonth)) currentMonth = availableMonths[0] || "";
-                
-                populateFilterDropdowns();
-                renderMatrix();
-                document.getElementById('last-update').innerText = "Live • " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            } catch (err) { document.getElementById('last-update').innerText = "Sync Error..."; }
-        }
+      view.innerHTML = html;
+    }
 
-        function populateFilterDropdowns() {
-            const crewFilter = document.getElementById('crew-filter');
-            const sessionFilter = document.getElementById('session-filter');
-            const sessionFilterCont = document.getElementById('session-filter-container');
-            
-            const prevCrew = crewFilter.value;
-            const prevSession = sessionFilter.value;
-            
-            crewFilter.innerHTML = '<option value="">-- All Crew (Show All Sessions) --</option>' + 
-                db.crew.map(c => `<option value="${c}">${c}</option>`).join('');
-            if (db.crew.includes(prevCrew)) crewFilter.value = prevCrew;
-            
-            if (isAdmin) {
-                sessionFilterCont.classList.remove('hidden');
-                const monthSessions = db.sessions.filter(s => s.month === currentMonth);
-                sessionFilter.innerHTML = '<option value="">-- All Sessions (Show All Crew) --</option>' + 
-                    monthSessions.map(s => {
-                        const d = new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
-                        return `<option value="${s.id}">${d} - ${s.topic}</option>`;
-                    }).join('');
-                    
-                if (monthSessions.some(s => s.id === prevSession)) {
-                    sessionFilter.value = prevSession;
-                } else {
-                    sessionFilter.value = "";
-                }
-            } else {
-                sessionFilterCont.classList.add('hidden');
-            }
-        }
+    /**
+     * Opens interface action wizard window card.
+     */
+    function openInteractionModal(crewName, sessionId) {
+      state.selectedCrew = crewName;
+      state.selectedSessionId = sessionId;
 
-        function triggerMatrixRender() { renderMatrix(); }
-        function switchMonth(m) { currentMonth = m; populateFilterDropdowns(); renderMatrix(); }
+      const targetSess = state.sessions.find(s => s.id == sessionId);
+      const existingMatch = state.signups.find(s => s.name === crewName && s.sessionId == sessionId);
 
-        function renderMatrix() {
-            document.getElementById('tabs').innerHTML = availableMonths.map(m => 
-                `<div class="tab ${m === currentMonth ? 'active' : ''}" onclick="switchMonth('${m}')">${m}</div>`
-            ).join('');
-            
-            let sessions = db.sessions.filter(s => s.month === currentMonth);
-            let crewList = [...db.crew];
-            
-            const activeCrewFilter = document.getElementById('crew-filter').value;
-            const activeSessionFilter = document.getElementById('session-filter').value;
-            
-            if (activeCrewFilter) { crewList = crewList.filter(name => name === activeCrewFilter); }
-            if (isAdmin && activeSessionFilter) { sessions = sessions.filter(s => s.id === activeSessionFilter); }
-            
-            document.getElementById('h-row').innerHTML = `<th>Crew Member</th>` + sessions.map(s => 
-                `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><span style="font-size:0.6rem; font-weight:normal;">${s.topic}</span></th>`
-            ).join('');
-            
-            if (crewList.length === 0 || sessions.length === 0) {
-                document.getElementById('b-rows').innerHTML = `<tr><td colspan="${sessions.length + 1}" style="padding:20px; color:#718096; text-align:center;">No active personnel or sessions found matching selection.</td></tr>`;
-            } else {
-                document.getElementById('b-rows').innerHTML = crewList.map(name => 
-                    `<tr><td>${name}</td>${sessions.map(s => `<td>${getCellHTML(name, s.id)}</td>`).join('')}</tr>`
-                ).join('');
-            }
-        }
+      document.getElementById("mCrewName").textContent = crewName;
+      document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${formatDisplayDate(targetSess.date)} @ ${targetSess.time})` : "Session Context Data Record";
 
-        function getCellHTML(name, sid) {
-            const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
-            
-            const isNoTraining = sig && (sig.allocatedCategory === "No Training" || sig.allocatedRole === "No Training");
-            const isAllocated = isNoTraining || !!(sig && sig.allocatedCategory && sig.allocatedRole);
-            
-            let statusClass = 'status-empty', content = '<div class="role-title" style="color:#cbd5e1">—</div>';
+      // Hydrate forms with existing spreadsheet values or defaults
+      document.getElementById("inputPrefRole").value = (existingMatch && existingMatch.preferred) ? existingMatch.preferred : "";
+      document.getElementById("inputNotes").value = (existingMatch && existingMatch.notes) ? existingMatch.notes : "";
+      
+      document.getElementById("selectCategory").value = (existingMatch && existingMatch.allocatedCategory) ? existingMatch.allocatedCategory : "No Training";
+      document.getElementById("selectRole").value = (existingMatch && existingMatch.allocatedRole) ? existingMatch.allocatedRole : "No Training";
+      document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "No Training";
 
-            if (isAllocated) {
-                if (isNoTraining) {
-                    statusClass = "status-no-training";
-                    content = `<div class="padlock">🔒</div><div class="role-title">No Training</div>`;
-                } else {
-                    statusClass = 'status-allocated';
-                    content = `<div class="padlock">🔒</div><div class="role-cat-label">${sig.allocatedCategory}</div><div class="role-title">${sig.allocatedRole}</div><div class="note-text">${sig.notes || ""}</div>`;
-                }
-            } else if (sig) {
-                statusClass = 'status-pending';
-                content = `<div class="role-cat-label">Request</div><div class="role-title">${sig.preferred}</div><div class="note-text">${sig.notes || ""}</div>`;
-            }
-            return `<button class="cell-btn ${statusClass}" onclick="handleCellClick('${name}', '${sid}', ${isAllocated})">${content}</button>`;
-        }
+      switchModalTab('signup');
+      document.getElementById("actionModal").classList.add("open");
+    }
 
-        function handleCellClick(name, sid, isAlloc) { if (isAdmin) openAlloc(name, sid); else openSignup(name, sid, isAlloc); }
+    function closeModal() {
+      document.getElementById("actionModal").classList.remove("open");
+    }
 
-        function openSignup(name, sid, isLocked) {
-            target = { name, sessionId: sid };
-            const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
-            document.getElementById('s-title').innerText = name;
-            document.getElementById('locked-notice').classList.toggle('hidden', !isLocked);
-            document.getElementById('signup-fields').classList.toggle('hidden', isLocked);
-            document.getElementById('btn-remove-signup').classList.toggle('hidden', (!sig || isLocked));
-            if (sig) { document.getElementById('s-cat').value = sig.preferred; document.getElementById('s-notes').value = sig.notes; }
-            else { document.getElementById('s-cat').value = "Afloat"; document.getElementById('s-notes').value = ""; }
-            document.getElementById('modal-signup').classList.remove('hidden');
-        }
+    function switchModalTab(tab) {
+      const tabButtons = document.querySelectorAll(".modal-tab-btn");
+      if(tab === 'signup') {
+        tabButtons[0].classList.add("active");
+        tabButtons[1].classList.remove("active");
+        document.getElementById("formSectionSignup").style.display = "block";
+        document.getElementById("formSectionAllocate").style.display = "none";
+      } else {
+        tabButtons[0].classList.remove("active");
+        tabButtons[1].classList.add("active");
+        document.getElementById("formSectionSignup").style.display = "none";
+        document.getElementById("formSectionAllocate").style.display = "block";
+      }
+    }
 
-        function openAlloc(name, sid) {
-            target = { name, sessionId: sid };
-            const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
-            document.getElementById('a-name').innerText = name;
-            document.getElementById('a-pref-box').innerText = sig ? `Request: ${sig.preferred}\nNotes: ${sig.notes || "None"}` : "No Request.";
-            
-            const catSelect = document.getElementById('a-cat');
-            const roleSelect = document.getElementById('a-role');
-            const subcatInput = document.getElementById('a-subcat');
-            
-            if (sig) {
-                if (sig.allocatedCategory === "No Training" || sig.allocatedRole === "No Training") {
-                    catSelect.value = "No Training";
-                } else {
-                    catSelect.value = sig.allocatedCategory || "";
-                }
-                
-                toggleRoleDisable();
-                
-                if (catSelect.value !== "No Training") {
-                    roleSelect.value = sig.allocatedRole || "";
-                    subcatInput.value = sig.allocatedSubCategory || ""; // Map backend data to custom text box
-                }
-            } else {
-                catSelect.value = "";
-                roleSelect.value = "";
-                subcatInput.value = "";
-                toggleRoleDisable();
-            }
-            document.getElementById('modal-alloc').classList.remove('hidden');
-        }
+    /**
+     * Enforces that selecting "No Training" resets the remaining administrative drop-downs automatically.
+     */
+    function checkNoTrainingRule(elem) {
+      if(elem.value === "No Training") {
+        document.getElementById("selectRole").value = "No Training";
+        document.getElementById("selectSubCategory").value = "No Training";
+      }
+    }
 
-        function toggleRoleDisable() {
-            const catSelect = document.getElementById('a-cat');
-            const roleSelect = document.getElementById('a-role');
-            const subcatInput = document.getElementById('a-subcat');
-            const isNoTraining = catSelect.value === "No Training";
-            
-            for (let i = roleSelect.options.length - 1; i >= 0; i--) {
-                if (roleSelect.options[i].value === "No Training") {
-                    roleSelect.remove(i);
-                }
-            }
+    /**
+     * Package and transmit transaction data payloads to the backend API macro scripts.
+     */
+    function executeAction(actionType) {
+      let payload = {
+        action: actionType,
+        sessionId: state.selectedSessionId,
+        crewName: state.selectedCrew
+      };
 
-            if (isNoTraining) {
-                const opt = document.createElement('option');
-                opt.value = "No Training";
-                opt.text = "No Training";
-                roleSelect.add(opt);
-                roleSelect.value = "No Training";
-                roleSelect.disabled = true;
-                
-                subcatInput.value = "No Training";
-                subcatInput.disabled = true;
-            } else {
-                roleSelect.disabled = false;
-                subcatInput.disabled = false;
-                if (subcatInput.value === "No Training") subcatInput.value = "";
-            }
-        }
+      if (actionType === "signup") {
+        payload.preferredRole = document.getElementById("inputPrefRole").value.trim();
+        payload.notes = document.getElementById("inputNotes").value.trim();
+      } 
+      else if (actionType === "allocate") {
+        payload.roleType = document.getElementById("selectCategory").value;
+        payload.specificRole = document.getElementById("selectRole").value;
+        payload.subCategory = document.getElementById("selectSubCategory").value;
+      }
 
-        async function sendData(payload) {
-            closeModals(); showLoad(true);
-            try {
-                await fetch(API, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
-                setTimeout(refreshData, 2500);
-            } catch (err) { alert("Save Error"); }
-            setTimeout(() => showLoad(false), 2500);
-        }
+      closeModal();
+      document.getElementById("dashboardView").innerHTML = '<div class="loading-shield">Writing execution metrics to Google Sheets ledger...</div>';
 
-        function submitSignup() { sendData({ action: "signup", crewName: target.name, sessionId: target.sessionId, preferredRole: document.getElementById('s-cat').value, notes: document.getElementById('s-notes').value }); }
-        function submitRemove() { if(confirm("Remove request?")) sendData({ action: "remove", crewName: target.name, sessionId: target.sessionId }); }
-        
-        function submitAlloc() { 
-            const cat = document.getElementById('a-cat').value;
-            let role = document.getElementById('a-role').value;
-            let subcat = document.getElementById('a-subcat').value;
-            
-            if (cat === "No Training") {
-                role = "No Training";
-                subcat = "No Training";
-            }
-            
-            sendData({ 
-                action: "allocate", 
-                crewName: target.name, 
-                sessionId: target.sessionId, 
-                roleType: cat, 
-                specificRole: role,
-                subCategory: subcat // Package parameter into outgoing API transaction
-            }); 
-        }
-        
-        function addSession(e) { 
-            e.preventDefault(); 
-            const dInput = document.getElementById('n-date').value;
-            const tInput = document.getElementById('n-time').value;
-            const topicInput = document.getElementById('n-topic').value;
-            
-            if(!dInput || !tInput) {
-                alert("Please specify a Date and Time for the new session.");
-                return;
-            }
-            
-            sendData({ action: "addSession", date: dInput, time: tInput, topic: topicInput });
-            
-            document.getElementById('n-date').value = "";
-            document.getElementById('n-time').value = "";
-            document.getElementById('n-topic').value = "";
-            
-            setTimeout(() => { switchAdminView('matrix'); }, 2600);
-        }
-        
-        function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); }
-    </script>
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(() => { fetchMatrixData(); })
+          .withFailureHandler(handleNetworkError)
+          .doPost(JSON.stringify(payload));
+      } else {
+        // External application pipeline post deployment context fallback handler
+        fetch(WEB_APP_URL, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "text/plain;charset=utf-8" }
+        })
+        .then(res => res.json())
+        .then(() => { fetchMatrixData(); })
+        .catch(handleNetworkError);
+      }
+    }
+
+    // Helper: Formats string dates nicely for display
+    function formatDisplayDate(dateStr) {
+      if(!dateStr) return "";
+      const d = new Date(dateStr);
+      if(isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    // Helper: Escapes HTML strings to prevent breaking layout rules via text injection bugs
+    function escapeHtml(str) {
+      if(!str) return "";
+      return str.toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
 </body>
 </html>

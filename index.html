@@ -106,11 +106,13 @@
             <div id="last-update">Syncing...</div>
         </div>
 
+        <!-- Admin High-Level Sub Navigation Bar -->
         <div id="admin-nav-bar" class="admin-nav hidden">
             <div id="admin-tab-matrix" class="admin-nav-tab active" onclick="switchAdminView('matrix')">📊 Training Matrix</div>
             <div id="admin-tab-session" class="admin-nav-tab" onclick="switchAdminView('session')">📅 Manage Sessions</div>
         </div>
 
+        <!-- Admin Entry Panel Tab Content -->
         <div id="admin-panel" class="hidden" style="background:white; padding:15px; border-radius:8px; margin-bottom:10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 4px solid var(--rnli-orange);">
             <h3 style="color: var(--rnli-navy); margin-top:0; margin-bottom:12px;">Create New Training Session</h3>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
@@ -130,9 +132,11 @@
             </div>
         </div>
 
+        <!-- Matrix & Filtering View Wrapper -->
         <div id="matrix-view-container">
             <div class="controls" id="tabs"></div>
 
+            <!-- Dynamic Filter Row -->
             <div class="filter-row">
                 <div class="filter-group">
                     <label for="crew-filter">Horizontal Filter (Crew Member)</label>
@@ -150,6 +154,7 @@
         </div>
     </div>
 
+    <!-- Modals -->
     <div id="modal-signup" class="modal hidden">
         <div class="modal-content">
             <h4 id="s-title" style="margin:0 0 10px 0; color:var(--rnli-navy);"></h4>
@@ -170,18 +175,26 @@
         <div class="modal-content">
             <h4 id="a-name" style="margin:0 0 10px 0; color:var(--rnli-navy);"></h4>
             <div id="a-pref-box" style="font-size:0.7rem; background:#fffbeb; padding:8px; border-radius:4px; margin-bottom:10px; border: 1px solid #fcd34d;"></div>
+            
             <label>Category:</label>
             <select id="a-cat" onchange="toggleRoleDisable()"></select>
+            
             <label id="a-role-label">Role:</label>
             <select id="a-role"></select>
-            <button onclick="submitAlloc()" class="btn">Update Matrix</button>
+
+            <!-- Hybrid Predefined Dropdown & Free Text Sub-Category Component -->
+            <label id="a-subcat-label">Sub-Category (Predefined or Custom):</label>
+            <input type="text" id="a-subcat" list="subcat-options" placeholder="Select from list or type custom text...">
+            <datalist id="subcat-options"></datalist>
+
+            <button onclick="submitAlloc()" class="btn" style="margin-top: 10px;">Update Matrix</button>
             <button onclick="closeModals()" class="btn btn-outline">Cancel</button>
         </div>
     </div>
 
     <script>
         const API = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; 
-        let db = { crew: [], sessions: [], signups: [], roles: [], categories: [] };
+        let db = { crew: [], sessions: [], signups: [], roles: [], categories: [], subCategories: [] };
         let isAdmin = false, currentMonth = "", target = {}, availableMonths = [];
         let refreshInterval = null;
 
@@ -211,7 +224,7 @@
                 header.innerText = "LTC Mode";
                 header.style.background = "var(--rnli-navy)";
                 adminNavBar.classList.remove('hidden');
-                switchAdminView('matrix'); // Default to view the matrix
+                switchAdminView('matrix');
             } else {
                 header.innerText = "Crew Mode";
                 header.style.background = "#2d3748";
@@ -252,6 +265,11 @@
                 document.getElementById('a-role').innerHTML = '<option value="">-- Clear --</option>' + db.roles.map(r => `<option value="${r}">${r}</option>`).join('');
                 document.getElementById('a-cat').innerHTML = '<option value="">-- Clear --</option>' + db.categories.map(c => `<option value="${c}">${c}</option>`).join('');
                 
+                // Bind Predefined Options from Config Sheet Column E to the Datalist
+                if (db.subCategories) {
+                    document.getElementById('subcat-options').innerHTML = db.subCategories.map(s => `<option value="${s}"></option>`).join('');
+                }
+
                 availableMonths = [...new Set(db.sessions.map(s => s.month))];
                 if (!currentMonth || !availableMonths.includes(currentMonth)) currentMonth = availableMonths[0] || "";
                 
@@ -269,12 +287,10 @@
             const prevCrew = crewFilter.value;
             const prevSession = sessionFilter.value;
             
-            // Populate Horizontal Filter Options
             crewFilter.innerHTML = '<option value="">-- All Crew (Show All Sessions) --</option>' + 
                 db.crew.map(c => `<option value="${c}">${c}</option>`).join('');
             if (db.crew.includes(prevCrew)) crewFilter.value = prevCrew;
             
-            // Display Vertical Session Filter inside LTC Mode context exclusively
             if (isAdmin) {
                 sessionFilterCont.classList.remove('hidden');
                 const monthSessions = db.sessions.filter(s => s.month === currentMonth);
@@ -294,15 +310,8 @@
             }
         }
 
-        function triggerMatrixRender() {
-            renderMatrix();
-        }
-
-        function switchMonth(m) {
-            currentMonth = m;
-            populateFilterDropdowns();
-            renderMatrix();
-        }
+        function triggerMatrixRender() { renderMatrix(); }
+        function switchMonth(m) { currentMonth = m; populateFilterDropdowns(); renderMatrix(); }
 
         function renderMatrix() {
             document.getElementById('tabs').innerHTML = availableMonths.map(m => 
@@ -315,15 +324,8 @@
             const activeCrewFilter = document.getElementById('crew-filter').value;
             const activeSessionFilter = document.getElementById('session-filter').value;
             
-            // Apply Crew Filter: Isolate row data strictly by hiding all other crew members
-            if (activeCrewFilter) {
-                crewList = crewList.filter(name => name === activeCrewFilter);
-            }
-            
-            // Apply Session Filter: Isolate column data strictly by hiding all other session entries
-            if (isAdmin && activeSessionFilter) {
-                sessions = sessions.filter(s => s.id === activeSessionFilter);
-            }
+            if (activeCrewFilter) { crewList = crewList.filter(name => name === activeCrewFilter); }
+            if (isAdmin && activeSessionFilter) { sessions = sessions.filter(s => s.id === activeSessionFilter); }
             
             document.getElementById('h-row').innerHTML = `<th>Crew Member</th>` + sessions.map(s => 
                 `<th>${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}<br><span style="font-size:0.6rem; font-weight:normal;">${s.topic}</span></th>`
@@ -341,7 +343,6 @@
         function getCellHTML(name, sid) {
             const sig = db.signups.find(x => x.name == name && x.sessionId == sid);
             
-            // Comprehensive rule matching intercepting 'No Training' even if one field returns empty from sheet
             const isNoTraining = sig && (sig.allocatedCategory === "No Training" || sig.allocatedRole === "No Training");
             const isAllocated = isNoTraining || !!(sig && sig.allocatedCategory && sig.allocatedRole);
             
@@ -384,6 +385,7 @@
             
             const catSelect = document.getElementById('a-cat');
             const roleSelect = document.getElementById('a-role');
+            const subcatInput = document.getElementById('a-subcat');
             
             if (sig) {
                 if (sig.allocatedCategory === "No Training" || sig.allocatedRole === "No Training") {
@@ -396,10 +398,12 @@
                 
                 if (catSelect.value !== "No Training") {
                     roleSelect.value = sig.allocatedRole || "";
+                    subcatInput.value = sig.allocatedSubCategory || ""; // Map backend data to custom text box
                 }
             } else {
                 catSelect.value = "";
                 roleSelect.value = "";
+                subcatInput.value = "";
                 toggleRoleDisable();
             }
             document.getElementById('modal-alloc').classList.remove('hidden');
@@ -408,9 +412,9 @@
         function toggleRoleDisable() {
             const catSelect = document.getElementById('a-cat');
             const roleSelect = document.getElementById('a-role');
+            const subcatInput = document.getElementById('a-subcat');
             const isNoTraining = catSelect.value === "No Training";
             
-            // Clean helper instances backwards to avoid mutation skip bugs
             for (let i = roleSelect.options.length - 1; i >= 0; i--) {
                 if (roleSelect.options[i].value === "No Training") {
                     roleSelect.remove(i);
@@ -424,8 +428,13 @@
                 roleSelect.add(opt);
                 roleSelect.value = "No Training";
                 roleSelect.disabled = true;
+                
+                subcatInput.value = "No Training";
+                subcatInput.disabled = true;
             } else {
                 roleSelect.disabled = false;
+                subcatInput.disabled = false;
+                if (subcatInput.value === "No Training") subcatInput.value = "";
             }
         }
 
@@ -444,12 +453,21 @@
         function submitAlloc() { 
             const cat = document.getElementById('a-cat').value;
             let role = document.getElementById('a-role').value;
+            let subcat = document.getElementById('a-subcat').value;
             
             if (cat === "No Training") {
                 role = "No Training";
+                subcat = "No Training";
             }
             
-            sendData({ action: "allocate", crewName: target.name, sessionId: target.sessionId, roleType: cat, specificRole: role }); 
+            sendData({ 
+                action: "allocate", 
+                crewName: target.name, 
+                sessionId: target.sessionId, 
+                roleType: cat, 
+                specificRole: role,
+                subCategory: subcat // Package parameter into outgoing API transaction
+            }); 
         }
         
         function addSession(e) { 
@@ -465,12 +483,10 @@
             
             sendData({ action: "addSession", date: dInput, time: tInput, topic: topicInput });
             
-            // Flush input parameters clear
             document.getElementById('n-date').value = "";
             document.getElementById('n-time').value = "";
             document.getElementById('n-topic').value = "";
             
-            // Automatically switch view focus back to Matrix seamlessly
             setTimeout(() => { switchAdminView('matrix'); }, 2600);
         }
         

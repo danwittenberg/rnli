@@ -35,29 +35,29 @@
     body {
       background-color: var(--bg-main);
       color: var(--text-main);
-      padding: 20px;
+      padding: 12px; /* Margins narrowed slightly for mobile panels */
     }
 
     .container {
       max-width: 1400px;
       margin: 0 auto;
       background: white;
-      padding: 20px;
+      padding: 15px;
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
 
     header {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 2px solid var(--border-color);
-      padding-bottom: 15px;
+      padding-bottom: 12px;
     }
 
     h1 {
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       color: #1a202c;
     }
 
@@ -65,10 +65,11 @@
       background-color: var(--primary-color);
       color: white;
       border: none;
-      padding: 8px 16px;
+      padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
       font-weight: 600;
+      font-size: 0.85rem;
       transition: background 0.2s;
     }
 
@@ -78,19 +79,20 @@
 
     .tabs-container {
       display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
+      gap: 6px;
+      margin-bottom: 15px;
       overflow-x: auto;
       padding-bottom: 5px;
     }
 
     .tab-btn {
-      padding: 10px 20px;
+      padding: 8px 14px;
       background-color: #edf2f7;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       cursor: pointer;
       font-weight: 500;
+      font-size: 0.85rem;
       color: #4a5568;
       white-space: nowrap;
       transition: all 0.2s;
@@ -104,7 +106,7 @@
 
     .matrix-wrapper {
       overflow-x: auto;
-      max-height: 650px;
+      max-height: 600px;
       overflow-y: auto;
       border: 1px solid var(--border-color);
       border-radius: 6px;
@@ -117,11 +119,12 @@
     }
 
     th, td {
-      padding: 12px;
+      padding: 8px;
       border-bottom: 1px solid var(--border-color);
       border-right: 1px solid var(--border-color);
       text-align: left;
-      min-width: 190px;
+      /* NARROWED SESSIONS: Shifted down from 190px to fit significantly more columns */
+      min-width: 140px; 
     }
 
     th {
@@ -133,14 +136,18 @@
       z-index: 10;
     }
 
+    /* COMPACT STICKY CREW COLUMN: Structural tuning for mobile viewing */
     th:first-child, td:first-child {
       position: sticky;
       left: 0;
-      width: 180px;
-      min-width: 180px;
+      width: 110px;      /* Downsized from 180px */
+      min-width: 110px;  /* Downsized from 180px */
+      max-width: 110px;  
       background-color: #fff;
       z-index: 11;
       border-right: 2px solid var(--border-color);
+      word-break: break-word; /* Forces long names to break and wrap nicely vertically */
+      hyphens: auto;
     }
 
     th:first-child {
@@ -149,33 +156,34 @@
     }
 
     .session-header-title {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       color: #1a202c;
+      line-height: 1.2;
     }
 
     .session-header-meta {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: #718096;
       margin-top: 4px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .narrative-btn-wrapper {
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .narrative-btn {
       background-color: #edf2f7;
       border: 1px solid #cbd5e0;
       color: #4a5568;
-      padding: 4px 8px;
-      font-size: 0.75rem;
+      padding: 2px 6px;
+      font-size: 0.7rem;
       font-weight: 600;
       border-radius: 4px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       transition: all 0.2s;
     }
 
@@ -188,11 +196,14 @@
     .crew-name-cell {
       font-weight: 600;
       color: #2d3748;
+      font-size: 0.8rem; /* Slightly reduced text scale to match compact footprint */
+      line-height: 1.3;
     }
 
     .matrix-cell {
       cursor: pointer;
       transition: background 0.2s;
+      vertical-align: top;
     }
 
     .matrix-cell:hover {
@@ -201,20 +212,20 @@
 
     .empty-tile {
       color: #a0aec0;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-style: italic;
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100%;
-      min-height: 50px;
+      min-height: 44px;
     }
 
     .tile-box {
-      padding: 8px;
+      padding: 6px;
       border-radius: 4px;
       border: 1px solid var(--border-color);
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
 
     .tile-box.preferred {
@@ -237,24 +248,36 @@
 
     .tile-category {
       font-weight: 700;
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       margin-bottom: 2px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
 
     .tile-role {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 500;
     }
 
     .tile-subcat {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-style: italic;
-      margin-top: 4px;
-      padding-top: 4px;
+      margin-top: 3px;
+      padding-top: 3px;
       border-top: 1px dashed rgba(0, 0, 0, 0.08);
       opacity: 0.9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tile-note-line {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #4a5568;
+      margin-top: 3px;
+      padding-top: 3px;
+      border-top: 1px dotted rgba(0, 0, 0, 0.15);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -274,6 +297,7 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s;
+      padding: 10px;
     }
 
     .modal-overlay.open {
@@ -283,57 +307,74 @@
 
     .modal-card {
       background: white;
-      padding: 24px;
+      padding: 20px;
       border-radius: 8px;
       width: 100%;
-      max-width: 500px;
+      max-width: 460px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
 
     .modal-header {
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     .modal-title {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 700;
     }
 
     .modal-subtitle {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: #718096;
       margin-top: 2px;
     }
 
+    .modal-notes-banner {
+      background-color: #fffaf0;
+      border-left: 4px solid #f6ad55;
+      padding: 8px 10px;
+      margin-bottom: 12px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      color: #c05621;
+    }
+    
+    .modal-notes-banner.empty {
+      background-color: #f7fafc;
+      border-left: 4px solid #cbd5e0;
+      color: #718096;
+    }
+
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     label {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       color: #4a5568;
     }
 
     select, input, textarea {
       width: 100%;
-      padding: 8px;
+      padding: 7px;
       border: 1px solid var(--border-color);
       border-radius: 4px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     textarea {
       resize: vertical;
-      height: 60px;
+      height: 55px;
     }
 
     .modal-tabs {
       display: flex;
       border-bottom: 1px solid var(--border-color);
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     .modal-tab-btn {
@@ -344,6 +385,7 @@
       border-bottom: 2px solid transparent;
       cursor: pointer;
       font-weight: 600;
+      font-size: 0.85rem;
       color: #718096;
     }
 
@@ -355,17 +397,17 @@
     .modal-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
+      gap: 8px;
+      margin-top: 15px;
     }
 
     .btn {
-      padding: 8px 16px;
+      padding: 7px 14px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     .btn-secondary { background-color: #edf2f7; color: #4a5568; }
@@ -374,18 +416,18 @@
 
     .loading-shield {
       text-align: center;
-      padding: 40px;
-      font-size: 1.1rem;
+      padding: 30px;
+      font-size: 1rem;
       color: #718096;
     }
 
     .narrative-textarea {
       width: 100%;
-      height: 280px;
+      height: 250px;
       font-family: 'Courier New', Courier, monospace;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       line-height: 1.4;
-      padding: 12px;
+      padding: 10px;
       background-color: #f7fafc;
       border: 1px solid #cbd5e0;
       border-radius: 4px;
@@ -418,6 +460,8 @@
         <div class="modal-subtitle" id="mSessionTitle">Session Specifics</div>
       </div>
 
+      <div id="modalNotesBanner" class="modal-notes-banner"></div>
+
       <div class="modal-tabs">
         <button class="modal-tab-btn active" onclick="switchModalTab('signup')">Sign Up/Preference</button>
         <button class="modal-tab-btn" onclick="switchModalTab('allocate')">Allocation (Admin)</button>
@@ -449,7 +493,7 @@
           <select id="selectRole"></select>
         </div>
         <div class="form-group">
-          <label>Allocated Activity / Sub-Category (Config Column E - Type or Select)</label>
+          <label>Allocated Activity / Sub-Category (Config Column E)</label>
           <input type="text" id="selectSubCategory" list="subCategoryOptions" placeholder="Select or type custom activity...">
           <datalist id="subCategoryOptions"></datalist>
         </div>
@@ -463,7 +507,7 @@
   </div>
 
   <div class="modal-overlay" id="narrativeModal">
-    <div class="modal-card" style="max-width: 550px;">
+    <div class="modal-card" style="max-width: 500px;">
       <div class="modal-header">
         <div class="modal-title">Generated Session Narrative</div>
         <div class="modal-subtitle" id="narrativeModalSubtitle">Overview Breakdown</div>
@@ -479,15 +523,15 @@
   </div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec";
+    const WEB_APP_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
     let state = {
       crew: [],
       sessions: [],
-      categories: [],       // Column A
-      roles: [],            // Column B
-      adminCategories: [],  // Column D
-      subCategories: [],    // Column E
+      categories: [],       
+      roles: [],            
+      adminCategories: [],  
+      subCategories: [],    
       signups: [],
       activeMonth: "",
       selectedCrew: "",
@@ -536,7 +580,6 @@
       state.subCategories = response.subCategories || [];
       state.signups = response.signups || [];
 
-      // Isolate perfectly grouped months from the display value cache
       const distinctMonths = [...new Set(state.sessions.map(s => s.month).filter(Boolean))];
 
       if (distinctMonths.length > 0 && (!state.activeMonth || !distinctMonths.includes(state.activeMonth))) {
@@ -628,7 +671,7 @@
         html += `
           <th>
             <div class="session-header-title">${sess.topic || "Unnamed Session"}</div>
-            <div class="session-header-meta">${formatDisplayDate(sess.date)} @ ${sess.time}</div>
+            <div class="session-header-meta">${sess.date} @ ${sess.time}</div>
             <div class="narrative-btn-wrapper">
               <button class="narrative-btn" onclick="triggerSessionNarrative('${sess.id}')">📋 Narrative</button>
             </div>
@@ -668,6 +711,7 @@
                   <div class="tile-category">${escapeHtml(match.allocatedCategory)}</div>
                   <div class="tile-role">${escapeHtml(match.allocatedRole || 'Unassigned')}</div>
                   ${match.allocatedSubCategory ? `<div class="tile-subcat" title="${escapeHtml(match.allocatedSubCategory)}">${escapeHtml(match.allocatedSubCategory)}</div>` : ''}
+                  ${match.notes ? `<div class="tile-note-line" title="Crew Note: ${escapeHtml(match.notes)}">📝 ${escapeHtml(match.notes)}</div>` : ''}
                 </div>
               `;
             } 
@@ -675,6 +719,7 @@
               html += `
                 <div class="tile-box notraining">
                   <div class="tile-category">No Training</div>
+                  ${match.notes ? `<div class="tile-note-line" title="Crew Note: ${escapeHtml(match.notes)}">📝 ${escapeHtml(match.notes)}</div>` : ''}
                 </div>
               `;
             }
@@ -708,16 +753,11 @@
       view.innerHTML = html;
     }
 
-    /**
-     * Narrative Generator Engine Core Action
-     */
     function triggerSessionNarrative(sessionId) {
       const targetSess = state.sessions.find(s => s.id == sessionId);
       if(!targetSess) return;
 
       const sessionSignups = state.signups.filter(s => s.sessionId == sessionId);
-      
-      // Validation check: Verify if any active sign-up has not been handled by an admin yet
       const unallocatedCrew = sessionSignups.filter(s => s.preferred && (!s.allocatedCategory || s.allocatedCategory.trim() === ""));
       
       if (unallocatedCrew.length > 0) {
@@ -726,13 +766,9 @@
         return;
       }
 
-      // Isolate allocations (skipping "No Training" choices)
       const validAllocated = sessionSignups.filter(s => s.allocatedCategory && s.allocatedCategory !== "No Training" && s.allocatedCategory.trim() !== "");
-
-      // Pull day name safely pre-computed by the backend engine
       let dayName = targetSess.dayName || "Training Day";
 
-      // Group people dynamically by unique Allocation category arrays
       const allocationGroups = {};
       validAllocated.forEach(person => {
         const catKey = person.allocatedCategory;
@@ -751,7 +787,6 @@
       const uniqueCategoryKeys = Object.keys(allocationGroups);
       const N = uniqueCategoryKeys.length;
 
-      // Compile raw structural narrative layout
       let textOutput = `${dayName}'s training will comprise of ${N} sessions.\n\n`;
 
       uniqueCategoryKeys.forEach((categoryName, index) => {
@@ -790,7 +825,16 @@
       const existingMatch = state.signups.find(s => s.name === crewName && s.sessionId == sessionId);
 
       document.getElementById("mCrewName").textContent = crewName;
-      document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${formatDisplayDate(targetSess.date)} @ ${targetSess.time})` : "Session Context Data Record";
+      document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${targetSess.date} @ ${targetSess.time})` : "Session Context Data Record";
+
+      const notesBanner = document.getElementById("modalNotesBanner");
+      if (existingMatch && existingMatch.notes && existingMatch.notes.trim() !== "") {
+        notesBanner.className = "modal-notes-banner";
+        notesBanner.innerHTML = `<strong>Crew Member Notes:</strong> "${escapeHtml(existingMatch.notes)}"`;
+      } else {
+        notesBanner.className = "modal-notes-banner empty";
+        notesBanner.innerHTML = `<strong>Crew Member Notes:</strong> None provided for this session`;
+      }
 
       document.getElementById("selectPrefRole").value = (existingMatch && existingMatch.preferred) ? existingMatch.preferred : "Any";
       document.getElementById("inputNotes").value = (existingMatch && existingMatch.notes) ? existingMatch.notes : "";
@@ -866,10 +910,7 @@
       }
     }
 
-    function formatDisplayDate(dateStr) {
-      return dateStr || ""; // Respects exact format used in the spreadsheet column
-    }
-
+    // Secure sanitizer utility
     function escapeHtml(str) {
       if(!str) return "";
       return str.toString()

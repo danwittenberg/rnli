@@ -250,7 +250,7 @@
       background-color: rgba(255, 255, 255, 0.15);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: white;
-      padding: 4px 5px;
+      padding: 6px 5px; /* Shifted padding for icon symmetry */
       font-size: 0.68rem;
       font-weight: 700;
       border-radius: 3px;
@@ -642,7 +642,7 @@
   <div class="modal-overlay" id="narrativeModal">
     <div class="modal-card" style="max-width: 520px;">
       <div class="modal-header-wrapper">
-        <div id="uiNarrativeTitle" class="modal-title">Generated Session Narrative</div>
+        <div id="uiNarrativeTitle" class="modal-title">Generated Session SMS Narrative</div>
         <div class="modal-subtitle" id="narrativeModalSubtitle">Overview Breakdown</div>
       </div>
       <div class="form-group">
@@ -695,7 +695,7 @@
       allocActivityLabel: "Activity",
       allocActivityPlaceholder: "Select or type custom activity...",
       commitAllocBtn: "Commit",
-      narrativeTitle: "Narrative",
+      narrativeTitle: "SMS Narrative Broadcast",
       narrativeSubtitleFallback: "Overview Breakdown",
       closeBtn: "Close",
       copyClipboardBtn: "Copy to Clipboard",
@@ -933,8 +933,14 @@
                 <div class="session-header-meta">${sess.date} @ ${sess.time}</div>
               </div>
               <div class="action-btn-row">
-                <button class="narrative-btn" onclick="triggerSessionNarrative('${sess.id}')">📋 Narrative</button>
-                <button class="${filterClass}" title="Filter signups for this session" onclick="toggleSessionFilter('${sess.id}')">▼ Filter</button>
+                <button class="narrative-btn" title="Generate Session SMS Narrative" onclick="triggerSessionNarrative('${sess.id}')">
+                  <!-- SMS / Message Bubble Icon -->
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
+                </button>
+                <button class="${filterClass}" title="Filter signups for this session" onclick="toggleSessionFilter('${sess.id}')">
+                  <!-- Funnel / Filter Icon -->
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M10 24v-9L3.07 4.93C2.43 4.09 3.03 3 4.08 3h15.83c1.05 0 1.65 1.09 1.02 1.93L14 15v7c0 .55-.45 1-1 1h-2c-.55 0-1-.45-1-1z"/></svg>
+                </button>
               </div>
             </div>
           </th>

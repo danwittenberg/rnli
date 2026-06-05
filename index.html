@@ -27,7 +27,7 @@
     }
 
     * {
-      box-sizing: border-box;
+      box-spacing: border-box;
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -391,8 +391,8 @@
 
       <div id="formSectionSignup">
         <div class="form-group">
-          <label>Preferred Role / Choice</label>
-          <input type="text" id="inputPrefRole" placeholder="e.g. Primary Lead, Support, Backup">
+          <label>Preference</label>
+          <select id="selectPrefRole"></select>
         </div>
         <div class="form-group">
           <label>Notes / Availability Details</label>
@@ -429,7 +429,7 @@
 
   <script>
     // CRUCIAL STEP: Replace with your actual deployment script URL
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec";
+    const WEB_APP_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
     // Application Global State Context Data Container
     let state = {
@@ -457,14 +457,12 @@
     function fetchMatrixData() {
       document.getElementById("dashboardView").innerHTML = '<div class="loading-shield">Pulling real-time parameters from Google Sheets...</div>';
       
-      // Dynamic execution context detection (works whether hosted inside Apps Script frame or externally)
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(processServerPayload)
           .withFailureHandler(handleNetworkError)
           .doGet();
       } else {
-        // External local sandbox fallback method
         if(WEB_APP_URL.includes("YOUR_APPS_SCRIPT")) {
           document.getElementById("dashboardView").innerHTML = '<div class="loading-shield" style="color:red;">Configuration Error: Please paste your script deployment URL into the WEB_APP_URL string constant at the top of the HTML file.</div>';
           return;
@@ -496,10 +494,8 @@
       state.subCategories = response.subCategories || [];
       state.signups = response.signups || [];
 
-      // Extract unique list of months derived from row dates
       const distinctMonths = [...new Set(state.sessions.map(s => s.month))];
 
-      // Auto-focus on the first available month tab block context
       if (distinctMonths.length > 0 && (!state.activeMonth || !distinctMonths.includes(state.activeMonth))) {
         state.activeMonth = distinctMonths[0];
       }
@@ -516,13 +512,27 @@
       populateSelectElement("selectCategory", state.categories);
       populateSelectElement("selectRole", state.roles);
       populateSelectElement("selectSubCategory", state.subCategories);
+      
+      // Build the User Preference dropdown menu bounded to the Config Categories
+      const prefSelect = document.getElementById("selectPrefRole");
+      prefSelect.innerHTML = "";
+      
+      // Inject 'Any' as the default structural rule choice
+      const filteredCategories = state.categories.filter(cat => cat !== "No Training");
+      const prefOptions = ["Any", ...filteredCategories];
+      
+      prefOptions.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        prefSelect.appendChild(option);
+      });
     }
 
     function populateSelectElement(id, list) {
       const select = document.getElementById(id);
       select.innerHTML = "";
       
-      // Standard dynamic addition of the 'No Training' structural exception override rules
       const trackingList = list.includes("No Training") ? list : ["No Training", ...list];
       
       trackingList.forEach(item => {
@@ -563,8 +573,6 @@
      */
     function renderMatrixGrid() {
       const view = document.getElementById("dashboardView");
-      
-      // Filter sessions that belong to the active month
       const activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
 
       if (activeSessions.length === 0) {
@@ -580,7 +588,6 @@
                 <th>Crew Member</th>
       `;
 
-      // Build out session headers
       activeSessions.forEach(sess => {
         html += `
           <th>
@@ -600,16 +607,13 @@
         html += `<tr><td colspan="${activeSessions.length + 1}" style="text-align:center; font-style:italic;">No personnel listed in Crew worksheet.</td></tr>`;
       }
 
-      // Loop through crew members (Rows)
       state.crew.forEach(crewName => {
         html += `
           <tr>
             <td class="crew-name-cell">${crewName}</td>
         `;
 
-        // Loop through sessions for the active month (Columns)
         activeSessions.forEach(sess => {
-          // Check if there is an existing signup or allocation matching this crew member and session ID
           const match = state.signups.find(s => s.name === crewName && s.sessionId == sess.id);
 
           html += `
@@ -617,7 +621,6 @@
           `;
 
           if (match) {
-            // Priority 1: Has explicit allocation
             if (match.allocatedCategory && match.allocatedCategory !== "No Training") {
               const styleClass = match.allocatedCategory.toLowerCase().replace(/[^a-z0-9]/g, "") === "notraining" ? "notraining" : "allocated";
               
@@ -629,7 +632,6 @@
                 </div>
               `;
             } 
-            // Fallback 1: Explicitly assigned to "No Training" status
             else if (match.allocatedCategory === "No Training") {
               html += `
                 <div class="tile-box notraining">
@@ -637,7 +639,6 @@
                 </div>
               `;
             }
-            // Priority 2: Has a preference signup, but not allocated yet
             else if (match.preferred) {
               html += `
                 <div class="tile-box preferred">
@@ -682,7 +683,7 @@
       document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${formatDisplayDate(targetSess.date)} @ ${targetSess.time})` : "Session Context Data Record";
 
       // Hydrate forms with existing spreadsheet values or defaults
-      document.getElementById("inputPrefRole").value = (existingMatch && existingMatch.preferred) ? existingMatch.preferred : "";
+      document.getElementById("selectPrefRole").value = (existingMatch && existingMatch.preferred) ? existingMatch.preferred : "Any";
       document.getElementById("inputNotes").value = (existingMatch && existingMatch.notes) ? existingMatch.notes : "";
       
       document.getElementById("selectCategory").value = (existingMatch && existingMatch.allocatedCategory) ? existingMatch.allocatedCategory : "No Training";
@@ -712,9 +713,6 @@
       }
     }
 
-    /**
-     * Enforces that selecting "No Training" resets the remaining administrative drop-downs automatically.
-     */
     function checkNoTrainingRule(elem) {
       if(elem.value === "No Training") {
         document.getElementById("selectRole").value = "No Training";
@@ -733,7 +731,7 @@
       };
 
       if (actionType === "signup") {
-        payload.preferredRole = document.getElementById("inputPrefRole").value.trim();
+        payload.preferredRole = document.getElementById("selectPrefRole").value;
         payload.notes = document.getElementById("inputNotes").value.trim();
       } 
       else if (actionType === "allocate") {
@@ -751,7 +749,6 @@
           .withFailureHandler(handleNetworkError)
           .doPost(JSON.stringify(payload));
       } else {
-        // External application pipeline post deployment context fallback handler
         fetch(WEB_APP_URL, {
           method: "POST",
           body: JSON.stringify(payload),
@@ -763,7 +760,6 @@
       }
     }
 
-    // Helper: Formats string dates nicely for display
     function formatDisplayDate(dateStr) {
       if(!dateStr) return "";
       const d = new Date(dateStr);
@@ -771,7 +767,6 @@
       return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
-    // Helper: Escapes HTML strings to prevent breaking layout rules via text injection bugs
     function escapeHtml(str) {
       if(!str) return "";
       return str.toString()

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Newhaven Tides & Weather</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+<style>
+  :root {
+    /* RNLI Brand Toolkit Colors */
+    --rnli-blue: #002663;
+    --rnli-orange: #F28B00;
+    --rnli-yellow: #FFD200;
+    --rnli-lightblue: #00B9E4;
+    --rnli-blue-2: #C0C8D6;
+    --rnli-grey: #36424A;
+    --rnli-red: #9E1B32;
+
+    --bg: var(--rnli-blue);
+    --text: #ffffff;
+    --muted: #e6e8eecc;
+    --accent: var(--rnli-orange);
+    --border: rgba(255, 255, 255, 0.14);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    --radius: 16px;
+    --container-w: min(1200px, 92vw);
+  }
+  
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; min-height: 100%; }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(circle at top center, #163673 0%, var(--bg) 70%);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 40px;
+  }
+
+  .disclaimer {
+    background: linear-gradient(90deg, var(--rnli-red), #b5263f);
+    color: #ffffff;
+    padding: 16px 18px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .disclaimer u { text-underline-offset: 3px; }
+
+  header {
+    position: sticky; 
+    top: 0; 
+    z-index: 100;
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    background: rgba(0, 18, 51, 0.85);
+    border-bottom: 1px solid var(--border);
+    padding: 26px 16px;
+    text-align: center;
+  }
+  
+  h1 { 
+    margin: 0; 
+    font-size: clamp(32px, 8vw, 42px); 
+    font-weight: 700;
+    letter-spacing: -0.3px; 
+    color: #fff;
+  }
+
+  .container { 
+    padding: 24px 0; 
+    max-width: var(--container-w); 
+    margin: 0 auto; 
+  }
+
+  .grid { 
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    box-shadow: var(--shadow);
+    display: flex; 
+    flex-direction: column;
+  }
+  
+  .card h2 { 
+    margin: 0 0 24px 0; 
+    font-size: 36px; 
+    font-weight: 700;
+    border-bottom: 4px solid var(--accent);
+    padding-bottom: 8px;
+    display: inline-block;
+    align-self: flex-start;
+  }
+
+  .kv { 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 0; 
+    border-bottom: 1px solid rgba(255,255,255,0.08); 
+    font-size: 36px;
+  }
+  .kv:last-of-type { border-bottom: none; }
+  
+  .k { color: var(--rnli-blue-2); font-weight: 400; }
+  .v { color: #ffffff; font-weight: 600; text-align: right; }
+  
+  .v.highlight { color: #fff; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 6px; }
+  .v.warning { color: var(--rnli-yellow); font-weight: 700; }
+  .text-accent { color: var(--rnli-orange); }
+
+  .kv.kv-stack { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 10px;
+  }
+  .kv.kv-stack .v { 
+    text-align: left; 
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 36px;
+  }
+
+  .badge {
+    font-size: 18px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.15);
+    color: var(--rnli-blue-2);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .badge.active {
+    background: var(--rnli-orange);
+    color: #000;
+  }
+  .tide-time {
+    color: var(--rnli-lightblue);
+    font-weight: 700;
+  }
+
+  .card-sep {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 24px 0 16px 0;
+  }
+
+  .wave-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    color: var(--rnli-yellow);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .alert-icon { font-size: 22px; }
+  .muted { color: var(--rnli-blue-2); font-style: italic; }
+
+  .note { 
+    margin: 24px 0 0 0; 
+    font-size: 16px; 
+    color: var(--rnli-blue-2); 
+    line-height: 1.6; 
+    background: rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    border-radius: 8px;
+  }
+  .note strong { color: #fff; }
+
+  footer { 
+    margin-top: 48px; 
+    color: var(--rnli-blue-2); 
+    font-size: 18px; 
+    text-align: center; 
+    padding: 0 16px;
+  }
+
+  .footer-sub {
+    font-size: 14px;
+    color: var(--rnli-yellow);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  
+  .links { 
+    margin-top: 20px; 
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .links a { 
+    color: var(--rnli-lightblue); 
+    text-decoration: none; 
+    font-weight: 500;
+    padding: 14px 28px; 
+    background: rgba(255,255,255,0.05);
+    border-radius: 26px;
+    border: 1px solid var(--border);
+  }
+  .links a:hover { 
+    background: rgba(255,255,255,0.15); 
+    color: #fff;
+  }
+
+  @media (max-width: 360px) {
+    .kv { font-size: 28px; }
+    .card h2 { font-size: 28px; }
+    .kv.kv-stack .v { font-size: 28px; }
+    .wave-alert { font-size: 16px; }
+    .badge { font-size: 15px; }
+  }
+
+  @media (min-width: 1025px) {
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 24px; 
+    }
+    .card { padding: 24px; }
+    .card h2 { 
+      font-size: 22px; 
+      margin-bottom: 16px; 
+      border-bottom-width: 2px;
+      padding-bottom: 6px;
+    }
+    .kv { font-size: 15px; padding: 12px 0; }
+    .kv.kv-stack .v { font-size: 14px; }
+    .badge { font-size: 11px; padding: 3px 8px; }
+    .card-sep { margin: 16px 0 12px 0; }
+    .wave-alert { font-size: 13px; gap: 6px; }
+    .alert-icon { font-size: 16px; }
+    .note { font-size: 12px; padding: 10px 12px; margin-top: 16px; }
+    footer { font-size: 14px; margin-top: 40px; }
+    .footer-sub { font-size: 12px; margin-top: 4px; }
+    .links a { padding: 6px 12px; border-radius: 20px; }
+  }
+</style>
+</head>
+<body>
+  <div class="disclaimer"><strong>Trial System:</strong> Dashboard is in evaluation phase. Information may be delayed. <u>Verify with official marine forecasts before heading out.</u></div>
+
+  <header>
+    <h1>Newhaven Tides & Weather</h1>
+  </header>
+
+  <div class="container">
+    <main class="grid">
+      <!-- Wind Card -->
+      <section class="card" id="card-wind">
+        <h2>Wind</h2>
+        <div id="wind-target"><div class="muted">Awaiting telemetry...</div></div>
+      </section>
+
+      <!-- Wave Card -->
+      <section class="card" id="card-wave">
+        <h2>Waves</h2>
+        <div id="wave-target"><div class="muted">Awaiting telemetry...</div></div>
+        <hr class="card-sep">
+        <div class="wave-alert">
+          <span class="alert-icon">⚠️</span> Wave data can be up to 2 hours old.
+        </div>
+      </section>
+
+      <!-- Tide Card -->
+      <section class="card" id="card-tide">
+        <h2>Tides</h2>
+        <div id="tide-target"><div class="muted">Awaiting telemetry...</div></div>
+        <div id="debug-target"></div>
+      </section>
+    </main>
+
+    <footer>
+      <div>System updates automatically every 5 minutes.</div>
+      <div class="footer-sub">Updated: <span id="hdr-time">Connecting...</span></div>
+      <div class="links">
+        <a href="#" id="link-txt" target="_blank">Plain Text View</a>
+        <a href="#" id="link-json" target="_blank">JSON Payload</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ⚠️ CRUCIAL: Replace this string with your live Apps Script Web App Executable URL
+    const DEPLOYED_API_URL = "https://script.google.com/macros/s/.../exec";
+
+    function updateDashboard() {
+      // Build specific links for explicit views
+      document.getElementById('link-txt').href = DEPLOYED_API_URL + "?format=text";
+      document.getElementById('link-json').href = DEPLOYED_API_URL + "?format=json";
+
+      fetch(DEPLOYED_API_URL)
+        .then(response => {
+          if (!response.ok) throw new Error('Data sync stream failed.');
+          return response.json();
+        })
+        .then(data => {
+          if (!data || !data.ok) return;
+
+          const r1 = x => (x != null && !isNaN(x)) ? Number(x).toFixed(1) : "n/a";
+          const esc = s => s ? String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
+
+          // 1. Update timestamp
+          document.getElementById('hdr-time').textContent = data.conditions_time || 'Sync Error';
+
+          // 2. Render Wind View
+          const wind = data.wind || {};
+          const windTarget = document.getElementById('wind-target');
+          if (!wind.error && wind.mean_kn != null) {
+            windTarget.innerHTML = `
+              <div class="kv"><span class="k">Direction</span><span class="v highlight">${esc(wind.direction || "n/a")}</span></div>
+              <div class="kv"><span class="k">Mean Speed</span><span class="v">${r1(wind.mean_kn)} kn</span></div>
+              <div class="kv"><span class="k">Gust Speed</span><span class="v warning">${r1(wind.gust_kn)} kn</span></div>
+              ${wind.beaufort ? `<div class="kv"><span class="k">Beaufort</span><span class="v">${esc(wind.beaufort.force + " – " + wind.beaufort.description)}</span></div>` : ''}
+              <p class="note">Sourced from Newhaven West Breakwater</p>
+            `;
+          } else {
+            windTarget.innerHTML = `<div class="muted">Wind unavailable ${wind.error ? ': ' + esc(wind.error) : ''}</div>`;
+          }
+
+          // 3. Render Wave View
+          const wave = data.wave || {};
+          const waveTarget = document.getElementById('wave-target');
+          if (!wave.error && wave.hs_m != null) {
+            waveTarget.innerHTML = `
+              <div class="kv"><span class="k">Station</span><span class="v">${esc(wave.station || "n/a")}</span></div>
+              <div class="kv"><span class="k">Hs (Signif.)</span><span class="v highlight">${r1(wave.hs_m)} m</span></div>
+              ${isFinite(wave.hmax_m) ? `<div class="kv"><span class="k">Hmax (Max)</span><span class="v">${r1(wave.hmax_m)} m</span></div>` : ''}
+              ${isFinite(wave.swell_period_s) ? `<div class="kv"><span class="k">Swell Period</span><span class="v">${r1(wave.swell_period_s)} s</span></div>` : ''}
+              ${wave.sea_state ? `<div class="kv"><span class="k">Sea State</span><span class="v text-accent">${esc(wave.sea_state)}</span></div>` : ''}
+              <p class="note"><strong>Hs:</strong> High average wave baseline.<br><strong>Hmax:</strong> Maximum observed single wave.</p>
+            `;
+          } else {
+            waveTarget.innerHTML = `<div class="muted">Wave data unavailable ${wave.error ? ': ' + esc(wave.error) : ''}</div>`;
+          }
+
+          // 4. Render Tide View
+          const tide = data.tide || {};
+          const tideTarget = document.getElementById('tide-target');
+          if (!tide.error && (tide.prev || tide.next)) {
+            tideTarget.innerHTML = `
+              ${tide.prev ? `
+                <div class="kv kv-stack">
+                  <span class="k">Previous Tide</span>
+                  <div class="v"><span class="badge">${esc(tide.prev.kind || "n/a")}</span> <span class="tide-time">${esc(tide.prev.time_local || "n/a")}</span> – <strong>${r1(tide.prev.height_m)} m</strong></div>
+                </div>` : ''}
+              ${tide.next ? `
+                <div class="kv kv-stack">
+                  <span class="k">Next Tide</span>
+                  <div class="v"><span class="badge active">${esc(tide.next.kind || "n/a")}</span> <span class="tide-time">${esc(tide.next.time_local || "n/a")}</span> – <strong>${r1(tide.next.height_m)} m</strong></div>
+                </div>` : ''}
+              <p class="note">Tidal predictions for Newhaven. Sourced from UKHO.</p>
+            `;
+          } else {
+            tideTarget.innerHTML = `<div class="muted">Tide data unavailable ${tide.error ? ': ' + esc(tide.error) : ''}</div>`;
+          }
+
+          // Debug fields
+          const debugTarget = document.getElementById('debug-target');
+          if (data.debug_note) {
+            debugTarget.innerHTML = `<p class="note">${esc(data.debug_note)}</p>`;
+          } else {
+            debugTarget.innerHTML = '';
+          }
+        })
+        .catch(err => {
+          console.error('Telemetry fetch exception:', err);
+          document.getElementById('hdr-time').textContent = 'Sync offline';
+        });
+    }
+
+    // Trigger update pipeline immediately on mount
+    document.addEventListener('DOMContentLoaded', updateDashboard);
+    
+    // Maintain regular 5-minute background polling cycles
+    setInterval(updateDashboard, 300000);
+  </script>
+</body>
+</html>

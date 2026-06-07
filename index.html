@@ -42,7 +42,7 @@
       transition: padding 0.2s ease;
     }
 
-    /* Bugfix: Elastic viewport wrapper expanding beautifully to utilize full wide desktop layouts */
+    /* Elastic viewport wrapper expanding beautifully to utilize full wide desktop layouts */
     .container {
       width: 100%;
       max-width: 100%; 
@@ -160,7 +160,7 @@
 
     .matrix-wrapper {
       overflow-x: auto;
-      max-height: 680px;
+      max-height: 650px;
       overflow-y: auto;
       border: 2px solid var(--rnli-navy);
       border-radius: 4px;
@@ -205,7 +205,6 @@
       margin-bottom: 35px;
     }
 
-    /* Bugfix: Cleared 'Crew Member' string text placeholder. Opaque white mask stops sliding content overlay bleed-through */
     th:first-child, td:first-child {
       position: sticky;
       left: 0;
@@ -271,7 +270,6 @@
       border-color: var(--rnli-orange);
     }
 
-    /* Bugfix: Maintained state rules prevent reset shifts to column 1 when filter toggled */
     .filter-arrow-btn.active-filter {
       background-color: var(--rnli-orange);
       border-color: #FFF;
@@ -560,7 +558,7 @@
       resize: none;
     }
 
-    /* Mobile Engine - Media Viewport Rules */
+    /* Mobile Media Viewport Configurations */
     @media (max-width: 768px) {
       body {
         padding: 6px;
@@ -612,7 +610,6 @@
         padding: 8px 4px;
         position: relative;
       }
-      /* Inject Session Header Labels before card content blocks */
       td.matrix-cell::before {
         content: attr(data-label);
         display: block;
@@ -634,6 +631,7 @@
         <h1 id="uiDashboardTitle">Crew Allocation Matrix</h1>
       </div>
       <div class="header-actions">
+        <button id="globalSheetBtn" class="global-admin-btn" style="display: none;" onclick="window.open('https://docs.google.com/spreadsheets/d/1pShwO5f9OiTReD3llwWMkrfHc1z405q3PP-m0-AbPIk/edit?usp=sharing', '_blank')">🟢 View Database</button>
         <button id="globalAdminBtn" class="global-admin-btn" onclick="toggleGlobalAdminMode()">LTC Mode</button>
         <button id="uiRefreshBtn" class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
       </div>
@@ -798,15 +796,13 @@
       adminCategories: [],  
       subCategories: [],    
       signups: [],
-      activeMonth: "All Upcoming", // Feature addition default state value
+      activeMonth: "All Upcoming", 
       selectedCrew: "",
       selectedSessionId: "",
       isGlobalAdminUnlocked: false,
-      activeSessionFilterId: null,
-      lockLeadHours: 24
+      activeSessionFilterId: null
     };
 
-    // Global SVG asset mapping definition block
     const SVG_ICONS = {
       lock: `<svg class="lock-icon-svg" viewBox="0 0 24 24" width="11" height="11"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`,
       sms: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>`,
@@ -892,10 +888,6 @@
 
       const distinctMonths = [...new Set(state.sessions.map(s => s.month).filter(Boolean))];
 
-      if (distinctMonths.length > 0 && !state.activeMonth) {
-        state.activeMonth = "All Upcoming";
-      }
-
       populateDropdownLists();
       renderMonthTabs(distinctMonths);
       renderMatrixGrid();
@@ -938,17 +930,12 @@
       });
     }
 
-    // Feature addition: Injected 'All Upcoming' filter control node alongside month categories
+    // Bugfix: Corrected filtering matrix assembly logic to completely render custom tabs arrays
     function renderMonthTabs(months) {
       const panel = document.getElementById("monthTabsPanel");
       panel.innerHTML = "";
 
-      if(months.length === 0) {
-        panel.innerHTML = `<div style="font-style:italic; padding:10px;">${UI_TEXT.noSessionDates}</div>`;
-        return;
-      }
-
-      // Render the comprehensive global viewing tab option
+      // 1. Core Global View Tab Generation
       const globalBtn = document.createElement("button");
       globalBtn.className = `tab-btn ${state.activeMonth === "All Upcoming" ? 'active' : ''}`;
       globalBtn.textContent = "All Upcoming";
@@ -959,6 +946,7 @@
       };
       panel.appendChild(globalBtn);
 
+      // 2. Individual Sub-Month Categories Generation Loop
       months.forEach(m => {
         const btn = document.createElement("button");
         btn.className = `tab-btn ${state.activeMonth === m ? 'active' : ''}`;
@@ -981,7 +969,6 @@
       renderMatrixGrid();
     }
 
-    // System helper evaluating live calendar metrics against dynamic config limits
     function isSessionTimeLocked(sessionObj) {
       if (!sessionObj || !sessionObj.date) return false;
       try {
@@ -1007,7 +994,6 @@
     function renderMatrixGrid() {
       const view = document.getElementById("dashboardView");
       
-      // Determine session collection based on active global tab view state
       let activeSessions = [];
       if (state.activeMonth === "All Upcoming") {
         activeSessions = state.sessions;
@@ -1029,7 +1015,6 @@
       `;
 
       activeSessions.forEach(sess => {
-        // Bugfix: Prevent horizontal layout compression shifts by tracking explicit dynamic classes
         if (state.activeSessionFilterId && state.activeSessionFilterId != sess.id) {
           return; 
         }
@@ -1067,7 +1052,6 @@
       }
 
       state.crew.forEach(crewName => {
-        // If a column isolation rule is active, verify that this person has active changes in it
         if (state.activeSessionFilterId) {
           const match = state.signups.find(s => s.name === crewName && s.sessionId == state.activeSessionFilterId);
           const hasRecord = match && (match.preferred || match.allocatedCategory);
@@ -1125,7 +1109,6 @@
                 </div>
               `;
             }
-            // Feature addition: String swap changes text token from "Preference" to "Requested..."
             else if (match.preferred) {
               html += `
                 <div class="tile-box preferred">
@@ -1195,7 +1178,6 @@
       const uniqueCategoryKeys = Object.keys(allocationGroups);
       const N = uniqueCategoryKeys.length;
 
-      // Feature addition: Dynamic data strings injected cleanly inside text blocks
       let textOutput = `${dayName} (${targetSess.date} @ ${targetSess.time})${UI_TEXT.narrativeTemplateSegment1}${N}${UI_TEXT.narrativeTemplateSegment2}`;
 
       uniqueCategoryKeys.forEach((categoryName, index) => {
@@ -1230,7 +1212,6 @@
       const targetSess = state.sessions.find(s => s.id == sessionId);
       const isLocked = isSessionTimeLocked(targetSess);
 
-      // Enforce lockout security rules for base users
       if (isLocked && !state.isGlobalAdminUnlocked) {
         alert("This workspace selection has fallen inside the locking period window and cannot be modified.");
         return; 
@@ -1249,7 +1230,6 @@
         document.getElementById("formSectionSignup").style.display = "block";
         document.getElementById("formSectionAllocate").style.display = "none";
 
-        // Feature removal: Hide withdraw actions if an administrator has committed allocations
         const removeButtonNode = document.getElementById("uiSignupRemoveBtn");
         if (isAllocated) {
           removeButtonNode.style.display = "none";
@@ -1257,7 +1237,6 @@
           removeButtonNode.style.display = "inline-block";
         }
 
-        // Toggle warning banners if operations fall inside constraint frames
         const warningBanner = document.getElementById("lockWarningMessage");
         if (isLocked) {
           warningBanner.style.display = "block";
@@ -1288,6 +1267,7 @@
       
       document.getElementById("selectCategory").value = (existingMatch && existingMatch.allocatedCategory) ? existingMatch.allocatedCategory : "No Training";
       document.getElementById("selectRole").value = (existingMatch && existingMatch.allocatedRole) ? existingMatch.allocatedRole : "No Training";
+      
       document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "";
 
       document.getElementById("actionModal").classList.add("open");
@@ -1299,12 +1279,14 @@
 
     function toggleGlobalAdminMode() {
       const btn = document.getElementById("globalAdminBtn");
+      const sheetBtn = document.getElementById("globalSheetBtn");
       
       if (state.isGlobalAdminUnlocked) {
         state.isGlobalAdminUnlocked = false;
         btn.classList.remove("unlocked");
         btn.title = UI_TEXT.adminUnlockTooltip;
         btn.textContent = UI_TEXT.adminBtnText;
+        if(sheetBtn) sheetBtn.style.display = "none";
         renderMatrixGrid();
       } else {
         const inputPass = prompt(UI_TEXT.adminPromptChallenge);
@@ -1312,8 +1294,8 @@
           state.isGlobalAdminUnlocked = true;
           btn.classList.add("unlocked");
           btn.title = UI_TEXT.adminLockTooltip;
-          // Feature addition: Structural link to manage constraint options directly from LTC mode button state
           btn.textContent = "LTC Menu Options ⚙️";
+          if(sheetBtn) sheetBtn.style.display = "inline-flex";
           renderMatrixGrid();
         } else if (inputPass !== null) {
           alert(UI_TEXT.adminInvalidCredentials);
@@ -1321,7 +1303,6 @@
       }
     }
 
-    // Injected secondary management branch route handling settings window
     document.getElementById("globalAdminBtn").addEventListener("contextmenu", (e) => {
       if (state.isGlobalAdminUnlocked) {
         e.preventDefault();
@@ -1329,7 +1310,6 @@
       }
     });
     
-    // Explicit click listener check routing administration screens
     const originalToggle = toggleGlobalAdminMode;
     toggleGlobalAdminMode = function() {
       if (state.isGlobalAdminUnlocked) {

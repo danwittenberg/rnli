@@ -770,13 +770,13 @@
         google.script.run
           .withSuccessHandler(processServerPayload)
           .withFailureHandler(handleNetworkError)
-          .doGet();
+          .getMatrixDataPayload(); // FIX: Calling specific backend function
       } else {
         if(WEB_APP_URL.includes("YOUR_APPS_SCRIPT")) {
           document.getElementById("dashboardView").innerHTML = `<div class="loading-shield" style="color:red;">${UI_TEXT.urlConfigError}</div>`;
           return;
         }
-        fetch(WEB_APP_URL)
+        fetch(WEB_APP_URL + "?data=true") // FIX: Appending explicit data request for external fetching
           .then(res => res.json())
           .then(processServerPayload)
           .catch(handleNetworkError);
@@ -934,11 +934,9 @@
               </div>
               <div class="action-btn-row">
                 <button class="narrative-btn" title="Generate Session SMS Narrative" onclick="triggerSessionNarrative('${sess.id}')">
-                  <!-- SMS / Message Bubble Icon -->
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
                 </button>
                 <button class="${filterClass}" title="Filter signups for this session" onclick="toggleSessionFilter('${sess.id}')">
-                  <!-- Funnel / Filter Icon -->
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M10 24v-9L3.07 4.93C2.43 4.09 3.03 3 4.08 3h15.83c1.05 0 1.65 1.09 1.02 1.93L14 15v7c0 .55-.45 1-1 1h-2c-.55 0-1-.45-1-1z"/></svg>
                 </button>
               </div>
@@ -1137,8 +1135,7 @@
       
       document.getElementById("selectCategory").value = (existingMatch && existingMatch.allocatedCategory) ? existingMatch.allocatedCategory : "No Training";
       document.getElementById("selectRole").value = (existingMatch && existingMatch.allocatedRole) ? existingMatch.allocatedRole : "No Training";
-      
-      document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "";
+      document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "No Training";
 
       document.getElementById("actionModal").classList.add("open");
     }
@@ -1155,14 +1152,14 @@
         state.isGlobalAdminUnlocked = false;
         btn.classList.remove("unlocked");
         btn.title = UI_TEXT.adminUnlockTooltip;
-        sheetBtn.style.display = "none";
+        if(sheetBtn) sheetBtn.style.display = "none";
       } else {
         const inputPass = prompt(UI_TEXT.adminPromptChallenge);
         if (inputPass === ADMIN_PASSWORD) {
           state.isGlobalAdminUnlocked = true;
           btn.classList.add("unlocked");
           btn.title = UI_TEXT.adminLockTooltip;
-          sheetBtn.style.display = "inline-flex";
+          if(sheetBtn) sheetBtn.style.display = "inline-flex";
         } else if (inputPass !== null) {
           alert(UI_TEXT.adminInvalidCredentials);
         }

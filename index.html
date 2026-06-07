@@ -39,10 +39,13 @@
       background-color: var(--bg-main);
       color: var(--text-main);
       padding: 14px;
+      transition: padding 0.2s ease;
     }
 
+    /* Bugfix: Elastic viewport wrapper expanding beautifully to utilize full wide desktop layouts */
     .container {
-      max-width: 1450px;
+      width: 100%;
+      max-width: 100%; 
       margin: 0 auto;
       background: white;
       padding: 18px;
@@ -58,6 +61,8 @@
       align-items: center;
       border-bottom: 2px solid var(--border-color);
       padding-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     h1 {
@@ -72,6 +77,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .refresh-btn {
@@ -92,7 +98,6 @@
       background-color: var(--rnli-orange-hover);
     }
 
-    /* LTC Mode Text Button Styling */
     .global-admin-btn {
       background: white;
       border: 2px solid var(--rnli-navy);
@@ -155,7 +160,7 @@
 
     .matrix-wrapper {
       overflow-x: auto;
-      max-height: 650px;
+      max-height: 680px;
       overflow-y: auto;
       border: 2px solid var(--rnli-navy);
       border-radius: 4px;
@@ -165,7 +170,7 @@
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      table-layout: fixed; /* Enforces strict layout boundaries across elements */
+      table-layout: fixed;
     }
 
     th, td {
@@ -173,10 +178,9 @@
       border-bottom: 1px solid var(--border-color);
       border-right: 1px solid var(--border-color);
       text-align: left;
-      width: 160px;
-      min-width: 160px;
-      max-width: 160px;
-      overflow: hidden; /* Stops horizontal bleed-through */
+      width: 170px;
+      min-width: 170px;
+      max-width: 170px;
     }
 
     th {
@@ -186,11 +190,10 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      height: 115px; /* Unified top header height alignment */
+      height: 125px;
       vertical-align: top;
     }
 
-    /* Absolute Placement Structure for Header Buttons alignment */
     .session-header-container {
       position: relative;
       height: 100%;
@@ -199,24 +202,24 @@
     }
 
     .session-header-top {
-      margin-bottom: 35px; /* reserves precise baseline room for buttons */
+      margin-bottom: 35px;
     }
 
-    /* Fixed Sticky Column Dimensions and Solid Masking */
+    /* Bugfix: Cleared 'Crew Member' string text placeholder. Opaque white mask stops sliding content overlay bleed-through */
     th:first-child, td:first-child {
       position: sticky;
       left: 0;
-      width: 115px;      
-      min-width: 115px;  
-      max-width: 115px;  
-      background-color: #ffffff !important;
-      z-index: 200; /* High index bounds clean cutting matrix content sliding underneath */
+      width: 120px;      
+      min-width: 120px;  
+      max-width: 120px;  
+      background-color: #ffffff !important; 
+      z-index: 200; 
       border-right: 3px solid var(--rnli-navy);
-      word-break: break-all;
+      word-break: break-word;
     }
 
     th:first-child {
-      z-index: 300; /* Corner anchor sits above all dimensions */
+      z-index: 300; 
       background-color: var(--rnli-navy) !important;
       color: white;
     }
@@ -250,7 +253,7 @@
       background-color: rgba(255, 255, 255, 0.15);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: white;
-      padding: 6px 5px; /* Shifted padding for icon symmetry */
+      padding: 6px 5px;
       font-size: 0.68rem;
       font-weight: 700;
       border-radius: 3px;
@@ -268,6 +271,7 @@
       border-color: var(--rnli-orange);
     }
 
+    /* Bugfix: Maintained state rules prevent reset shifts to column 1 when filter toggled */
     .filter-arrow-btn.active-filter {
       background-color: var(--rnli-orange);
       border-color: #FFF;
@@ -276,35 +280,8 @@
     .crew-name-cell {
       font-weight: 700;
       color: var(--rnli-navy);
-      font-size: 0.78rem; 
+      font-size: 0.82rem; 
       line-height: 1.3;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .crew-filter-btn {
-      background: none;
-      border: 1px solid var(--border-color);
-      border-radius: 3px;
-      cursor: pointer;
-      font-size: 0.65rem;
-      padding: 1px 3px;
-      color: var(--rnli-navy);
-      flex-shrink: 0;
-    }
-
-    .crew-filter-btn:hover {
-      background-color: var(--rnli-orange);
-      color: white;
-      border-color: var(--rnli-orange);
-    }
-
-    .crew-filter-btn.active-filter {
-      background-color: var(--rnli-navy);
-      color: white;
-      border-color: var(--rnli-navy);
     }
 
     tr:hover td.crew-name-cell {
@@ -316,6 +293,10 @@
       transition: background 0.2s;
       vertical-align: top;
       background-color: #FFF;
+    }
+
+    .matrix-cell.cell-locked {
+      cursor: not-allowed;
     }
 
     .matrix-cell:hover {
@@ -379,10 +360,23 @@
       letter-spacing: 0.3px;
     }
 
+    .tile-indicators {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
     .tile-tooltip-indicator {
       font-size: 0.72rem;
       cursor: help;
       opacity: 0.9;
+    }
+
+    .lock-icon-svg {
+      display: inline-block;
+      color: currentColor;
+      fill: currentColor;
+      vertical-align: middle;
     }
 
     .tile-role {
@@ -565,6 +559,71 @@
       color: var(--text-main);
       resize: none;
     }
+
+    /* Mobile Engine - Media Viewport Rules */
+    @media (max-width: 768px) {
+      body {
+        padding: 6px;
+      }
+      .container {
+        padding: 10px;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .matrix-wrapper {
+        border: none;
+        max-height: none;
+        overflow: visible;
+      }
+      table, thead, tbody, th, td, tr {
+        display: block; 
+      }
+      thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      tr {
+        background: white;
+        border: 2px solid var(--rnli-navy);
+        border-radius: 6px;
+        margin-bottom: 16px;
+        padding: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      }
+      th:first-child, td:first-child {
+        position: static;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 6px;
+        margin-bottom: 8px;
+        background-color: transparent !important;
+      }
+      td {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        border-right: none;
+        padding: 8px 4px;
+        position: relative;
+      }
+      /* Inject Session Header Labels before card content blocks */
+      td.matrix-cell::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: var(--rnli-navy);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        letter-spacing: 0.3px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -575,7 +634,6 @@
         <h1 id="uiDashboardTitle">Crew Allocation Matrix</h1>
       </div>
       <div class="header-actions">
-        <button id="globalSheetBtn" class="global-admin-btn" style="display: none;" onclick="window.open('https://docs.google.com/spreadsheets/d/1pShwO5f9OiTReD3llwWMkrfHc1z405q3PP-m0-AbPIk/edit?usp=sharing', '_blank')">🟢 View Database</button>
         <button id="globalAdminBtn" class="global-admin-btn" onclick="toggleGlobalAdminMode()">LTC Mode</button>
         <button id="uiRefreshBtn" class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
       </div>
@@ -603,6 +661,9 @@
         <div class="form-group">
           <label id="uiNotesLabel">Notes / Availability Details</label>
           <textarea id="inputNotes" placeholder="Any specific scheduling notes..."></textarea>
+        </div>
+        <div id="lockWarningMessage" style="display:none; color:#D32F2F; font-size:0.8rem; font-weight:700; margin-bottom:10px;">
+          ⚠️ This session is locked. Crew modifications are disabled.
         </div>
         <div class="modal-actions">
           <button id="uiSignupRemoveBtn" class="btn btn-danger" onclick="executeAction('remove')">Clear / Withdraw</button>
@@ -655,6 +716,26 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="configModal">
+    <div class="modal-card">
+      <div class="modal-header-wrapper">
+        <div class="modal-title">LTC System Constraints</div>
+        <div class="modal-subtitle">Configure lock lead times for new submissions</div>
+      </div>
+      <div class="form-group">
+        <label>Lockout Window Threshold (Hours)</label>
+        <input type="number" id="inputLockHours" min="0" value="24">
+        <span style="font-size:0.75rem; color:#5A6E7F; display:block; margin-top:4px;">
+          The number of hours prior to a session's start time that crew members are locked out from signing up or modifying choices.
+        </span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeConfigModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSystemConfig()">Save Constraints</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec";
     const ADMIN_PASSWORD = "admin"; 
@@ -671,11 +752,11 @@
       loadingTimeoutError: "Pipeline Execution Timeout or Configuration Error. Check Apps Script logs.",
       urlConfigError: "Configuration Error: Please paste your script deployment URL into the WEB_APP_URL constant.",
       noSessionDates: "No session dates found.",
-      noSessionsForMonth: "No sessions mapped to this month tab context.",
+      noSessionsForMonth: "No sessions mapped to this context window.",
       noPersonnelCrew: "No personnel listed in Crew worksheet.",
-      tileModify: "+ Click to Modify",
+      tileModify: "+ Modify Selection",
       tileSignUp: "+ Sign Up",
-      tileFallbackCategory: "Preference",
+      tileFallbackCategory: "Requested...", 
       tileFallbackRole: "Unassigned",
       fallbackDayName: "Training Day",
       crewTableHeaderLabel: "Crew Member",
@@ -717,12 +798,19 @@
       adminCategories: [],  
       subCategories: [],    
       signups: [],
-      activeMonth: "",
+      activeMonth: "All Upcoming", // Feature addition default state value
       selectedCrew: "",
       selectedSessionId: "",
       isGlobalAdminUnlocked: false,
-      activeSessionFilterId: null, 
-      activeCrewFilterName: null    
+      activeSessionFilterId: null,
+      lockLeadHours: 24
+    };
+
+    // Global SVG asset mapping definition block
+    const SVG_ICONS = {
+      lock: `<svg class="lock-icon-svg" viewBox="0 0 24 24" width="11" height="11"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`,
+      sms: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>`,
+      funnel: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M10 24v-9L3.07 4.93C2.43 4.09 3.03 3 4.08 3h15.83c1.05 0 1.65 1.09 1.02 1.93L14 15v7c0 .55-.45 1-1 1h-2c-.55 0-1-.45-1-1z"/></svg>`
     };
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -763,8 +851,6 @@
 
     function fetchMatrixData() {
       document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingFetch}</div>`;
-      state.activeSessionFilterId = null;
-      state.activeCrewFilterName = null;
       
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
@@ -800,11 +886,14 @@
       state.adminCategories = response.adminCategories || []; 
       state.subCategories = response.subCategories || [];
       state.signups = response.signups || [];
+      state.lockLeadHours = response.lockLeadHours !== undefined ? response.lockLeadHours : 24;
+
+      document.getElementById("inputLockHours").value = state.lockLeadHours;
 
       const distinctMonths = [...new Set(state.sessions.map(s => s.month).filter(Boolean))];
 
-      if (distinctMonths.length > 0 && (!state.activeMonth || !distinctMonths.includes(state.activeMonth))) {
-        state.activeMonth = distinctMonths[0];
+      if (distinctMonths.length > 0 && !state.activeMonth) {
+        state.activeMonth = "All Upcoming";
       }
 
       populateDropdownLists();
@@ -849,6 +938,7 @@
       });
     }
 
+    // Feature addition: Injected 'All Upcoming' filter control node alongside month categories
     function renderMonthTabs(months) {
       const panel = document.getElementById("monthTabsPanel");
       panel.innerHTML = "";
@@ -858,14 +948,23 @@
         return;
       }
 
+      // Render the comprehensive global viewing tab option
+      const globalBtn = document.createElement("button");
+      globalBtn.className = `tab-btn ${state.activeMonth === "All Upcoming" ? 'active' : ''}`;
+      globalBtn.textContent = "All Upcoming";
+      globalBtn.onclick = () => {
+        state.activeMonth = "All Upcoming";
+        renderMonthTabs(months);
+        renderMatrixGrid();
+      };
+      panel.appendChild(globalBtn);
+
       months.forEach(m => {
         const btn = document.createElement("button");
         btn.className = `tab-btn ${state.activeMonth === m ? 'active' : ''}`;
         btn.textContent = m;
         btn.onclick = () => {
           state.activeMonth = m;
-          state.activeSessionFilterId = null; 
-          state.activeCrewFilterName = null;
           renderMonthTabs(months);
           renderMatrixGrid();
         };
@@ -877,40 +976,48 @@
       if (state.activeSessionFilterId == sessionId) {
         state.activeSessionFilterId = null; 
       } else {
-        state.activeSessionFilterId = sessionId;
-        state.activeCrewFilterName = null; 
+        state.activeSessionFilterId = sessionId; 
       }
       renderMatrixGrid();
     }
 
-    function toggleCrewFilter(crewName) {
-      if (state.activeCrewFilterName === crewName) {
-        state.activeCrewFilterName = null;
-      } else {
-        state.activeCrewFilterName = crewName;
-        state.activeSessionFilterId = null; 
+    // System helper evaluating live calendar metrics against dynamic config limits
+    function isSessionTimeLocked(sessionObj) {
+      if (!sessionObj || !sessionObj.date) return false;
+      try {
+        const parts = sessionObj.date.split('/');
+        if (parts.length !== 3) return false;
+        
+        const dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`; 
+        const timeStr = sessionObj.time || "00:00";
+        
+        const sessionDateObj = new Date(`${dateStr}T${timeStr}:00`);
+        if (isNaN(sessionDateObj.getTime())) return false;
+        
+        const currentNow = new Date();
+        const diffInMs = sessionDateObj.getTime() - currentNow.getTime();
+        const diffInHours = diffInMs / (1000 * 60 * 60);
+        
+        return diffInHours <= state.lockLeadHours;
+      } catch (e) {
+        return false;
       }
-      renderMatrixGrid();
     }
 
     function renderMatrixGrid() {
       const view = document.getElementById("dashboardView");
-      const activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
+      
+      // Determine session collection based on active global tab view state
+      let activeSessions = [];
+      if (state.activeMonth === "All Upcoming") {
+        activeSessions = state.sessions;
+      } else {
+        activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
+      }
 
       if (activeSessions.length === 0) {
         view.innerHTML = `<div class="loading-shield">${UI_TEXT.noSessionsForMonth}</div>`;
         return;
-      }
-
-      let hiddenSessionIds = [];
-      if (state.activeCrewFilterName) {
-        activeSessions.forEach(sess => {
-          const match = state.signups.find(s => s.name === state.activeCrewFilterName && s.sessionId == sess.id);
-          const hasRecord = match && (match.preferred || match.allocatedCategory);
-          if (!hasRecord) {
-            hiddenSessionIds.push(sess.id);
-          }
-        });
       }
 
       let html = `
@@ -918,15 +1025,19 @@
           <table>
             <thead>
               <tr>
-                <th>${UI_TEXT.crewTableHeaderLabel}</th>
+                <th></th>
       `;
 
       activeSessions.forEach(sess => {
-        const isColHidden = hiddenSessionIds.includes(sess.id);
+        // Bugfix: Prevent horizontal layout compression shifts by tracking explicit dynamic classes
+        if (state.activeSessionFilterId && state.activeSessionFilterId != sess.id) {
+          return; 
+        }
+
         const filterClass = state.activeSessionFilterId == sess.id ? "filter-arrow-btn active-filter" : "filter-arrow-btn";
         
         html += `
-          <th class="${isColHidden ? 'hide-column' : ''}">
+          <th>
             <div class="session-header-container">
               <div class="session-header-top">
                 <div class="session-header-title">${sess.topic || "Unnamed Session"}</div>
@@ -934,12 +1045,10 @@
               </div>
               <div class="action-btn-row">
                 <button class="narrative-btn" title="Generate Session SMS Narrative" onclick="triggerSessionNarrative('${sess.id}')">
-                  <!-- SMS / Message Bubble Icon -->
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
+                  ${SVG_ICONS.sms}
                 </button>
-                <button class="${filterClass}" title="Filter signups for this session" onclick="toggleSessionFilter('${sess.id}')">
-                  <!-- Funnel / Filter Icon -->
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M10 24v-9L3.07 4.93C2.43 4.09 3.03 3 4.08 3h15.83c1.05 0 1.65 1.09 1.02 1.93L14 15v7c0 .55-.45 1-1 1h-2c-.55 0-1-.45-1-1z"/></svg>
+                <button class="${filterClass}" title="Isolate session column" onclick="toggleSessionFilter('${sess.id}')">
+                  ${SVG_ICONS.funnel}
                 </button>
               </div>
             </div>
@@ -954,35 +1063,38 @@
       `;
 
       if(state.crew.length === 0) {
-        html += `<tr><td colspan="${activeSessions.length + 1}" style="text-align:center; font-style:italic;">${UI_TEXT.noPersonnelCrew}</td></tr>`;
+        html += `<tr><td colspan="100" style="text-align:center; font-style:italic;">${UI_TEXT.noPersonnelCrew}</td></tr>`;
       }
 
       state.crew.forEach(crewName => {
+        // If a column isolation rule is active, verify that this person has active changes in it
         if (state.activeSessionFilterId) {
           const match = state.signups.find(s => s.name === crewName && s.sessionId == state.activeSessionFilterId);
           const hasRecord = match && (match.preferred || match.allocatedCategory);
           if (!hasRecord) return; 
         }
 
-        const crewFilterClass = state.activeCrewFilterName === crewName ? "crew-filter-btn active-filter" : "crew-filter-btn";
-
         html += `
           <tr>
-            <td class="crew-name-cell">
-              <span>${crewName}</span>
-              <button class="${crewFilterClass}" title="Isolate this crew's timeline" onclick="toggleCrewFilter('${escapeHtml(crewName)}')">▶</button>
-            </td>
+            <td class="crew-name-cell">${crewName}</td>
         `;
 
         activeSessions.forEach(sess => {
-          const isColHidden = hiddenSessionIds.includes(sess.id);
+          if (state.activeSessionFilterId && state.activeSessionFilterId != sess.id) {
+            return; 
+          }
+
           const match = state.signups.find(s => s.name === crewName && s.sessionId == sess.id);
+          const isLocked = isSessionTimeLocked(sess);
+          const labelContext = `${sess.topic} (${sess.date})`;
 
           html += `
-            <td class="matrix-cell ${isColHidden ? 'hide-column' : ''}" onclick="openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')">
+            <td class="matrix-cell ${isLocked ? 'cell-locked' : ''}" data-label="${escapeHtml(labelContext)}" onclick="openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')">
           `;
 
           if (match) {
+            const showPadlock = isLocked && (!state.isGlobalAdminUnlocked);
+
             if (match.allocatedCategory && match.allocatedCategory !== "No Training") {
               const styleClass = match.allocatedCategory.toLowerCase().replace(/[^a-z0-9]/g, "") === "notraining" ? "notraining" : "allocated";
               
@@ -990,7 +1102,10 @@
                 <div class="tile-box ${styleClass}">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">${escapeHtml(match.allocatedCategory)}</div>
-                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    <div class="tile-indicators">
+                      ${showPadlock ? SVG_ICONS.lock : ''}
+                      ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    </div>
                   </div>
                   <div class="tile-role">${escapeHtml(match.allocatedRole || UI_TEXT.tileFallbackRole)}</div>
                   ${match.allocatedSubCategory ? `<div class="tile-subcat" title="${escapeHtml(match.allocatedSubCategory)}">${escapeHtml(match.allocatedSubCategory)}</div>` : ''}
@@ -1002,26 +1117,33 @@
                 <div class="tile-box notraining">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">No Training</div>
-                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    <div class="tile-indicators">
+                      ${showPadlock ? SVG_ICONS.lock : ''}
+                      ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    </div>
                   </div>
                 </div>
               `;
             }
+            // Feature addition: String swap changes text token from "Preference" to "Requested..."
             else if (match.preferred) {
               html += `
                 <div class="tile-box preferred">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">${UI_TEXT.tileFallbackCategory}</div>
-                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    <div class="tile-indicators">
+                      ${isLocked ? SVG_ICONS.lock : ''}
+                      ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    </div>
                   </div>
                   <div class="tile-role">${escapeHtml(match.preferred)}</div>
                 </div>
               `;
             } else {
-              html += `<div class="empty-tile">${UI_TEXT.tileModify}</div>`;
+              html += `<div class="empty-tile">${isLocked ? SVG_ICONS.lock + ' Locked' : UI_TEXT.tileModify}</div>`;
             }
           } else {
-            html += `<div class="empty-tile">${UI_TEXT.tileSignUp}</div>`;
+            html += `<div class="empty-tile">${isLocked ? SVG_ICONS.lock + ' Locked' : UI_TEXT.tileSignUp}</div>`;
           }
 
           html += `</td>`;
@@ -1073,7 +1195,8 @@
       const uniqueCategoryKeys = Object.keys(allocationGroups);
       const N = uniqueCategoryKeys.length;
 
-      let textOutput = `${dayName}${UI_TEXT.narrativeTemplateSegment1}${N}${UI_TEXT.narrativeTemplateSegment2}`;
+      // Feature addition: Dynamic data strings injected cleanly inside text blocks
+      let textOutput = `${dayName} (${targetSess.date} @ ${targetSess.time})${UI_TEXT.narrativeTemplateSegment1}${N}${UI_TEXT.narrativeTemplateSegment2}`;
 
       uniqueCategoryKeys.forEach((categoryName, index) => {
         const currentGroup = allocationGroups[categoryName];
@@ -1104,8 +1227,20 @@
     }
 
     function openInteractionModal(crewName, sessionId) {
+      const targetSess = state.sessions.find(s => s.id == sessionId);
+      const isLocked = isSessionTimeLocked(targetSess);
+
+      // Enforce lockout security rules for base users
+      if (isLocked && !state.isGlobalAdminUnlocked) {
+        alert("This workspace selection has fallen inside the locking period window and cannot be modified.");
+        return; 
+      }
+
       state.selectedCrew = crewName;
       state.selectedSessionId = sessionId;
+
+      const existingMatch = state.signups.find(s => s.name === crewName && s.sessionId == sessionId);
+      const isAllocated = existingMatch && existingMatch.allocatedCategory && existingMatch.allocatedCategory.trim() !== "";
 
       if (state.isGlobalAdminUnlocked) {
         document.getElementById("formSectionSignup").style.display = "none";
@@ -1113,10 +1248,26 @@
       } else {
         document.getElementById("formSectionSignup").style.display = "block";
         document.getElementById("formSectionAllocate").style.display = "none";
-      }
 
-      const targetSess = state.sessions.find(s => s.id == sessionId);
-      const existingMatch = state.signups.find(s => s.name === crewName && s.sessionId == sessionId);
+        // Feature removal: Hide withdraw actions if an administrator has committed allocations
+        const removeButtonNode = document.getElementById("uiSignupRemoveBtn");
+        if (isAllocated) {
+          removeButtonNode.style.display = "none";
+        } else {
+          removeButtonNode.style.display = "inline-block";
+        }
+
+        // Toggle warning banners if operations fall inside constraint frames
+        const warningBanner = document.getElementById("lockWarningMessage");
+        if (isLocked) {
+          warningBanner.style.display = "block";
+          document.getElementById("uiSignupSaveBtn").style.display = "none";
+          removeButtonNode.style.display = "none";
+        } else {
+          warningBanner.style.display = "none";
+          document.getElementById("uiSignupSaveBtn").style.display = "inline-block";
+        }
+      }
 
       document.getElementById("mCrewName").textContent = crewName || UI_TEXT.crewMemberFallback;
       document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${targetSess.date} @ ${targetSess.time})` : UI_TEXT.sessionSpecificsFallback;
@@ -1137,7 +1288,6 @@
       
       document.getElementById("selectCategory").value = (existingMatch && existingMatch.allocatedCategory) ? existingMatch.allocatedCategory : "No Training";
       document.getElementById("selectRole").value = (existingMatch && existingMatch.allocatedRole) ? existingMatch.allocatedRole : "No Training";
-      
       document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "";
 
       document.getElementById("actionModal").classList.add("open");
@@ -1149,23 +1299,81 @@
 
     function toggleGlobalAdminMode() {
       const btn = document.getElementById("globalAdminBtn");
-      const sheetBtn = document.getElementById("globalSheetBtn");
       
       if (state.isGlobalAdminUnlocked) {
         state.isGlobalAdminUnlocked = false;
         btn.classList.remove("unlocked");
         btn.title = UI_TEXT.adminUnlockTooltip;
-        sheetBtn.style.display = "none";
+        btn.textContent = UI_TEXT.adminBtnText;
+        renderMatrixGrid();
       } else {
         const inputPass = prompt(UI_TEXT.adminPromptChallenge);
         if (inputPass === ADMIN_PASSWORD) {
           state.isGlobalAdminUnlocked = true;
           btn.classList.add("unlocked");
           btn.title = UI_TEXT.adminLockTooltip;
-          sheetBtn.style.display = "inline-flex";
+          // Feature addition: Structural link to manage constraint options directly from LTC mode button state
+          btn.textContent = "LTC Menu Options ⚙️";
+          renderMatrixGrid();
         } else if (inputPass !== null) {
           alert(UI_TEXT.adminInvalidCredentials);
         }
+      }
+    }
+
+    // Injected secondary management branch route handling settings window
+    document.getElementById("globalAdminBtn").addEventListener("contextmenu", (e) => {
+      if (state.isGlobalAdminUnlocked) {
+        e.preventDefault();
+        document.getElementById("configModal").classList.add("open");
+      }
+    });
+    
+    // Explicit click listener check routing administration screens
+    const originalToggle = toggleGlobalAdminMode;
+    toggleGlobalAdminMode = function() {
+      if (state.isGlobalAdminUnlocked) {
+        if (confirm("Would you like to open System Configuration? (Cancel to exit Admin Mode)")) {
+          document.getElementById("configModal").classList.add("open");
+          return;
+        }
+      }
+      originalToggle();
+    };
+
+    function closeConfigModal() {
+      document.getElementById("configModal").classList.remove("open");
+    }
+
+    function saveSystemConfig() {
+      const val = parseInt(document.getElementById("inputLockHours").value, 10);
+      if (isNaN(val) || val < 0) {
+        alert("Please specify a valid positive numerical constraint range.");
+        return;
+      }
+      
+      closeConfigModal();
+      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingWrite}</div>`;
+      
+      const payload = {
+        action: "updateConfig",
+        lockLeadHours: val
+      };
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(fetchMatrixData)
+          .withFailureHandler(handleNetworkError)
+          .doPost(JSON.stringify(payload));
+      } else {
+        fetch(WEB_APP_URL, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "text/plain;charset=utf-8" }
+        })
+        .then(res => res.json())
+        .then(fetchMatrixData)
+        .catch(handleNetworkError);
       }
     }
 

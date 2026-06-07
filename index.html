@@ -39,13 +39,10 @@
       background-color: var(--bg-main);
       color: var(--text-main);
       padding: 14px;
-      transition: padding 0.2s ease;
     }
 
-    /* Elastic viewport wrapper expanding beautifully to utilize full wide desktop layouts */
     .container {
-      width: 100%;
-      max-width: 100%; 
+      max-width: 1450px;
       margin: 0 auto;
       background: white;
       padding: 18px;
@@ -61,8 +58,6 @@
       align-items: center;
       border-bottom: 2px solid var(--border-color);
       padding-bottom: 14px;
-      flex-wrap: wrap;
-      gap: 12px;
     }
 
     h1 {
@@ -77,7 +72,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: wrap;
     }
 
     .refresh-btn {
@@ -98,6 +92,7 @@
       background-color: var(--rnli-orange-hover);
     }
 
+    /* LTC Mode Text Button Styling */
     .global-admin-btn {
       background: white;
       border: 2px solid var(--rnli-navy);
@@ -170,7 +165,6 @@
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      table-layout: fixed;
     }
 
     th, td {
@@ -178,9 +172,7 @@
       border-bottom: 1px solid var(--border-color);
       border-right: 1px solid var(--border-color);
       text-align: left;
-      width: 170px;
-      min-width: 170px;
-      max-width: 170px;
+      min-width: 150px; 
     }
 
     th {
@@ -189,101 +181,78 @@
       font-weight: 700;
       position: sticky;
       top: 0;
-      z-index: 100;
-      height: 125px;
-      vertical-align: top;
-    }
-
-    .session-header-container {
-      position: relative;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .session-header-top {
-      margin-bottom: 35px;
+      z-index: 10;
     }
 
     th:first-child, td:first-child {
       position: sticky;
       left: 0;
-      width: 120px;      
-      min-width: 120px;  
-      max-width: 120px;  
-      background-color: #ffffff !important; 
-      z-index: 200; 
+      width: 130px;      
+      min-width: 130px;  
+      max-width: 130px;  
+      background-color: #fff;
+      z-index: 11;
       border-right: 3px solid var(--rnli-navy);
-      word-break: break-word;
+      word-break: break-word; 
+      hyphens: auto;
     }
 
     th:first-child {
-      z-index: 300; 
-      background-color: var(--rnli-navy) !important;
+      z-index: 12;
+      background-color: var(--rnli-navy);
       color: white;
     }
 
     .session-header-title {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 700;
       line-height: 1.2;
       text-transform: uppercase;
       letter-spacing: 0.3px;
-      word-break: break-word;
     }
 
     .session-header-meta {
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       color: #A4B9D0;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+
+    .narrative-btn-wrapper {
       margin-top: 2px;
     }
 
-    .action-btn-row {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      gap: 4px;
-      background-color: var(--rnli-navy);
-    }
-
-    .narrative-btn, .filter-arrow-btn {
+    .narrative-btn {
       background-color: rgba(255, 255, 255, 0.15);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: white;
-      padding: 6px 5px;
-      font-size: 0.68rem;
+      padding: 3px 8px;
+      font-size: 0.72rem;
       font-weight: 700;
       border-radius: 3px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
       text-transform: uppercase;
-      flex: 1;
-      justify-content: center;
+      transition: all 0.2s;
     }
 
-    .narrative-btn:hover, .filter-arrow-btn:hover {
+    .narrative-btn:hover {
       background-color: var(--rnli-orange);
       border-color: var(--rnli-orange);
-    }
-
-    .filter-arrow-btn.active-filter {
-      background-color: var(--rnli-orange);
-      border-color: #FFF;
     }
 
     .crew-name-cell {
       font-weight: 700;
       color: var(--rnli-navy);
-      font-size: 0.82rem; 
+      font-size: 0.85rem; 
       line-height: 1.3;
+      background-color: #FFF;
     }
 
     tr:hover td.crew-name-cell {
-      background-color: #F4F6F8 !important;
+      background-color: #F4F6F8;
     }
 
     .matrix-cell {
@@ -293,17 +262,13 @@
       background-color: #FFF;
     }
 
-    .matrix-cell.cell-locked {
-      cursor: not-allowed;
-    }
-
     .matrix-cell:hover {
       background-color: #F4F6F8;
     }
 
     .empty-tile {
       color: #8A9CAE;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-style: italic;
       display: flex;
       align-items: center;
@@ -316,10 +281,9 @@
       padding: 8px;
       border-radius: 4px;
       border: 1px solid var(--border-color);
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       position: relative;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      width: 100%;
     }
 
     .tile-box.preferred {
@@ -352,38 +316,25 @@
 
     .tile-category {
       font-weight: 800;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       margin-bottom: 3px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
 
-    .tile-indicators {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-    }
-
     .tile-tooltip-indicator {
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       cursor: help;
       opacity: 0.9;
     }
 
-    .lock-icon-svg {
-      display: inline-block;
-      color: currentColor;
-      fill: currentColor;
-      vertical-align: middle;
-    }
-
     .tile-role {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-weight: 600;
     }
 
     .tile-subcat {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-style: italic;
       margin-top: 4px;
       padding-top: 4px;
@@ -392,10 +343,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    .hide-column {
-      display: none !important;
     }
 
     .modal-overlay {
@@ -409,7 +356,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 100;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s;
@@ -557,70 +504,6 @@
       color: var(--text-main);
       resize: none;
     }
-
-    /* Mobile Media Viewport Configurations */
-    @media (max-width: 768px) {
-      body {
-        padding: 6px;
-      }
-      .container {
-        padding: 10px;
-      }
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .matrix-wrapper {
-        border: none;
-        max-height: none;
-        overflow: visible;
-      }
-      table, thead, tbody, th, td, tr {
-        display: block; 
-      }
-      thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-      }
-      tr {
-        background: white;
-        border: 2px solid var(--rnli-navy);
-        border-radius: 6px;
-        margin-bottom: 16px;
-        padding: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      }
-      th:first-child, td:first-child {
-        position: static;
-        width: 100% !important;
-        max-width: none !important;
-        min-width: 0 !important;
-        border-right: none;
-        border-bottom: 2px solid var(--border-color);
-        padding-bottom: 6px;
-        margin-bottom: 8px;
-        background-color: transparent !important;
-      }
-      td {
-        width: 100% !important;
-        max-width: none !important;
-        min-width: 0 !important;
-        border-right: none;
-        padding: 8px 4px;
-        position: relative;
-      }
-      td.matrix-cell::before {
-        content: attr(data-label);
-        display: block;
-        font-size: 0.72rem;
-        font-weight: 800;
-        color: var(--rnli-navy);
-        text-transform: uppercase;
-        margin-bottom: 4px;
-        letter-spacing: 0.3px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -631,7 +514,6 @@
         <h1 id="uiDashboardTitle">Crew Allocation Matrix</h1>
       </div>
       <div class="header-actions">
-        <button id="globalSheetBtn" class="global-admin-btn" style="display: none;" onclick="window.open('https://docs.google.com/spreadsheets/d/1pShwO5f9OiTReD3llwWMkrfHc1z405q3PP-m0-AbPIk/edit?usp=sharing', '_blank')">🟢 View Database</button>
         <button id="globalAdminBtn" class="global-admin-btn" onclick="toggleGlobalAdminMode()">LTC Mode</button>
         <button id="uiRefreshBtn" class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
       </div>
@@ -659,9 +541,6 @@
         <div class="form-group">
           <label id="uiNotesLabel">Notes / Availability Details</label>
           <textarea id="inputNotes" placeholder="Any specific scheduling notes..."></textarea>
-        </div>
-        <div id="lockWarningMessage" style="display:none; color:#D32F2F; font-size:0.8rem; font-weight:700; margin-bottom:10px;">
-          ⚠️ This session is locked. Crew modifications are disabled.
         </div>
         <div class="modal-actions">
           <button id="uiSignupRemoveBtn" class="btn btn-danger" onclick="executeAction('remove')">Clear / Withdraw</button>
@@ -701,7 +580,7 @@
   <div class="modal-overlay" id="narrativeModal">
     <div class="modal-card" style="max-width: 520px;">
       <div class="modal-header-wrapper">
-        <div id="uiNarrativeTitle" class="modal-title">Generated Session SMS Narrative</div>
+        <div id="uiNarrativeTitle" class="modal-title">Generated Session Narrative</div>
         <div class="modal-subtitle" id="narrativeModalSubtitle">Overview Breakdown</div>
       </div>
       <div class="form-group">
@@ -710,26 +589,6 @@
       <div class="modal-actions">
         <button id="uiNarrativeCloseBtn" class="btn btn-secondary" onclick="closeNarrativeModal()">Close</button>
         <button id="uiNarrativeCopyBtn" class="btn btn-primary" onclick="copyNarrativeToClipboard()">Copy to Clipboard</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="configModal">
-    <div class="modal-card">
-      <div class="modal-header-wrapper">
-        <div class="modal-title">LTC System Constraints</div>
-        <div class="modal-subtitle">Configure lock lead times for new submissions</div>
-      </div>
-      <div class="form-group">
-        <label>Lockout Window Threshold (Hours)</label>
-        <input type="number" id="inputLockHours" min="0" value="24">
-        <span style="font-size:0.75rem; color:#5A6E7F; display:block; margin-top:4px;">
-          The number of hours prior to a session's start time that crew members are locked out from signing up or modifying choices.
-        </span>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-secondary" onclick="closeConfigModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="saveSystemConfig()">Save Constraints</button>
       </div>
     </div>
   </div>
@@ -750,11 +609,11 @@
       loadingTimeoutError: "Pipeline Execution Timeout or Configuration Error. Check Apps Script logs.",
       urlConfigError: "Configuration Error: Please paste your script deployment URL into the WEB_APP_URL constant.",
       noSessionDates: "No session dates found.",
-      noSessionsForMonth: "No sessions mapped to this context window.",
+      noSessionsForMonth: "No sessions mapped to this month tab context.",
       noPersonnelCrew: "No personnel listed in Crew worksheet.",
-      tileModify: "+ Modify Selection",
+      tileModify: "+ Click to Modify",
       tileSignUp: "+ Sign Up",
-      tileFallbackCategory: "Requested...", 
+      tileFallbackCategory: "Preference",
       tileFallbackRole: "Unassigned",
       fallbackDayName: "Training Day",
       crewTableHeaderLabel: "Crew Member",
@@ -774,7 +633,7 @@
       allocActivityLabel: "Activity",
       allocActivityPlaceholder: "Select or type custom activity...",
       commitAllocBtn: "Commit",
-      narrativeTitle: "SMS Narrative Broadcast",
+      narrativeTitle: "Narrative",
       narrativeSubtitleFallback: "Overview Breakdown",
       closeBtn: "Close",
       copyClipboardBtn: "Copy to Clipboard",
@@ -796,17 +655,10 @@
       adminCategories: [],  
       subCategories: [],    
       signups: [],
-      activeMonth: "All Upcoming", 
+      activeMonth: "",
       selectedCrew: "",
       selectedSessionId: "",
-      isGlobalAdminUnlocked: false,
-      activeSessionFilterId: null
-    };
-
-    const SVG_ICONS = {
-      lock: `<svg class="lock-icon-svg" viewBox="0 0 24 24" width="11" height="11"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`,
-      sms: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>`,
-      funnel: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M10 24v-9L3.07 4.93C2.43 4.09 3.03 3 4.08 3h15.83c1.05 0 1.65 1.09 1.02 1.93L14 15v7c0 .55-.45 1-1 1h-2c-.55 0-1-.45-1-1z"/></svg>`
+      isGlobalAdminUnlocked: false
     };
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -876,20 +728,72 @@
       }
       
       state.crew = response.crew || [];
-      state.sessions = response.sessions || [];
       state.categories = response.categories || [];
       state.roles = response.roles || [];
       state.adminCategories = response.adminCategories || []; 
       state.subCategories = response.subCategories || [];
       state.signups = response.signups || [];
-      state.lockLeadHours = response.lockLeadHours !== undefined ? response.lockLeadHours : 24;
 
-      document.getElementById("inputLockHours").value = state.lockLeadHours;
+      // Robust layout handling for raw string timestamps vs standard format arrays
+      const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+      
+      state.sessions = (response.sessions || []).map(sess => {
+        let rawDate = sess.date || "";
+        let cleanMonth = sess.month || "";
+        let displayDate = rawDate;
+        let displayTime = sess.time || "";
 
-      const distinctMonths = [...new Set(state.sessions.map(s => s.month).filter(Boolean))];
+        // Parse full timestamp headers string if supplied by Google Sheets API core lookup
+        if (rawDate.includes("GMT") || rawDate.includes("00:00:00")) {
+          try {
+            // Standard parse of string object structures
+            const cleanedStr = rawDate.replace(/\(.*?\)/g, "").trim();
+            const parsedJSDate = new Date(cleanedStr);
+            
+            if (!isNaN(parsedJSDate.getTime())) {
+              cleanMonth = monthNames[parsedJSDate.getMonth()];
+              
+              // Standard format output creation 10/06/2026
+              const dd = String(parsedJSDate.getDate()).padStart(2, '0');
+              const mm = String(parsedJSDate.getMonth() + 1).padStart(2, '0');
+              const yy = String(parsedJSDate.getFullYear()).slice(-2);
+              displayDate = `${dd}/${mm}/${yy}`;
+            }
+          } catch(e) {
+            console.error("Error formatting date string context", e);
+          }
+        }
+
+        // Secondary parse clean fallback for secondary fields formatting mismatch errors
+        if (displayTime.includes("GMT") || displayTime.includes("1899")) {
+          try {
+            const timeExtract = displayTime.match(/(\d{2}):(\d{2}):(\d{2})/);
+            if (timeExtract) {
+              displayTime = `${timeExtract[1]}:${timeExtract[2]}`;
+            }
+          } catch(e) {}
+        }
+
+        return {
+          ...sess,
+          date: displayDate,
+          time: displayTime,
+          month: cleanMonth ? cleanMonth.toUpperCase() : "OTHER"
+        };
+      });
+
+      const distinctMonths = [...new Set(state.sessions.map(s => s.month).filter(m => m && m !== "OTHER"))];
+      distinctMonths.sort((a, b) => monthNames.indexOf(a) - monthNames.indexOf(b));
+
+      // Append default master "ALL UPCOMING" options view tag control logic right here
+      const tabOptions = ["ALL UPCOMING", ...distinctMonths];
+
+      if (!state.activeMonth || !tabOptions.includes(state.activeMonth)) {
+        state.activeMonth = tabOptions[0];
+      }
 
       populateDropdownLists();
-      renderMonthTabs(distinctMonths);
+      renderMonthTabs(tabOptions);
       renderMatrixGrid();
     }
 
@@ -930,23 +834,15 @@
       });
     }
 
-    // Bugfix: Corrected filtering matrix assembly logic to completely render custom tabs arrays
     function renderMonthTabs(months) {
       const panel = document.getElementById("monthTabsPanel");
       panel.innerHTML = "";
 
-      // 1. Core Global View Tab Generation
-      const globalBtn = document.createElement("button");
-      globalBtn.className = `tab-btn ${state.activeMonth === "All Upcoming" ? 'active' : ''}`;
-      globalBtn.textContent = "All Upcoming";
-      globalBtn.onclick = () => {
-        state.activeMonth = "All Upcoming";
-        renderMonthTabs(months);
-        renderMatrixGrid();
-      };
-      panel.appendChild(globalBtn);
+      if(months.length === 0) {
+        panel.innerHTML = `<div style="font-style:italic; padding:10px;">${UI_TEXT.noSessionDates}</div>`;
+        return;
+      }
 
-      // 2. Individual Sub-Month Categories Generation Loop
       months.forEach(m => {
         const btn = document.createElement("button");
         btn.className = `tab-btn ${state.activeMonth === m ? 'active' : ''}`;
@@ -960,42 +856,11 @@
       });
     }
 
-    function toggleSessionFilter(sessionId) {
-      if (state.activeSessionFilterId == sessionId) {
-        state.activeSessionFilterId = null; 
-      } else {
-        state.activeSessionFilterId = sessionId; 
-      }
-      renderMatrixGrid();
-    }
-
-    function isSessionTimeLocked(sessionObj) {
-      if (!sessionObj || !sessionObj.date) return false;
-      try {
-        const parts = sessionObj.date.split('/');
-        if (parts.length !== 3) return false;
-        
-        const dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`; 
-        const timeStr = sessionObj.time || "00:00";
-        
-        const sessionDateObj = new Date(`${dateStr}T${timeStr}:00`);
-        if (isNaN(sessionDateObj.getTime())) return false;
-        
-        const currentNow = new Date();
-        const diffInMs = sessionDateObj.getTime() - currentNow.getTime();
-        const diffInHours = diffInMs / (1000 * 60 * 60);
-        
-        return diffInHours <= state.lockLeadHours;
-      } catch (e) {
-        return false;
-      }
-    }
-
     function renderMatrixGrid() {
       const view = document.getElementById("dashboardView");
       
       let activeSessions = [];
-      if (state.activeMonth === "All Upcoming") {
+      if (state.activeMonth === "ALL UPCOMING") {
         activeSessions = state.sessions;
       } else {
         activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
@@ -1011,31 +876,16 @@
           <table>
             <thead>
               <tr>
-                <th></th>
+                <th>${UI_TEXT.crewTableHeaderLabel}</th>
       `;
 
       activeSessions.forEach(sess => {
-        if (state.activeSessionFilterId && state.activeSessionFilterId != sess.id) {
-          return; 
-        }
-
-        const filterClass = state.activeSessionFilterId == sess.id ? "filter-arrow-btn active-filter" : "filter-arrow-btn";
-        
         html += `
           <th>
-            <div class="session-header-container">
-              <div class="session-header-top">
-                <div class="session-header-title">${sess.topic || "Unnamed Session"}</div>
-                <div class="session-header-meta">${sess.date} @ ${sess.time}</div>
-              </div>
-              <div class="action-btn-row">
-                <button class="narrative-btn" title="Generate Session SMS Narrative" onclick="triggerSessionNarrative('${sess.id}')">
-                  ${SVG_ICONS.sms}
-                </button>
-                <button class="${filterClass}" title="Isolate session column" onclick="toggleSessionFilter('${sess.id}')">
-                  ${SVG_ICONS.funnel}
-                </button>
-              </div>
+            <div class="session-header-title">${sess.topic || "Unnamed Session"}</div>
+            <div class="session-header-meta">${sess.date} @ ${sess.time}</div>
+            <div class="narrative-btn-wrapper">
+              <button class="narrative-btn" onclick="triggerSessionNarrative('${sess.id}')">搭 Narrative</button>
             </div>
           </th>
         `;
@@ -1048,37 +898,23 @@
       `;
 
       if(state.crew.length === 0) {
-        html += `<tr><td colspan="100" style="text-align:center; font-style:italic;">${UI_TEXT.noPersonnelCrew}</td></tr>`;
+        html += `<tr><td colspan="${activeSessions.length + 1}" style="text-align:center; font-style:italic;">${UI_TEXT.noPersonnelCrew}</td></tr>`;
       }
 
       state.crew.forEach(crewName => {
-        if (state.activeSessionFilterId) {
-          const match = state.signups.find(s => s.name === crewName && s.sessionId == state.activeSessionFilterId);
-          const hasRecord = match && (match.preferred || match.allocatedCategory);
-          if (!hasRecord) return; 
-        }
-
         html += `
           <tr>
             <td class="crew-name-cell">${crewName}</td>
         `;
 
         activeSessions.forEach(sess => {
-          if (state.activeSessionFilterId && state.activeSessionFilterId != sess.id) {
-            return; 
-          }
-
           const match = state.signups.find(s => s.name === crewName && s.sessionId == sess.id);
-          const isLocked = isSessionTimeLocked(sess);
-          const labelContext = `${sess.topic} (${sess.date})`;
 
           html += `
-            <td class="matrix-cell ${isLocked ? 'cell-locked' : ''}" data-label="${escapeHtml(labelContext)}" onclick="openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')">
+            <td class="matrix-cell" onclick="openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')">
           `;
 
           if (match) {
-            const showPadlock = isLocked && (!state.isGlobalAdminUnlocked);
-
             if (match.allocatedCategory && match.allocatedCategory !== "No Training") {
               const styleClass = match.allocatedCategory.toLowerCase().replace(/[^a-z0-9]/g, "") === "notraining" ? "notraining" : "allocated";
               
@@ -1086,10 +922,7 @@
                 <div class="tile-box ${styleClass}">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">${escapeHtml(match.allocatedCategory)}</div>
-                    <div class="tile-indicators">
-                      ${showPadlock ? SVG_ICONS.lock : ''}
-                      ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
-                    </div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">統</span>` : ''}
                   </div>
                   <div class="tile-role">${escapeHtml(match.allocatedRole || UI_TEXT.tileFallbackRole)}</div>
                   ${match.allocatedSubCategory ? `<div class="tile-subcat" title="${escapeHtml(match.allocatedSubCategory)}">${escapeHtml(match.allocatedSubCategory)}</div>` : ''}
@@ -1101,10 +934,7 @@
                 <div class="tile-box notraining">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">No Training</div>
-                    <div class="tile-indicators">
-                      ${showPadlock ? SVG_ICONS.lock : ''}
-                      ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
-                    </div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">統</span>` : ''}
                   </div>
                 </div>
               `;
@@ -1114,19 +944,16 @@
                 <div class="tile-box preferred">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">${UI_TEXT.tileFallbackCategory}</div>
-                    <div class="tile-indicators">
-                      ${isLocked ? SVG_ICONS.lock : ''}
-                      ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
-                    </div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">統</span>` : ''}
                   </div>
                   <div class="tile-role">${escapeHtml(match.preferred)}</div>
                 </div>
               `;
             } else {
-              html += `<div class="empty-tile">${isLocked ? SVG_ICONS.lock + ' Locked' : UI_TEXT.tileModify}</div>`;
+              html += `<div class="empty-tile">${UI_TEXT.tileModify}</div>`;
             }
           } else {
-            html += `<div class="empty-tile">${isLocked ? SVG_ICONS.lock + ' Locked' : UI_TEXT.tileSignUp}</div>`;
+            html += `<div class="empty-tile">${UI_TEXT.tileSignUp}</div>`;
           }
 
           html += `</td>`;
@@ -1178,7 +1005,7 @@
       const uniqueCategoryKeys = Object.keys(allocationGroups);
       const N = uniqueCategoryKeys.length;
 
-      let textOutput = `${dayName} (${targetSess.date} @ ${targetSess.time})${UI_TEXT.narrativeTemplateSegment1}${N}${UI_TEXT.narrativeTemplateSegment2}`;
+      let textOutput = `${dayName}${UI_TEXT.narrativeTemplateSegment1}${N}${UI_TEXT.narrativeTemplateSegment2}`;
 
       uniqueCategoryKeys.forEach((categoryName, index) => {
         const currentGroup = allocationGroups[categoryName];
@@ -1209,19 +1036,8 @@
     }
 
     function openInteractionModal(crewName, sessionId) {
-      const targetSess = state.sessions.find(s => s.id == sessionId);
-      const isLocked = isSessionTimeLocked(targetSess);
-
-      if (isLocked && !state.isGlobalAdminUnlocked) {
-        alert("This workspace selection has fallen inside the locking period window and cannot be modified.");
-        return; 
-      }
-
       state.selectedCrew = crewName;
       state.selectedSessionId = sessionId;
-
-      const existingMatch = state.signups.find(s => s.name === crewName && s.sessionId == sessionId);
-      const isAllocated = existingMatch && existingMatch.allocatedCategory && existingMatch.allocatedCategory.trim() !== "";
 
       if (state.isGlobalAdminUnlocked) {
         document.getElementById("formSectionSignup").style.display = "none";
@@ -1229,24 +1045,10 @@
       } else {
         document.getElementById("formSectionSignup").style.display = "block";
         document.getElementById("formSectionAllocate").style.display = "none";
-
-        const removeButtonNode = document.getElementById("uiSignupRemoveBtn");
-        if (isAllocated) {
-          removeButtonNode.style.display = "none";
-        } else {
-          removeButtonNode.style.display = "inline-block";
-        }
-
-        const warningBanner = document.getElementById("lockWarningMessage");
-        if (isLocked) {
-          warningBanner.style.display = "block";
-          document.getElementById("uiSignupSaveBtn").style.display = "none";
-          removeButtonNode.style.display = "none";
-        } else {
-          warningBanner.style.display = "none";
-          document.getElementById("uiSignupSaveBtn").style.display = "inline-block";
-        }
       }
+
+      const targetSess = state.sessions.find(s => s.id == sessionId);
+      const existingMatch = state.signups.find(s => s.name === crewName && s.sessionId == sessionId);
 
       document.getElementById("mCrewName").textContent = crewName || UI_TEXT.crewMemberFallback;
       document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${targetSess.date} @ ${targetSess.time})` : UI_TEXT.sessionSpecificsFallback;
@@ -1267,8 +1069,7 @@
       
       document.getElementById("selectCategory").value = (existingMatch && existingMatch.allocatedCategory) ? existingMatch.allocatedCategory : "No Training";
       document.getElementById("selectRole").value = (existingMatch && existingMatch.allocatedRole) ? existingMatch.allocatedRole : "No Training";
-      
-      document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "";
+      document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "No Training";
 
       document.getElementById("actionModal").classList.add("open");
     }
@@ -1279,81 +1080,20 @@
 
     function toggleGlobalAdminMode() {
       const btn = document.getElementById("globalAdminBtn");
-      const sheetBtn = document.getElementById("globalSheetBtn");
       
       if (state.isGlobalAdminUnlocked) {
         state.isGlobalAdminUnlocked = false;
         btn.classList.remove("unlocked");
         btn.title = UI_TEXT.adminUnlockTooltip;
-        btn.textContent = UI_TEXT.adminBtnText;
-        if(sheetBtn) sheetBtn.style.display = "none";
-        renderMatrixGrid();
       } else {
         const inputPass = prompt(UI_TEXT.adminPromptChallenge);
         if (inputPass === ADMIN_PASSWORD) {
           state.isGlobalAdminUnlocked = true;
           btn.classList.add("unlocked");
           btn.title = UI_TEXT.adminLockTooltip;
-          btn.textContent = "LTC Menu Options ⚙️";
-          if(sheetBtn) sheetBtn.style.display = "inline-flex";
-          renderMatrixGrid();
         } else if (inputPass !== null) {
           alert(UI_TEXT.adminInvalidCredentials);
         }
-      }
-    }
-
-    document.getElementById("globalAdminBtn").addEventListener("contextmenu", (e) => {
-      if (state.isGlobalAdminUnlocked) {
-        e.preventDefault();
-        document.getElementById("configModal").classList.add("open");
-      }
-    });
-    
-    const originalToggle = toggleGlobalAdminMode;
-    toggleGlobalAdminMode = function() {
-      if (state.isGlobalAdminUnlocked) {
-        if (confirm("Would you like to open System Configuration? (Cancel to exit Admin Mode)")) {
-          document.getElementById("configModal").classList.add("open");
-          return;
-        }
-      }
-      originalToggle();
-    };
-
-    function closeConfigModal() {
-      document.getElementById("configModal").classList.remove("open");
-    }
-
-    function saveSystemConfig() {
-      const val = parseInt(document.getElementById("inputLockHours").value, 10);
-      if (isNaN(val) || val < 0) {
-        alert("Please specify a valid positive numerical constraint range.");
-        return;
-      }
-      
-      closeConfigModal();
-      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingWrite}</div>`;
-      
-      const payload = {
-        action: "updateConfig",
-        lockLeadHours: val
-      };
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(fetchMatrixData)
-          .withFailureHandler(handleNetworkError)
-          .doPost(JSON.stringify(payload));
-      } else {
-        fetch(WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify(payload),
-          headers: { "Content-Type": "text/plain;charset=utf-8" }
-        })
-        .then(res => res.json())
-        .then(fetchMatrixData)
-        .catch(handleNetworkError);
       }
     }
 

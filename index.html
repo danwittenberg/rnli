@@ -165,7 +165,6 @@
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      table-layout: fixed; /* Enforces strict layout boundaries across elements */
     }
 
     th, td {
@@ -173,10 +172,7 @@
       border-bottom: 1px solid var(--border-color);
       border-right: 1px solid var(--border-color);
       text-align: left;
-      width: 160px;
-      min-width: 160px;
-      max-width: 160px;
-      overflow: hidden; /* Stops horizontal bleed-through */
+      min-width: 150px; 
     }
 
     th {
@@ -185,130 +181,78 @@
       font-weight: 700;
       position: sticky;
       top: 0;
-      z-index: 100;
-      height: 115px; /* Unified top header height alignment */
-      vertical-align: top;
+      z-index: 10;
     }
 
-    /* Absolute Placement Structure for Header Buttons alignment */
-    .session-header-container {
-      position: relative;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .session-header-top {
-      margin-bottom: 35px; /* reserves precise baseline room for buttons */
-    }
-
-    /* Fixed Sticky Column Dimensions and Solid Masking */
     th:first-child, td:first-child {
       position: sticky;
       left: 0;
-      width: 115px;      
-      min-width: 115px;  
-      max-width: 115px;  
-      background-color: #ffffff !important;
-      z-index: 200; /* High index bounds clean cutting matrix content sliding underneath */
+      width: 130px;      
+      min-width: 130px;  
+      max-width: 130px;  
+      background-color: #fff;
+      z-index: 11;
       border-right: 3px solid var(--rnli-navy);
-      word-break: break-all;
+      word-break: break-word; 
+      hyphens: auto;
     }
 
     th:first-child {
-      z-index: 300; /* Corner anchor sits above all dimensions */
-      background-color: var(--rnli-navy) !important;
+      z-index: 12;
+      background-color: var(--rnli-navy);
       color: white;
     }
 
     .session-header-title {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 700;
       line-height: 1.2;
       text-transform: uppercase;
       letter-spacing: 0.3px;
-      word-break: break-word;
     }
 
     .session-header-meta {
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       color: #A4B9D0;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+
+    .narrative-btn-wrapper {
       margin-top: 2px;
     }
 
-    .action-btn-row {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      gap: 4px;
-      background-color: var(--rnli-navy);
-    }
-
-    .narrative-btn, .filter-arrow-btn {
+    .narrative-btn {
       background-color: rgba(255, 255, 255, 0.15);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: white;
-      padding: 6px 5px; /* Shifted padding for icon symmetry */
-      font-size: 0.68rem;
+      padding: 3px 8px;
+      font-size: 0.72rem;
       font-weight: 700;
       border-radius: 3px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
       text-transform: uppercase;
-      flex: 1;
-      justify-content: center;
+      transition: all 0.2s;
     }
 
-    .narrative-btn:hover, .filter-arrow-btn:hover {
+    .narrative-btn:hover {
       background-color: var(--rnli-orange);
       border-color: var(--rnli-orange);
-    }
-
-    .filter-arrow-btn.active-filter {
-      background-color: var(--rnli-orange);
-      border-color: #FFF;
     }
 
     .crew-name-cell {
       font-weight: 700;
       color: var(--rnli-navy);
-      font-size: 0.78rem; 
+      font-size: 0.85rem; 
       line-height: 1.3;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .crew-filter-btn {
-      background: none;
-      border: 1px solid var(--border-color);
-      border-radius: 3px;
-      cursor: pointer;
-      font-size: 0.65rem;
-      padding: 1px 3px;
-      color: var(--rnli-navy);
-      flex-shrink: 0;
-    }
-
-    .crew-filter-btn:hover {
-      background-color: var(--rnli-orange);
-      color: white;
-      border-color: var(--rnli-orange);
-    }
-
-    .crew-filter-btn.active-filter {
-      background-color: var(--rnli-navy);
-      color: white;
-      border-color: var(--rnli-navy);
+      background-color: #FFF;
     }
 
     tr:hover td.crew-name-cell {
-      background-color: #F4F6F8 !important;
+      background-color: #F4F6F8;
     }
 
     .matrix-cell {
@@ -324,7 +268,7 @@
 
     .empty-tile {
       color: #8A9CAE;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-style: italic;
       display: flex;
       align-items: center;
@@ -337,10 +281,9 @@
       padding: 8px;
       border-radius: 4px;
       border: 1px solid var(--border-color);
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       position: relative;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      width: 100%;
     }
 
     .tile-box.preferred {
@@ -373,25 +316,25 @@
 
     .tile-category {
       font-weight: 800;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       margin-bottom: 3px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
 
     .tile-tooltip-indicator {
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       cursor: help;
       opacity: 0.9;
     }
 
     .tile-role {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-weight: 600;
     }
 
     .tile-subcat {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-style: italic;
       margin-top: 4px;
       padding-top: 4px;
@@ -400,10 +343,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    .hide-column {
-      display: none !important;
     }
 
     .modal-overlay {
@@ -417,7 +356,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 100;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s;
@@ -575,7 +514,6 @@
         <h1 id="uiDashboardTitle">Crew Allocation Matrix</h1>
       </div>
       <div class="header-actions">
-        <button id="globalSheetBtn" class="global-admin-btn" style="display: none;" onclick="window.open('https://docs.google.com/spreadsheets/d/1pShwO5f9OiTReD3llwWMkrfHc1z405q3PP-m0-AbPIk/edit?usp=sharing', '_blank')">🟢 View Database</button>
         <button id="globalAdminBtn" class="global-admin-btn" onclick="toggleGlobalAdminMode()">LTC Mode</button>
         <button id="uiRefreshBtn" class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
       </div>
@@ -642,7 +580,7 @@
   <div class="modal-overlay" id="narrativeModal">
     <div class="modal-card" style="max-width: 520px;">
       <div class="modal-header-wrapper">
-        <div id="uiNarrativeTitle" class="modal-title">Generated Session SMS Narrative</div>
+        <div id="uiNarrativeTitle" class="modal-title">Generated Session Narrative</div>
         <div class="modal-subtitle" id="narrativeModalSubtitle">Overview Breakdown</div>
       </div>
       <div class="form-group">
@@ -695,7 +633,7 @@
       allocActivityLabel: "Activity",
       allocActivityPlaceholder: "Select or type custom activity...",
       commitAllocBtn: "Commit",
-      narrativeTitle: "SMS Narrative Broadcast",
+      narrativeTitle: "Narrative",
       narrativeSubtitleFallback: "Overview Breakdown",
       closeBtn: "Close",
       copyClipboardBtn: "Copy to Clipboard",
@@ -720,9 +658,7 @@
       activeMonth: "",
       selectedCrew: "",
       selectedSessionId: "",
-      isGlobalAdminUnlocked: false,
-      activeSessionFilterId: null, 
-      activeCrewFilterName: null    
+      isGlobalAdminUnlocked: false
     };
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -763,8 +699,6 @@
 
     function fetchMatrixData() {
       document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingFetch}</div>`;
-      state.activeSessionFilterId = null;
-      state.activeCrewFilterName = null;
       
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
@@ -794,21 +728,72 @@
       }
       
       state.crew = response.crew || [];
-      state.sessions = response.sessions || [];
       state.categories = response.categories || [];
       state.roles = response.roles || [];
       state.adminCategories = response.adminCategories || []; 
       state.subCategories = response.subCategories || [];
       state.signups = response.signups || [];
 
-      const distinctMonths = [...new Set(state.sessions.map(s => s.month).filter(Boolean))];
+      // Robust layout handling for raw string timestamps vs standard format arrays
+      const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+      
+      state.sessions = (response.sessions || []).map(sess => {
+        let rawDate = sess.date || "";
+        let cleanMonth = sess.month || "";
+        let displayDate = rawDate;
+        let displayTime = sess.time || "";
 
-      if (distinctMonths.length > 0 && (!state.activeMonth || !distinctMonths.includes(state.activeMonth))) {
-        state.activeMonth = distinctMonths[0];
+        // Parse full timestamp headers string if supplied by Google Sheets API core lookup
+        if (rawDate.includes("GMT") || rawDate.includes("00:00:00")) {
+          try {
+            // Standard parse of string object structures
+            const cleanedStr = rawDate.replace(/\(.*?\)/g, "").trim();
+            const parsedJSDate = new Date(cleanedStr);
+            
+            if (!isNaN(parsedJSDate.getTime())) {
+              cleanMonth = monthNames[parsedJSDate.getMonth()];
+              
+              // Standard format output creation 10/06/2026
+              const dd = String(parsedJSDate.getDate()).padStart(2, '0');
+              const mm = String(parsedJSDate.getMonth() + 1).padStart(2, '0');
+              const yy = String(parsedJSDate.getFullYear()).slice(-2);
+              displayDate = `${dd}/${mm}/${yy}`;
+            }
+          } catch(e) {
+            console.error("Error formatting date string context", e);
+          }
+        }
+
+        // Secondary parse clean fallback for secondary fields formatting mismatch errors
+        if (displayTime.includes("GMT") || displayTime.includes("1899")) {
+          try {
+            const timeExtract = displayTime.match(/(\d{2}):(\d{2}):(\d{2})/);
+            if (timeExtract) {
+              displayTime = `${timeExtract[1]}:${timeExtract[2]}`;
+            }
+          } catch(e) {}
+        }
+
+        return {
+          ...sess,
+          date: displayDate,
+          time: displayTime,
+          month: cleanMonth ? cleanMonth.toUpperCase() : "OTHER"
+        };
+      });
+
+      const distinctMonths = [...new Set(state.sessions.map(s => s.month).filter(m => m && m !== "OTHER"))];
+      distinctMonths.sort((a, b) => monthNames.indexOf(a) - monthNames.indexOf(b));
+
+      // Append default master "ALL UPCOMING" options view tag control logic right here
+      const tabOptions = ["ALL UPCOMING", ...distinctMonths];
+
+      if (!state.activeMonth || !tabOptions.includes(state.activeMonth)) {
+        state.activeMonth = tabOptions[0];
       }
 
       populateDropdownLists();
-      renderMonthTabs(distinctMonths);
+      renderMonthTabs(tabOptions);
       renderMatrixGrid();
     }
 
@@ -864,8 +849,6 @@
         btn.textContent = m;
         btn.onclick = () => {
           state.activeMonth = m;
-          state.activeSessionFilterId = null; 
-          state.activeCrewFilterName = null;
           renderMonthTabs(months);
           renderMatrixGrid();
         };
@@ -873,44 +856,19 @@
       });
     }
 
-    function toggleSessionFilter(sessionId) {
-      if (state.activeSessionFilterId == sessionId) {
-        state.activeSessionFilterId = null; 
-      } else {
-        state.activeSessionFilterId = sessionId;
-        state.activeCrewFilterName = null; 
-      }
-      renderMatrixGrid();
-    }
-
-    function toggleCrewFilter(crewName) {
-      if (state.activeCrewFilterName === crewName) {
-        state.activeCrewFilterName = null;
-      } else {
-        state.activeCrewFilterName = crewName;
-        state.activeSessionFilterId = null; 
-      }
-      renderMatrixGrid();
-    }
-
     function renderMatrixGrid() {
       const view = document.getElementById("dashboardView");
-      const activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
+      
+      let activeSessions = [];
+      if (state.activeMonth === "ALL UPCOMING") {
+        activeSessions = state.sessions;
+      } else {
+        activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
+      }
 
       if (activeSessions.length === 0) {
         view.innerHTML = `<div class="loading-shield">${UI_TEXT.noSessionsForMonth}</div>`;
         return;
-      }
-
-      let hiddenSessionIds = [];
-      if (state.activeCrewFilterName) {
-        activeSessions.forEach(sess => {
-          const match = state.signups.find(s => s.name === state.activeCrewFilterName && s.sessionId == sess.id);
-          const hasRecord = match && (match.preferred || match.allocatedCategory);
-          if (!hasRecord) {
-            hiddenSessionIds.push(sess.id);
-          }
-        });
       }
 
       let html = `
@@ -922,26 +880,12 @@
       `;
 
       activeSessions.forEach(sess => {
-        const isColHidden = hiddenSessionIds.includes(sess.id);
-        const filterClass = state.activeSessionFilterId == sess.id ? "filter-arrow-btn active-filter" : "filter-arrow-btn";
-        
         html += `
-          <th class="${isColHidden ? 'hide-column' : ''}">
-            <div class="session-header-container">
-              <div class="session-header-top">
-                <div class="session-header-title">${sess.topic || "Unnamed Session"}</div>
-                <div class="session-header-meta">${sess.date} @ ${sess.time}</div>
-              </div>
-              <div class="action-btn-row">
-                <button class="narrative-btn" title="Generate Session SMS Narrative" onclick="triggerSessionNarrative('${sess.id}')">
-                  <!-- SMS / Message Bubble Icon -->
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
-                </button>
-                <button class="${filterClass}" title="Filter signups for this session" onclick="toggleSessionFilter('${sess.id}')">
-                  <!-- Funnel / Filter Icon -->
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M10 24v-9L3.07 4.93C2.43 4.09 3.03 3 4.08 3h15.83c1.05 0 1.65 1.09 1.02 1.93L14 15v7c0 .55-.45 1-1 1h-2c-.55 0-1-.45-1-1z"/></svg>
-                </button>
-              </div>
+          <th>
+            <div class="session-header-title">${sess.topic || "Unnamed Session"}</div>
+            <div class="session-header-meta">${sess.date} @ ${sess.time}</div>
+            <div class="narrative-btn-wrapper">
+              <button class="narrative-btn" onclick="triggerSessionNarrative('${sess.id}')">搭 Narrative</button>
             </div>
           </th>
         `;
@@ -958,28 +902,16 @@
       }
 
       state.crew.forEach(crewName => {
-        if (state.activeSessionFilterId) {
-          const match = state.signups.find(s => s.name === crewName && s.sessionId == state.activeSessionFilterId);
-          const hasRecord = match && (match.preferred || match.allocatedCategory);
-          if (!hasRecord) return; 
-        }
-
-        const crewFilterClass = state.activeCrewFilterName === crewName ? "crew-filter-btn active-filter" : "crew-filter-btn";
-
         html += `
           <tr>
-            <td class="crew-name-cell">
-              <span>${crewName}</span>
-              <button class="${crewFilterClass}" title="Isolate this crew's timeline" onclick="toggleCrewFilter('${escapeHtml(crewName)}')">▶</button>
-            </td>
+            <td class="crew-name-cell">${crewName}</td>
         `;
 
         activeSessions.forEach(sess => {
-          const isColHidden = hiddenSessionIds.includes(sess.id);
           const match = state.signups.find(s => s.name === crewName && s.sessionId == sess.id);
 
           html += `
-            <td class="matrix-cell ${isColHidden ? 'hide-column' : ''}" onclick="openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')">
+            <td class="matrix-cell" onclick="openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')">
           `;
 
           if (match) {
@@ -990,7 +922,7 @@
                 <div class="tile-box ${styleClass}">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">${escapeHtml(match.allocatedCategory)}</div>
-                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">統</span>` : ''}
                   </div>
                   <div class="tile-role">${escapeHtml(match.allocatedRole || UI_TEXT.tileFallbackRole)}</div>
                   ${match.allocatedSubCategory ? `<div class="tile-subcat" title="${escapeHtml(match.allocatedSubCategory)}">${escapeHtml(match.allocatedSubCategory)}</div>` : ''}
@@ -1002,7 +934,7 @@
                 <div class="tile-box notraining">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">No Training</div>
-                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">統</span>` : ''}
                   </div>
                 </div>
               `;
@@ -1012,7 +944,7 @@
                 <div class="tile-box preferred">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">${UI_TEXT.tileFallbackCategory}</div>
-                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">統</span>` : ''}
                   </div>
                   <div class="tile-role">${escapeHtml(match.preferred)}</div>
                 </div>
@@ -1137,8 +1069,7 @@
       
       document.getElementById("selectCategory").value = (existingMatch && existingMatch.allocatedCategory) ? existingMatch.allocatedCategory : "No Training";
       document.getElementById("selectRole").value = (existingMatch && existingMatch.allocatedRole) ? existingMatch.allocatedRole : "No Training";
-      
-      document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "";
+      document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "No Training";
 
       document.getElementById("actionModal").classList.add("open");
     }
@@ -1149,20 +1080,17 @@
 
     function toggleGlobalAdminMode() {
       const btn = document.getElementById("globalAdminBtn");
-      const sheetBtn = document.getElementById("globalSheetBtn");
       
       if (state.isGlobalAdminUnlocked) {
         state.isGlobalAdminUnlocked = false;
         btn.classList.remove("unlocked");
         btn.title = UI_TEXT.adminUnlockTooltip;
-        sheetBtn.style.display = "none";
       } else {
         const inputPass = prompt(UI_TEXT.adminPromptChallenge);
         if (inputPass === ADMIN_PASSWORD) {
           state.isGlobalAdminUnlocked = true;
           btn.classList.add("unlocked");
           btn.title = UI_TEXT.adminLockTooltip;
-          sheetBtn.style.display = "inline-flex";
         } else if (inputPass !== null) {
           alert(UI_TEXT.adminInvalidCredentials);
         }

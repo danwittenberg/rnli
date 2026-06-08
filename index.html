@@ -718,6 +718,7 @@
       subCategories: [],    
       signups: [],
       activeMonth: "",
+      lastRenderedMonth: "",
       selectedCrew: "",
       selectedSessionId: "",
       isGlobalAdminUnlocked: false,
@@ -893,7 +894,19 @@
       renderMatrixGrid();
     }
 
-    function renderMatrixGrid() {
+function renderMatrixGrid() {
+      // 1. CAPTURE CURRENT SCROLL POSITIONS BEFORE RE-RENDERING
+      const existingWrapper = document.querySelector('.matrix-wrapper');
+      let savedScrollLeft = existingWrapper ? existingWrapper.scrollLeft : 0;
+      let savedScrollTop = existingWrapper ? existingWrapper.scrollTop : 0;
+
+      // Clear the scroll memory if the user just clicked onto a completely different month tab
+      if (state.lastRenderedMonth !== state.activeMonth) {
+        savedScrollLeft = 0;
+        savedScrollTop = 0;
+        state.lastRenderedMonth = state.activeMonth;
+      }
+
       const view = document.getElementById("dashboardView");
       const activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
 
@@ -934,11 +947,9 @@
               </div>
               <div class="action-btn-row">
                 <button class="narrative-btn" title="Generate Session SMS Narrative" onclick="triggerSessionNarrative('${sess.id}')">
-                  <!-- SMS / Message Bubble Icon -->
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
                 </button>
                 <button class="${filterClass}" title="Filter signups for this session" onclick="toggleSessionFilter('${sess.id}')">
-                  <!-- Funnel / Filter Icon -->
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M10 24v-9L3.07 4.93C2.43 4.09 3.03 3 4.08 3h15.83c1.05 0 1.65 1.09 1.02 1.93L14 15v7c0 .55-.45 1-1 1h-2c-.55 0-1-.45-1-1z"/></svg>
                 </button>
               </div>
@@ -970,7 +981,7 @@
           <tr>
             <td class="crew-name-cell">
               <span>${crewName}</span>
-              <button class="${crewFilterClass}" title="Isolate this crew's timeline" onclick="toggleCrewFilter('${escapeHtml(crewName)}')">▶</button>
+              <button class="${crewFilterClass}" title="Isolate this crew's timeline" onclick="toggleCrewFilter('${escapeHtml(crewName)}')">▤</button>
             </td>
         `;
 
@@ -990,7 +1001,7 @@
                 <div class="tile-box ${styleClass}">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">${escapeHtml(match.allocatedCategory)}</div>
-                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">🗎</span>` : ''}
                   </div>
                   <div class="tile-role">${escapeHtml(match.allocatedRole || UI_TEXT.tileFallbackRole)}</div>
                   ${match.allocatedSubCategory ? `<div class="tile-subcat" title="${escapeHtml(match.allocatedSubCategory)}">${escapeHtml(match.allocatedSubCategory)}</div>` : ''}
@@ -1002,7 +1013,7 @@
                 <div class="tile-box notraining">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">No Training</div>
-                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">🗎</span>` : ''}
                   </div>
                 </div>
               `;
@@ -1012,7 +1023,7 @@
                 <div class="tile-box preferred">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">${UI_TEXT.tileFallbackCategory}</div>
-                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">🗎</span>` : ''}
                   </div>
                   <div class="tile-role">${escapeHtml(match.preferred)}</div>
                 </div>
@@ -1036,7 +1047,15 @@
         </div>
       `;
 
+      // Inject the newly calculated HTML into the page container
       view.innerHTML = html;
+
+      // 2. RESTORE SCROLL POSITIONS INSTANTLY AFTER INJECTION
+      const newWrapper = document.querySelector('.matrix-wrapper');
+      if (newWrapper) {
+        newWrapper.scrollLeft = savedScrollLeft;
+        newWrapper.scrollTop = savedScrollTop;
+      }
     }
 
     function triggerSessionNarrative(sessionId) {

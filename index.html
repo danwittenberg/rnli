@@ -379,11 +379,6 @@
       letter-spacing: 0.3px;
     }
 
-    .tile-lock-indicator {
-      font-size: 0.75rem;
-      line-height: 1;
-    }
-
     .tile-tooltip-indicator {
       font-size: 0.72rem;
       cursor: help;
@@ -570,20 +565,6 @@
       color: var(--text-main);
       resize: none;
     }
-
-    .lock-warning-notice {
-      background-color: #FFF0F2;
-      border: 1px solid #FFCCD2;
-      color: #B71C1C;
-      padding: 10px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
   </style>
 </head>
 <body>
@@ -614,10 +595,6 @@
         <div class="modal-subtitle" id="mSessionTitle">Session Specifics</div>
       </div>
 
-      <div id="uiLockWarningBox" class="lock-warning-notice" style="display: none;">
-        <span>🔒</span> Change window is locked (under threshold parameters).
-      </div>
-
       <div id="formSectionSignup">
         <div class="form-group">
           <label id="uiPrefChoiceLabel">Preference Choice</label>
@@ -635,11 +612,6 @@
       </div>
 
       <div id="formSectionAllocate" style="display: none;">
-        <div class="form-group" style="background: #EBF3FC; padding: 12px; border: 1px solid #7FAEE3; border-radius: 4px; margin-bottom: 16px;">
-          <label style="color: var(--rnli-navy); margin-bottom: 4px;">Lock Period Rule (Hours)</label>
-          <input type="number" id="inputLockWindow" min="0" style="background: white;" onchange="updateGlobalLockPeriod(this.value)">
-        </div>
-
         <div class="form-group">
           <label id="uiSubmittedNotesLabel">Submitted Crew Availability Notes</label>
           <div id="adminNotesViewBox" class="admin-notes-callout">None</div>
@@ -741,7 +713,7 @@
       crew: [],
       sessions: [],
       categories: [],       
-      roles: [],           
+      roles: [],            
       adminCategories: [],  
       subCategories: [],    
       signups: [],
@@ -750,8 +722,7 @@
       selectedSessionId: "",
       isGlobalAdminUnlocked: false,
       activeSessionFilterId: null, 
-      activeCrewFilterName: null,
-      lockPeriodHours: 48 // Configurable lock window setup
+      activeCrewFilterName: null    
     };
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -790,29 +761,6 @@
       document.getElementById("uiNarrativeCopyBtn").textContent = UI_TEXT.copyClipboardBtn;
     }
 
-    function isSessionLocked(dateStr, timeStr) {
-      if (!dateStr || !timeStr) return false;
-      const parts = dateStr.split('/');
-      if (parts.length !== 3) return false;
-      
-      const [day, month, year] = parts.map(Number);
-      const [hours, minutes] = timeStr.split(':').map(Number);
-      
-      const sessionDate = new Date(year, month - 1, day, hours || 0, minutes || 0);
-      const now = new Date();
-      
-      const diffInHours = (sessionDate - now) / (1000 * 60 * 60);
-      return diffInHours <= state.lockPeriodHours && diffInHours > 0;
-    }
-
-    function updateGlobalLockPeriod(value) {
-      const parsed = parseInt(value, 10);
-      if (!isNaN(parsed) && parsed >= 0) {
-        state.lockPeriodHours = parsed;
-        renderMatrixGrid();
-      }
-    }
-
     function fetchMatrixData() {
       document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingFetch}</div>`;
       state.activeSessionFilterId = null;
@@ -822,13 +770,13 @@
         google.script.run
           .withSuccessHandler(processServerPayload)
           .withFailureHandler(handleNetworkError)
-          .getMatrixDataPayload(); 
+          .doGet();
       } else {
         if(WEB_APP_URL.includes("YOUR_APPS_SCRIPT")) {
           document.getElementById("dashboardView").innerHTML = `<div class="loading-shield" style="color:red;">${UI_TEXT.urlConfigError}</div>`;
           return;
         }
-        fetch(WEB_APP_URL + "?data=true")
+        fetch(WEB_APP_URL)
           .then(res => res.json())
           .then(processServerPayload)
           .catch(handleNetworkError);
@@ -945,16 +893,6 @@
       renderMatrixGrid();
     }
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.toString()
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
     function renderMatrixGrid() {
       const view = document.getElementById("dashboardView");
       const activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
@@ -980,7 +918,7 @@
           <table>
             <thead>
               <tr>
-                <th></th>
+                <th>${UI_TEXT.crewTableHeaderLabel}</th>
       `;
 
       activeSessions.forEach(sess => {
@@ -991,14 +929,16 @@
           <th class="${isColHidden ? 'hide-column' : ''}">
             <div class="session-header-container">
               <div class="session-header-top">
-                <div class="session-header-title">${escapeHtml(sess.topic || "Unnamed Session")}</div>
+                <div class="session-header-title">${sess.topic || "Unnamed Session"}</div>
                 <div class="session-header-meta">${sess.date} @ ${sess.time}</div>
               </div>
               <div class="action-btn-row">
                 <button class="narrative-btn" title="Generate Session SMS Narrative" onclick="triggerSessionNarrative('${sess.id}')">
+                  <!-- SMS / Message Bubble Icon -->
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
                 </button>
                 <button class="${filterClass}" title="Filter signups for this session" onclick="toggleSessionFilter('${sess.id}')">
+                  <!-- Funnel / Filter Icon -->
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M10 24v-9L3.07 4.93C2.43 4.09 3.03 3 4.08 3h15.83c1.05 0 1.65 1.09 1.02 1.93L14 15v7c0 .55-.45 1-1 1h-2c-.55 0-1-.45-1-1z"/></svg>
                 </button>
               </div>
@@ -1029,7 +969,7 @@
         html += `
           <tr>
             <td class="crew-name-cell">
-              <span>${escapeHtml(crewName)}</span>
+              <span>${crewName}</span>
               <button class="${crewFilterClass}" title="Isolate this crew's timeline" onclick="toggleCrewFilter('${escapeHtml(crewName)}')">▶</button>
             </td>
         `;
@@ -1037,7 +977,6 @@
         activeSessions.forEach(sess => {
           const isColHidden = hiddenSessionIds.includes(sess.id);
           const match = state.signups.find(s => s.name === crewName && s.sessionId == sess.id);
-          const locked = isSessionLocked(sess.date, sess.time);
 
           html += `
             <td class="matrix-cell ${isColHidden ? 'hide-column' : ''}" onclick="openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')">
@@ -1051,198 +990,104 @@
                 <div class="tile-box ${styleClass}">
                   <div class="tile-category-wrapper">
                     <div class="tile-category">${escapeHtml(match.allocatedCategory)}</div>
-                    <div>
-                      ${locked ? '<span class="tile-lock-indicator" title="Locked Frame">🔒</span>' : ''}
-                      ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
-                    </div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
                   </div>
                   <div class="tile-role">${escapeHtml(match.allocatedRole || UI_TEXT.tileFallbackRole)}</div>
-                  ${match.allocatedSubCategory ? `<div class="tile-subcat">${escapeHtml(match.allocatedSubCategory)}</div>` : ''}
+                  ${match.allocatedSubCategory ? `<div class="tile-subcat" title="${escapeHtml(match.allocatedSubCategory)}">${escapeHtml(match.allocatedSubCategory)}</div>` : ''}
                 </div>
               `;
-            } else {
+            } 
+            else if (match.allocatedCategory === "No Training") {
               html += `
-                <div class="tile-box preferred">
+                <div class="tile-box notraining">
                   <div class="tile-category-wrapper">
-                    <div class="tile-category">${escapeHtml(match.preferred || UI_TEXT.tileFallbackCategory)}</div>
-                    <div>
-                      ${locked ? '<span class="tile-lock-indicator" title="Locked Frame">🔒</span>' : ''}
-                      ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
-                    </div>
+                    <div class="tile-category">No Training</div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
                   </div>
-                  <div class="tile-role" style="font-style: italic;">Preference Logged</div>
                 </div>
               `;
             }
+            else if (match.preferred) {
+              html += `
+                <div class="tile-box preferred">
+                  <div class="tile-category-wrapper">
+                    <div class="tile-category">${UI_TEXT.tileFallbackCategory}</div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">📝</span>` : ''}
+                  </div>
+                  <div class="tile-role">${escapeHtml(match.preferred)}</div>
+                </div>
+              `;
+            } else {
+              html += `<div class="empty-tile">${UI_TEXT.tileModify}</div>`;
+            }
           } else {
-            html += `<div class="empty-tile">${locked ? '🔒 Locked' : UI_TEXT.tileSignUp}</div>`;
+            html += `<div class="empty-tile">${UI_TEXT.tileSignUp}</div>`;
           }
+
           html += `</td>`;
         });
+
         html += `</tr>`;
       });
-      view.innerHTML = html + `</tbody></table></div>`;
-    }
 
-    function openInteractionModal(crewName, sessionId) {
-      state.selectedCrew = crewName;
-      state.selectedSessionId = sessionId;
-      
-      const session = state.sessions.find(s => s.id == sessionId);
-      const locked = isSessionLocked(session.date, session.time);
-      
-      document.getElementById("mCrewName").textContent = crewName;
-      document.getElementById("mSessionTitle").textContent = `${session.topic || "Session Context"} (${session.date})`;
-      
-      const match = state.signups.find(s => s.name === crewName && s.sessionId == sessionId);
-      
-      // Sync form fields values
-      document.getElementById("selectPrefRole").value = (match && match.preferred) ? match.preferred : "Any";
-      document.getElementById("inputNotes").value = (match && match.notes) ? match.notes : "";
-      document.getElementById("adminNotesViewBox").textContent = (match && match.notes) ? match.notes : UI_TEXT.noNotesAdminView;
-      document.getElementById("selectCategory").value = (match && match.allocatedCategory) ? match.allocatedCategory : "No Training";
-      document.getElementById("selectRole").value = (match && match.allocatedRole) ? match.allocatedRole : "No Training";
-      document.getElementById("selectSubCategory").value = (match && match.allocatedSubCategory) ? match.allocatedSubCategory : "";
-      document.getElementById("inputLockWindow").value = state.lockPeriodHours;
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
 
-      // Handle Lock Actions visibility logic bounds
-      const warningBox = document.getElementById("uiLockWarningBox");
-      const signupSaveBtn = document.getElementById("uiSignupSaveBtn");
-      const signupRemoveBtn = document.getElementById("uiSignupRemoveBtn");
-
-      if (locked && !state.isGlobalAdminUnlocked) {
-        warningBox.style.display = "flex";
-        signupSaveBtn.style.display = "none";
-        signupRemoveBtn.style.display = "none";
-      } else {
-        warningBox.style.display = "none";
-        signupSaveBtn.style.display = "inline-block";
-        signupRemoveBtn.style.display = "inline-block";
-      }
-
-      document.getElementById("actionModal").classList.add("open");
-    }
-
-    function closeModal() { 
-      document.getElementById("actionModal").classList.remove("open"); 
-    }
-    
-    function toggleGlobalAdminMode() {
-      if (!state.isGlobalAdminUnlocked) {
-        const password = prompt(UI_TEXT.adminPromptChallenge);
-        if (password !== ADMIN_PASSWORD) {
-          alert(UI_TEXT.adminInvalidCredentials);
-          return;
-        }
-      }
-      
-      state.isGlobalAdminUnlocked = !state.isGlobalAdminUnlocked;
-      const adminBtn = document.getElementById("globalAdminBtn");
-      
-      if (state.isGlobalAdminUnlocked) {
-        adminBtn.classList.add("unlocked");
-        adminBtn.title = UI_TEXT.adminLockTooltip;
-        document.getElementById("formSectionSignup").style.display = "none";
-        document.getElementById("formSectionAllocate").style.display = "block";
-        document.getElementById("uiLockWarningBox").style.display = "none"; // Admin bypass
-      } else {
-        adminBtn.classList.remove("unlocked");
-        adminBtn.title = UI_TEXT.adminUnlockTooltip;
-        document.getElementById("formSectionSignup").style.display = "block";
-        document.getElementById("formSectionAllocate").style.display = "none";
-        
-        // Restore contextual lockout flags
-        if (state.selectedSessionId) {
-          const session = state.sessions.find(s => s.id == state.selectedSessionId);
-          if (session && isSessionLocked(session.date, session.time)) {
-            document.getElementById("uiLockWarningBox").style.display = "flex";
-            document.getElementById("uiSignupSaveBtn").style.display = "none";
-            document.getElementById("uiSignupRemoveBtn").style.display = "none";
-          }
-        }
-      }
-    }
-
-    function checkNoTrainingRule(selectElement) {
-      if (selectElement.value === "No Training") {
-        document.getElementById("selectRole").value = "No Training";
-        document.getElementById("selectSubCategory").value = "No Training";
-      }
-    }
-
-    function executeAction(actionType) {
-      const containerView = document.getElementById("dashboardView");
-      const originalHtml = containerView.innerHTML;
-      containerView.innerHTML = `<div class="loading-shield">${UI_TEXT.loadingWrite}</div>`;
-      
-      let payload = {
-        action: actionType,
-        crewName: state.selectedCrew,
-        sessionId: state.selectedSessionId
-      };
-
-      if (actionType === 'signup') {
-        payload.preferred = document.getElementById("selectPrefRole").value;
-        payload.notes = document.getElementById("inputNotes").value;
-      } else if (actionType === 'allocate') {
-        payload.allocatedCategory = document.getElementById("selectCategory").value;
-        payload.allocatedRole = document.getElementById("selectRole").value;
-        payload.allocatedSubCategory = document.getElementById("selectSubCategory").value;
-      }
-
-      closeModal();
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler((res) => { processServerPayload(res); })
-          .withFailureHandler((err) => { 
-            alert(UI_TEXT.submissionDelayedAlert + err); 
-            containerView.innerHTML = originalHtml;
-          })
-          .executeMatrixWriteAction(JSON.stringify(payload));
-      } else {
-        fetch(WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(processServerPayload)
-        .catch(err => {
-          alert(UI_TEXT.submissionDelayedAlert + err);
-          containerView.innerHTML = originalHtml;
-        });
-      }
+      view.innerHTML = html;
     }
 
     function triggerSessionNarrative(sessionId) {
-      const session = state.sessions.find(s => s.id == sessionId);
-      if(!session) return;
-      
-      const signupsForSession = state.signups.filter(s => s.sessionId == sessionId && (s.preferred || s.allocatedCategory));
-      let missingAllocations = [];
-      
-      signupsForSession.forEach(su => {
-        if (!su.allocatedCategory || su.allocatedCategory === "No Training") {
-          // If explicitly unassigned or left empty
-          missingAllocations.push(su.name);
-        }
-      });
+      const targetSess = state.sessions.find(s => s.id == sessionId);
+      if(!targetSess) return;
 
-      if (missingAllocations.length > 0 && !state.isGlobalAdminUnlocked) {
-        alert(UI_TEXT.narrativeErrorAlert + missingAllocations.join("\n"));
+      const sessionSignups = state.signups.filter(s => s.sessionId == sessionId);
+      const unallocatedCrew = sessionSignups.filter(s => s.preferred && (!s.allocatedCategory || s.allocatedCategory.trim() === ""));
+      
+      if (unallocatedCrew.length > 0) {
+        const namesList = unallocatedCrew.map(c => c.name).join(", ");
+        alert(`${UI_TEXT.narrativeErrorAlert}${namesList}`);
         return;
       }
 
-      let narrative = `RE: ${session.topic || UI_TEXT.fallbackDayName} (${session.date} @ ${session.time})\n`;
-      narrative += `Newhaven Lifeboat Station Crew Configurations:\n\n`;
+      const validAllocated = sessionSignups.filter(s => s.allocatedCategory && s.allocatedCategory !== "No Training" && s.allocatedCategory.trim() !== "");
+      let dayName = targetSess.dayName || UI_TEXT.fallbackDayName;
 
-      signupsForSession.forEach(su => {
-        if(su.allocatedCategory && su.allocatedCategory !== "No Training") {
-          narrative += `* ${su.name}: ${su.allocatedCategory} [Role: ${su.allocatedRole || "Crew"}] (${su.allocatedSubCategory || "Standard Profile"})\n`;
+      const allocationGroups = {};
+      validAllocated.forEach(person => {
+        const catKey = person.allocatedCategory;
+        if (!allocationGroups[catKey]) {
+          allocationGroups[catKey] = {
+            subCategory: person.allocatedSubCategory || "General",
+            crewList: []
+          };
         }
+        allocationGroups[catKey].crewList.push({
+          name: person.name,
+          role: person.allocatedRole || "Crew"
+        });
       });
 
-      document.getElementById("narrativeOutputText").value = narrative;
+      const uniqueCategoryKeys = Object.keys(allocationGroups);
+      const N = uniqueCategoryKeys.length;
+
+      let textOutput = `${dayName}${UI_TEXT.narrativeTemplateSegment1}${N}${UI_TEXT.narrativeTemplateSegment2}`;
+
+      uniqueCategoryKeys.forEach((categoryName, index) => {
+        const currentGroup = allocationGroups[categoryName];
+        textOutput += `${UI_TEXT.narrativeSessionLabel} ${index + 1}: ${categoryName} (${currentGroup.subCategory})\n`;
+        
+        currentGroup.crewList.forEach(crewMember => {
+          textOutput += `${crewMember.name} (${crewMember.role})\n`;
+        });
+        
+        textOutput += `\n`;
+      });
+
+      document.getElementById("narrativeModalSubtitle").textContent = `${targetSess.topic || 'Session'} Summary`;
+      document.getElementById("narrativeOutputText").value = textOutput.trim();
       document.getElementById("narrativeModal").classList.add("open");
     }
 
@@ -1251,12 +1096,141 @@
     }
 
     function copyNarrativeToClipboard() {
-      const txtArea = document.getElementById("narrativeOutputText");
-      txtArea.select();
-      txtArea.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(txtArea.value);
+      const copyTextEl = document.getElementById("narrativeOutputText");
+      copyTextEl.select();
+      copyTextEl.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(copyTextEl.value);
       alert(UI_TEXT.narrativeSuccessAlert);
-      closeNarrativeModal();
+    }
+
+    function openInteractionModal(crewName, sessionId) {
+      state.selectedCrew = crewName;
+      state.selectedSessionId = sessionId;
+
+      if (state.isGlobalAdminUnlocked) {
+        document.getElementById("formSectionSignup").style.display = "none";
+        document.getElementById("formSectionAllocate").style.display = "block";
+      } else {
+        document.getElementById("formSectionSignup").style.display = "block";
+        document.getElementById("formSectionAllocate").style.display = "none";
+      }
+
+      const targetSess = state.sessions.find(s => s.id == sessionId);
+      const existingMatch = state.signups.find(s => s.name === crewName && s.sessionId == sessionId);
+
+      document.getElementById("mCrewName").textContent = crewName || UI_TEXT.crewMemberFallback;
+      document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${targetSess.date} @ ${targetSess.time})` : UI_TEXT.sessionSpecificsFallback;
+
+      const adminBox = document.getElementById("adminNotesViewBox");
+      if (existingMatch && existingMatch.notes && existingMatch.notes.trim() !== "") {
+        adminBox.textContent = `"${existingMatch.notes}"`;
+        adminBox.style.fontStyle = "normal";
+        adminBox.style.color = "var(--cat-preferred-text)";
+      } else {
+        adminBox.textContent = UI_TEXT.noNotesAdminView;
+        adminBox.style.fontStyle = "italic";
+        adminBox.style.color = "#718096";
+      }
+
+      document.getElementById("selectPrefRole").value = (existingMatch && existingMatch.preferred) ? existingMatch.preferred : "Any";
+      document.getElementById("inputNotes").value = (existingMatch && existingMatch.notes) ? existingMatch.notes : "";
+      
+      document.getElementById("selectCategory").value = (existingMatch && existingMatch.allocatedCategory) ? existingMatch.allocatedCategory : "No Training";
+      document.getElementById("selectRole").value = (existingMatch && existingMatch.allocatedRole) ? existingMatch.allocatedRole : "No Training";
+      
+      document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "";
+
+      document.getElementById("actionModal").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("actionModal").classList.remove("open");
+    }
+
+    function toggleGlobalAdminMode() {
+      const btn = document.getElementById("globalAdminBtn");
+      const sheetBtn = document.getElementById("globalSheetBtn");
+      
+      if (state.isGlobalAdminUnlocked) {
+        state.isGlobalAdminUnlocked = false;
+        btn.classList.remove("unlocked");
+        btn.title = UI_TEXT.adminUnlockTooltip;
+        sheetBtn.style.display = "none";
+      } else {
+        const inputPass = prompt(UI_TEXT.adminPromptChallenge);
+        if (inputPass === ADMIN_PASSWORD) {
+          state.isGlobalAdminUnlocked = true;
+          btn.classList.add("unlocked");
+          btn.title = UI_TEXT.adminLockTooltip;
+          sheetBtn.style.display = "inline-flex";
+        } else if (inputPass !== null) {
+          alert(UI_TEXT.adminInvalidCredentials);
+        }
+      }
+    }
+
+    function checkNoTrainingRule(elem) {
+      if(elem.value === "No Training") {
+        document.getElementById("selectRole").value = "No Training";
+        document.getElementById("selectSubCategory").value = "No Training";
+      }
+    }
+
+    function executeAction(actionType) {
+      let payload = {
+        action: actionType,
+        sessionId: state.selectedSessionId,
+        crewName: state.selectedCrew
+      };
+
+      if (actionType === "signup") {
+        payload.preferredRole = document.getElementById("selectPrefRole").value;
+        payload.notes = document.getElementById("inputNotes").value.trim();
+      } 
+      else if (actionType === "allocate") {
+        payload.roleType = document.getElementById("selectCategory").value;
+        payload.specificRole = document.getElementById("selectRole").value;
+        payload.subCategory = document.getElementById("selectSubCategory").value.trim();
+      }
+
+      closeModal();
+      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingWrite}</div>`;
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((result) => { 
+            if (result && result.status === "error") {
+              alert(UI_TEXT.submissionDelayedAlert + result.message + "\n\nPlease try again in a few moments.");
+            }
+            fetchMatrixData(); 
+          })
+          .withFailureHandler(handleNetworkError)
+          .doPost(JSON.stringify(payload));
+      } else {
+        fetch(WEB_APP_URL, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "text/plain;charset=utf-8" }
+        })
+        .then(res => res.json())
+        .then((result) => { 
+          if (result && result.status === "error") {
+            alert(UI_TEXT.submissionDelayedAlert + result.message + "\n\nPlease try again in a few moments.");
+          }
+          fetchMatrixData(); 
+        })
+        .catch(handleNetworkError);
+      }
+    }
+
+    function escapeHtml(str) {
+      if(!str) return "";
+      return str.toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
   </script>
 </body>

@@ -1,5 +1,5 @@
 /**
- * Global Configuration Settings
+ * Global Configuration Settingss
  * Ensure your Spreadsheet sheet tab names perfectly match these constants.
  */
 const SHEET_CREW = "Crew";

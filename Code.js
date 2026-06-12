@@ -235,8 +235,27 @@ function processActionExecution(payload) {
     
     var sessionContext = getSessionMetaContext(sessionId);
     var formattedTimestamp = Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy HH:mm:ss");
+
+	var sessionContext = getSessionMetaContext(sessionId);
+    var formattedTimestamp = Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy HH:mm:ss");
     
-    if (action === "signup") {
+    // === NEW DATE PARSING LOGIC ===
+    // Converts text string (e.g., "Sat - 06/06/26") into a native sortable Date object
+    var properDateObject = new Date(); 
+    if (sessionContext.date) {
+      var dateOnlyStr = sessionContext.date.includes(" - ") ? sessionContext.date.split(" - ")[1] : sessionContext.date;
+      var parts = dateOnlyStr.split("/");
+      if (parts.length === 3) {
+        var dDay = parseInt(parts[0], 10);
+        var dMonth = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+        var dYear = parseInt(parts[2], 10);
+        if (dYear < 100) dYear += 2000;          // Converts "26" to 2026
+        properDateObject = new Date(dYear, dMonth, dDay);
+      }
+    }
+    // ==============================
+    
+if (action === "signup") {
       if (targetRowIndex !== -1) {
         sheet.getRange(targetRowIndex, 5).setValue(payload.preferredRole);
         sheet.getRange(targetRowIndex, 6).setValue(payload.notes);
@@ -244,7 +263,7 @@ function processActionExecution(payload) {
       } else {
         var nextRow = sheet.getLastRow() + 1;
         var rowData = [
-          sessionContext.date,   // A: Session Date
+          properDateObject,      // Column A: True Date Object
           sessionContext.time,   // B: Session Time
           sessionContext.topic,  // C: Session Name
           crewName,              // D: CrewName
@@ -257,8 +276,10 @@ function processActionExecution(payload) {
           ""                     // K: Allocated Activity
         ];
         sheet.getRange(nextRow, 1, 1, 11).setValues([rowData]);
+        sheet.getRange(nextRow, 1).setNumberFormat("ddd - dd/mm/yy"); // Formats display look
       }
-    } 
+    }
+	
     else if (action === "allocate") {
       if (targetRowIndex !== -1) {
         sheet.getRange(targetRowIndex, 7).setValue(payload.roleType);

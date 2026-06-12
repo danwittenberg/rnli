@@ -1,5 +1,5 @@
 /**
- * Global Configuration Settingss
+ * Global Configuration Settings
  * Ensure your Spreadsheet sheet tab names perfectly match these constants.
  */
 const SHEET_CREW = "Crew";
@@ -193,14 +193,6 @@ function getMatrixDataPayload() {
  * Maps incoming GUI actions and writes them directly to explicit column keys.
  * Implements LockService to handle simultaneous user race-conditions.
  */
-/**
- * Maps incoming GUI actions and writes them directly to explicit column keys.
- * Implements LockService to handle simultaneous user race-conditions.
- */
-/**
- * Maps incoming GUI actions and writes them directly to explicit column keys.
- * Implements LockService to handle simultaneous user race-conditions.
- */
 function processActionExecution(payload) {
   // A. Establish the atomic Script Lock
   var lock = LockService.getScriptLock();
@@ -317,128 +309,6 @@ function processActionExecution(payload) {
     
   } catch (error) {
     // Bubble database error message up cleanly to doPost handler
-    throw new Error(error.message || error.toString());
-  } finally {
-    // E. Release the lock pipeline so the next queued request can process
-    lock.releaseLock();
-  }
-}
-
-  // A. Establish the atomic Script Lock
-  var lock = LockService.getScriptLock();
-  
-  try {
-    // B. Block execution threads here, waiting up to 10 seconds for concurrent instances to complete
-    lock.waitLock(10000);
-    
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName(SHEET_SIGNUPS);
-    
-    if (!sheet) {
-      sheet = ss.insertSheet(SHEET_SIGNUPS);
-      sheet.appendRow(["Session Date", "Session Time", "Session Name", "CrewName", "PreferredChoice", "Notes", "AllocatedCategory", "AllocatedRole", "Timestamp", "SessionID", "Allocated Activity"]);
-    }
-    
-    var crewName = payload.crewName;
-    var sessionId = payload.sessionId;
-    var action = payload.action;
-    
-    var dataRange = sheet.getDataRange();
-    var values = dataRange.getValues();
-    
-    var targetRowIndex = -1;
-    var isAlreadyAllocated = false;
-    
-    // Scan table to find matching registration while checking Admin Allocation statuses
-    for (var i = 1; i < values.length; i++) {
-      if (values[i][3].toString().trim() === crewName && values[i][9].toString().trim() === sessionId.toString()) {
-        targetRowIndex = i + 1; 
-        
-        // Col G (index 6): AllocatedCategory | Col H (index 7): AllocatedRole
-        var allocatedCat = values[i][6] ? values[i][6].toString().trim() : "";
-        var allocatedRole = values[i][7] ? values[i][7].toString().trim() : "";
-        
-        if (allocatedCat !== "" || allocatedRole !== "") {
-          isAlreadyAllocated = true;
-        }
-        break;
-      }
-    }
-    
-    // 1. HANDLE WITHDRAWAL (REMOVE ACTION)
-    if (action === "remove") {
-      if (targetRowIndex !== -1) {
-        if (isAlreadyAllocated) {
-          throw new Error("Lockout: You cannot withdraw from this session because an administrator has already allocated your role.");
-        }
-        sheet.deleteRow(targetRowIndex);
-      }
-      // C. Flush cache to complete rows structural compression instantly
-      SpreadsheetApp.flush();
-      return;
-    }
-    
-    var sessionContext = getSessionMetaContext(sessionId);
-    var formattedTimestamp = Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy HH:mm:ss");
-    
-    // 2. HANDLE STANDARD USER SIGNUPS / MODIFICATIONS
-    if (action === "signup") {
-      if (targetRowIndex !== -1) {
-        if (isAlreadyAllocated) {
-          throw new Error("Lockout: You cannot modify your choices because an administrator has already allocated your role.");
-        }
-        sheet.getRange(targetRowIndex, 5).setValue(payload.preferredRole);
-        sheet.getRange(targetRowIndex, 6).setValue(payload.notes);
-        sheet.getRange(targetRowIndex, 9).setValue(formattedTimestamp);
-      } else {
-        var nextRow = sheet.getLastRow() + 1;
-        var rowData = [
-          sessionContext.date,   // A: Session Date
-          sessionContext.time,   // B: Session Time
-          sessionContext.topic,  // C: Session Name
-          crewName,              // D: CrewName
-          payload.preferredRole, // E: PreferredChoice
-          payload.notes,         // F: Notes
-          "",                    // G: AllocatedCategory
-          "",                    // H: AllocatedRole
-          formattedTimestamp,    // I: Timestamp
-          sessionId,             // J: SessionID
-          ""                     // K: Allocated Activity
-        ];
-        sheet.getRange(nextRow, 1, 1, 11).setValues([rowData]);
-      }
-    } 
-    // 3. HANDLE ADMIN ALLOCATIONS (Always allowed to overwrite)
-    else if (action === "allocate") {
-      if (targetRowIndex !== -1) {
-        sheet.getRange(targetRowIndex, 7).setValue(payload.roleType);
-        sheet.getRange(targetRowIndex, 8).setValue(payload.specificRole);
-        sheet.getRange(targetRowIndex, 9).setValue(formattedTimestamp);
-        sheet.getRange(targetRowIndex, 11).setValue(payload.subCategory);
-      } else {
-        var nextRow = sheet.getLastRow() + 1;
-        var rowData = [
-          sessionContext.date,   // A: Session Date
-          sessionContext.time,   // B: Session Time
-          sessionContext.topic,  // C: Session Name
-          crewName,              // D: CrewName
-          "",                    // E: PreferredChoice
-          "",                    // F: Notes
-          payload.roleType,      // G: AllocatedCategory
-          payload.specificRole,  // H: AllocatedRole
-          formattedTimestamp,    // I: Timestamp
-          sessionId,             // J: SessionID
-          payload.subCategory    // K: Allocated Activity
-        ];
-        sheet.getRange(nextRow, 1, 1, 11).setValues([rowData]);
-      }
-    }
-    
-    // D. CRITICAL: Force cache writing to cells BEFORE lock-release occurs
-    SpreadsheetApp.flush();
-    
-  } catch (error) {
-    // Bubble database error message up gracefully to doPost handler
     throw new Error(error.message || error.toString());
   } finally {
     // E. Release the lock pipeline so the next queued request can process

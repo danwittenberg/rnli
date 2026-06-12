@@ -280,7 +280,7 @@ if (action === "signup") {
       }
     }
 	
-    else if (action === "allocate") {
+else if (action === "allocate") {
       if (targetRowIndex !== -1) {
         sheet.getRange(targetRowIndex, 7).setValue(payload.roleType);
         sheet.getRange(targetRowIndex, 8).setValue(payload.specificRole);
@@ -289,7 +289,7 @@ if (action === "signup") {
       } else {
         var nextRow = sheet.getLastRow() + 1;
         var rowData = [
-          sessionContext.date,   // A: Session Date
+          properDateObject,      // Column A: True Date Object
           sessionContext.time,   // B: Session Time
           sessionContext.topic,  // C: Session Name
           crewName,              // D: CrewName
@@ -302,6 +302,7 @@ if (action === "signup") {
           payload.subCategory    // K: Allocated Activity
         ];
         sheet.getRange(nextRow, 1, 1, 11).setValues([rowData]);
+        sheet.getRange(nextRow, 1).setNumberFormat("ddd - dd/mm/yy"); // Formats display look
       }
     }
     

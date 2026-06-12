@@ -193,6 +193,10 @@ function getMatrixDataPayload() {
  * Maps incoming GUI actions and writes them directly to explicit column keys.
  * Implements LockService to handle simultaneous user race-conditions.
  */
+/**
+ * Maps incoming GUI actions and writes them directly to explicit column keys.
+ * Implements LockService to handle simultaneous user race-conditions.
+ */
 function processActionExecution(payload) {
   // A. Establish the atomic Script Lock
   var lock = LockService.getScriptLock();
@@ -215,17 +219,32 @@ function processActionExecution(payload) {
     
     var dataRange = sheet.getDataRange();
     var values = dataRange.getValues();
-    var targetRowIndex = -1;
     
+    var targetRowIndex = -1;
+    var isAlreadyAllocated = false;
+    
+    // Scan table to find matching registration while checking Admin Allocation statuses
     for (var i = 1; i < values.length; i++) {
       if (values[i][3].toString().trim() === crewName && values[i][9].toString().trim() === sessionId.toString()) {
         targetRowIndex = i + 1; 
+        
+        // Col G (index 6): AllocatedCategory | Col H (index 7): AllocatedRole
+        var allocatedCat = values[i][6] ? values[i][6].toString().trim() : "";
+        var allocatedRole = values[i][7] ? values[i][7].toString().trim() : "";
+        
+        if (allocatedCat !== "" || allocatedRole !== "") {
+          isAlreadyAllocated = true;
+        }
         break;
       }
     }
     
+    // 1. HANDLE WITHDRAWAL (REMOVE ACTION)
     if (action === "remove") {
       if (targetRowIndex !== -1) {
+        if (isAlreadyAllocated) {
+          throw new Error("Lockout: You cannot withdraw from this session because an administrator has already allocated your role.");
+        }
         sheet.deleteRow(targetRowIndex);
       }
       // C. Flush cache to complete rows structural compression instantly
@@ -235,35 +254,20 @@ function processActionExecution(payload) {
     
     var sessionContext = getSessionMetaContext(sessionId);
     var formattedTimestamp = Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy HH:mm:ss");
-
-	var sessionContext = getSessionMetaContext(sessionId);
-    var formattedTimestamp = Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy HH:mm:ss");
     
-    // === NEW DATE PARSING LOGIC ===
-    // Converts text string (e.g., "Sat - 06/06/26") into a native sortable Date object
-    var properDateObject = new Date(); 
-    if (sessionContext.date) {
-      var dateOnlyStr = sessionContext.date.includes(" - ") ? sessionContext.date.split(" - ")[1] : sessionContext.date;
-      var parts = dateOnlyStr.split("/");
-      if (parts.length === 3) {
-        var dDay = parseInt(parts[0], 10);
-        var dMonth = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
-        var dYear = parseInt(parts[2], 10);
-        if (dYear < 100) dYear += 2000;          // Converts "26" to 2026
-        properDateObject = new Date(dYear, dMonth, dDay);
-      }
-    }
-    // ==============================
-    
-if (action === "signup") {
+    // 2. HANDLE STANDARD USER SIGNUPS / MODIFICATIONS
+    if (action === "signup") {
       if (targetRowIndex !== -1) {
+        if (isAlreadyAllocated) {
+          throw new Error("Lockout: You cannot modify your choices because an administrator has already allocated your role.");
+        }
         sheet.getRange(targetRowIndex, 5).setValue(payload.preferredRole);
         sheet.getRange(targetRowIndex, 6).setValue(payload.notes);
         sheet.getRange(targetRowIndex, 9).setValue(formattedTimestamp);
       } else {
         var nextRow = sheet.getLastRow() + 1;
         var rowData = [
-          properDateObject,      // Column A: True Date Object
+          sessionContext.date,   // A: Session Date
           sessionContext.time,   // B: Session Time
           sessionContext.topic,  // C: Session Name
           crewName,              // D: CrewName
@@ -276,11 +280,10 @@ if (action === "signup") {
           ""                     // K: Allocated Activity
         ];
         sheet.getRange(nextRow, 1, 1, 11).setValues([rowData]);
-        sheet.getRange(nextRow, 1).setNumberFormat("ddd - dd/mm/yy"); // Formats display look
       }
-    }
-	
-else if (action === "allocate") {
+    } 
+    // 3. HANDLE ADMIN ALLOCATIONS (Always allowed to overwrite)
+    else if (action === "allocate") {
       if (targetRowIndex !== -1) {
         sheet.getRange(targetRowIndex, 7).setValue(payload.roleType);
         sheet.getRange(targetRowIndex, 8).setValue(payload.specificRole);
@@ -289,7 +292,7 @@ else if (action === "allocate") {
       } else {
         var nextRow = sheet.getLastRow() + 1;
         var rowData = [
-          properDateObject,      // Column A: True Date Object
+          sessionContext.date,   // A: Session Date
           sessionContext.time,   // B: Session Time
           sessionContext.topic,  // C: Session Name
           crewName,              // D: CrewName
@@ -302,7 +305,6 @@ else if (action === "allocate") {
           payload.subCategory    // K: Allocated Activity
         ];
         sheet.getRange(nextRow, 1, 1, 11).setValues([rowData]);
-        sheet.getRange(nextRow, 1).setNumberFormat("ddd - dd/mm/yy"); // Formats display look
       }
     }
     
@@ -311,7 +313,7 @@ else if (action === "allocate") {
     
   } catch (error) {
     // Bubble database error message up gracefully to doPost handler
-    throw new Error("Concurrency Database error: " + error.toString());
+    throw new Error(error.message || error.toString());
   } finally {
     // E. Release the lock pipeline so the next queued request can process
     lock.releaseLock();

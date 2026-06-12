@@ -762,16 +762,17 @@
       document.getElementById("uiNarrativeCopyBtn").textContent = UI_TEXT.copyClipboardBtn;
     }
 
-    function fetchMatrixData() {
+function fetchMatrixData() {
       document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingFetch}</div>`;
       state.activeSessionFilterId = null;
       state.activeCrewFilterName = null;
       
+      // FIXED: When running in Google environment, invoke direct data payload method instead of doGet()
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(processServerPayload)
           .withFailureHandler(handleNetworkError)
-          .doGet();
+          .getMatrixDataPayload(); 
       } else {
         if(WEB_APP_URL.includes("YOUR_APPS_SCRIPT")) {
           document.getElementById("dashboardView").innerHTML = `<div class="loading-shield" style="color:red;">${UI_TEXT.urlConfigError}</div>`;
@@ -1195,7 +1196,7 @@ function renderMatrixGrid() {
       }
     }
 
-    function executeAction(actionType) {
+function executeAction(actionType) {
       let payload = {
         action: actionType,
         sessionId: state.selectedSessionId,
@@ -1215,6 +1216,7 @@ function renderMatrixGrid() {
       closeModal();
       document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingWrite}</div>`;
 
+      // FIXED: Pass payload object directly to backend handler instead of stringifying to doPost()
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler((result) => { 
@@ -1224,7 +1226,7 @@ function renderMatrixGrid() {
             fetchMatrixData(); 
           })
           .withFailureHandler(handleNetworkError)
-          .doPost(JSON.stringify(payload));
+          .processClientAction(payload); 
       } else {
         fetch(WEB_APP_URL, {
           method: "POST",

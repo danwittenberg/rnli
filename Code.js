@@ -62,9 +62,9 @@ function doPost(e) {
  * Helper: Dynamically maps column indices by scanning the header row of the Sessions sheet.
  */
 function getSessionsColumnMapping(sheet) {
-  var headers = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 5)).getValues()[0];
+  var headers = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 6)).getValues()[0];
   // Safe defaults (0-based indices)
-  var mapping = { id: 0, month: 1, topic: 2, date: 3, time: 4 };
+  var mapping = { id: 0, month: 1, topic: 2, date: 3, time: 4, lock: 5 };
   
   for (var i = 0; i < headers.length; i++) {
     var headerText = headers[i].toString().toLowerCase().trim();
@@ -76,6 +76,8 @@ function getSessionsColumnMapping(sheet) {
       mapping.date = i;
     } else if (headerText.includes("time")) {
       mapping.time = i;
+    } else if (headerText.includes("lock")) {
+      mapping.lock = i;
     } else if (headerText.includes("name") || headerText.includes("topic") || headerText.includes("session")) {
       if (!headerText.includes("id") && !headerText.includes("date") && !headerText.includes("time") && !headerText.includes("month")) {
         mapping.topic = i;
@@ -105,7 +107,7 @@ function getMatrixDataPayload() {
   if (sessionSheet && sessionSheet.getLastRow() >= 2) {
     var lastRow = sessionSheet.getLastRow();
     var colMapping = getSessionsColumnMapping(sessionSheet);
-    var maxCol = Math.max(colMapping.id, colMapping.month, colMapping.topic, colMapping.date, colMapping.time) + 1;
+    var maxCol = Math.max(colMapping.id, colMapping.month, colMapping.topic, colMapping.date, colMapping.time, colMapping.lock) + 1;
     
     var sessionRows = sessionSheet.getRange(2, 1, lastRow - 1, maxCol).getValues();
     var sessionDisplayRows = sessionSheet.getRange(2, 1, lastRow - 1, maxCol).getDisplayValues();
@@ -140,7 +142,8 @@ function getMatrixDataPayload() {
         topic: displayRow[colMapping.topic] ? displayRow[colMapping.topic].toString().trim() : "",
         date: displayRow[colMapping.date] ? displayRow[colMapping.date].toString().trim() : "",
         dayName: dayNameText,
-        time: displayRow[colMapping.time] ? displayRow[colMapping.time].toString().trim() : ""
+        time: displayRow[colMapping.time] ? displayRow[colMapping.time].toString().trim() : "",
+        isLocked: row[colMapping.lock] === true || row[colMapping.lock].toString().toLowerCase().trim() === "true"
       };
     });
   }
@@ -194,11 +197,9 @@ function getMatrixDataPayload() {
  * Implements LockService to handle simultaneous user race-conditions.
  */
 function processActionExecution(payload) {
-  // A. Establish the atomic Script Lock
   var lock = LockService.getScriptLock();
   
   try {
-    // B. Block execution threads here, waiting up to 10 seconds for concurrent instances to complete
     lock.waitLock(10000);
     
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -212,6 +213,31 @@ function processActionExecution(payload) {
     var crewName = payload.crewName;
     var sessionId = payload.sessionId;
     var action = payload.action;
+    
+    var sessionContext = getSessionMetaContext(sessionId);
+    
+    // Safety Gate: Enforce administrative session freeze locks for ordinary interactions
+    if (action === "signup" || action === "remove") {
+      if (sessionContext.isLocked) {
+        throw new Error("Sorry, too late to change. Please contact the LTCs");
+      }
+    }
+    
+    // Administrative Action: Toggle Session Lock State
+    if (action === "toggleLock") {
+      var sessionSheet = ss.getSheetByName(SHEET_SESSIONS);
+      var colMapping = getSessionsColumnMapping(sessionSheet);
+      var sValues = sessionSheet.getDataRange().getValues();
+      
+      for (var j = 1; j < sValues.length; j++) {
+        if (sValues[j][colMapping.id].toString().trim() === sessionId.toString()) {
+          sessionSheet.getRange(j + 1, colMapping.lock + 1).setValue(payload.lockState);
+          break;
+        }
+      }
+      SpreadsheetApp.flush();
+      return;
+    }
     
     var dataRange = sheet.getDataRange();
     var values = dataRange.getValues();
@@ -243,12 +269,10 @@ function processActionExecution(payload) {
         }
         sheet.deleteRow(targetRowIndex);
       }
-      // C. Flush cache to complete rows structural compression instantly
       SpreadsheetApp.flush();
       return;
     }
     
-    var sessionContext = getSessionMetaContext(sessionId);
     var formattedTimestamp = Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy HH:mm:ss");
     
     // 2. HANDLE STANDARD USER SIGNUPS / MODIFICATIONS
@@ -304,14 +328,11 @@ function processActionExecution(payload) {
       }
     }
     
-    // D. CRITICAL: Force cache writing to cells BEFORE lock-release occurs
     SpreadsheetApp.flush();
     
   } catch (error) {
-    // Bubble database error message up cleanly to doPost handler
     throw new Error(error.message || error.toString());
   } finally {
-    // E. Release the lock pipeline so the next queued request can process
     lock.releaseLock();
   }
 }
@@ -320,24 +341,34 @@ function processActionExecution(payload) {
  * Private Helper: Resolves metadata properties using dynamic column header queries
  */
 function getSessionMetaContext(sessionId) {
-  var fallback = { month: "", topic: "", date: "", time: "" };
+  var fallback = { month: "", topic: "", date: "", time: "", isLocked: false };
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(SHEET_SESSIONS);
   if (!sheet || sheet.getLastRow() < 2) return fallback;
   
   var colMapping = getSessionsColumnMapping(sheet);
-  var maxCol = Math.max(colMapping.id, colMapping.month, colMapping.topic, colMapping.date, colMapping.time) + 1;
+  var maxCol = Math.max(colMapping.id, colMapping.month, colMapping.topic, colMapping.date, colMapping.time, colMapping.lock) + 1;
   
   var displayRows = sheet.getRange(2, 1, sheet.getLastRow() - 1, maxCol).getDisplayValues();
+  var rawRows = sheet.getRange(2, 1, sheet.getLastRow() - 1, maxCol).getValues();
+  
   for (var i = 0; i < displayRows.length; i++) {
     if (displayRows[i][colMapping.id].toString().trim() === sessionId.toString()) {
       return {
         month: displayRows[i][colMapping.month] ? displayRows[i][colMapping.month].toString().trim() : "",
         topic: displayRows[i][colMapping.topic] ? displayRows[i][colMapping.topic].toString().trim() : "",
         date: displayRows[i][colMapping.date] ? displayRows[i][colMapping.date].toString().trim() : "",
-        time: displayRows[i][colMapping.time] ? displayRows[i][colMapping.time].toString().trim() : ""
+        time: displayRows[i][colMapping.time] ? displayRows[i][colMapping.time].toString().trim() : "",
+        isLocked: rawRows[i][colMapping.lock] === true || rawRows[i][colMapping.lock].toString().toLowerCase().trim() === "true"
       };
     }
   }
   return fallback;
+}
+
+/**
+ * Public Direct Access Route for google.script.run client calls
+ */
+function processClientAction(payload) {
+  return processActionExecution(payload);
 }

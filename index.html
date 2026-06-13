@@ -3,410 +3,958 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Newhaven Lifeboat TPC Matrix</title>
+  <title>Newhaven Lifeboat TPC</title>
   <style>
     :root {
-      --primary-color: #0b2545;
-      --secondary-color: #134074;
-      --accent-color: #ee6c4d;
-      --bg-light: #f4f6f9;
-      --text-dark: #1d2d44;
-      --border-color: #cfd8dc;
-      --success-color: #2e7d32;
-      --warning-color: #ef6c00;
-      --info-color: #0288d1;
+      /* Official RNLI Brand Identity Palette */
+      --rnli-orange: #E25B1D;
+      --rnli-orange-hover: #C44A13;
+      --rnli-navy: #002147;
+      --rnli-navy-hover: #001530;
+      --bg-main: #F4F6F8;
+      --border-color: #D2D9E0;
+      --text-main: #1A2B3C;
+      
+      --cat-preferred-bg: #FFF7F2;
+      --cat-preferred-border: #F6AD82;
+      --cat-preferred-text: #C44A13;
+      
+      --cat-allocated-bg: #EBF3FC;
+      --cat-allocated-border: #7FAEE3;
+      --cat-allocated-text: #002147;
+      
+      --cat-notraining-bg: #EAEFF4;
+      --cat-notraining-border: #B8C5D0;
+      --cat-notraining-text: #5A6E7F;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-light);
-      color: var(--text-dark);
-      line-height: 1.5;
-      padding: 20px;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      padding: 14px;
+    }
+
+    .container {
+      max-width: 1450px;
+      margin: 0 auto;
+      background: white;
+      padding: 18px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 33, 71, 0.08);
+      border-top: 5px solid var(--rnli-orange);
     }
 
     header {
-      background-color: var(--primary-color);
-      color: #ffffff;
-      padding: 15px 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 14px;
     }
 
     h1 {
-      font-size: 1.5rem;
-      font-weight: 600;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--rnli-navy);
+      text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .header-btn-group {
+    .header-actions {
       display: flex;
-      gap: 10px;
       align-items: center;
-    }
-
-    .btn {
-      padding: 8px 16px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background-color 0.2s ease, transform 0.1s ease;
-      text-decoration: none;
-    }
-
-    .btn-primary { background-color: var(--accent-color); color: white; }
-    .btn-primary:hover { background-color: #f05a36; }
-    
-    .btn-secondary { background-color: #607d8b; color: white; }
-    .btn-secondary:hover { background-color: #4f6975; }
-
-    .btn-success { background-color: var(--success-color); color: white; }
-    .btn-success:hover { background-color: #235e26; }
-
-    .btn-danger { background-color: #c62828; color: white; }
-    .btn-danger:hover { background-color: #ad1414; }
-
-    #globalAdminBtn {
-      background-color: transparent;
-      border: 1px solid #ffffff;
-      color: #ffffff;
-    }
-    #globalAdminBtn.unlocked {
-      background-color: var(--accent-color);
-      border-color: var(--accent-color);
-    }
-
-    #dashboardView {
-      background: #ffffff;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      min-height: 300px;
-      position: relative;
-    }
-
-    .table-wrapper {
-      width: 100%;
-      overflow-x: auto;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-    }
-
-    .matrix-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.9rem;
-    }
-
-    .matrix-table th, .matrix-table td {
-      border: 1px solid var(--border-color);
-      padding: 12px;
-      vertical-align: top;
-    }
-
-    .matrix-table th {
-      background-color: var(--secondary-color);
-      color: white;
-      font-weight: 500;
-      min-width: 160px;
-    }
-
-    .matrix-table th:first-child {
-      position: sticky;
-      left: 0;
-      background-color: var(--primary-color);
-      z-index: 5;
-      min-width: 180px;
-    }
-
-    .crew-name-cell {
-      position: sticky;
-      left: 0;
-      background-color: #ffffff;
-      font-weight: 600;
-      z-index: 4;
-      border-right: 2px solid var(--border-color) !important;
-    }
-
-    .session-header-container {
-      display: flex;
-      flex-direction: column;
       gap: 8px;
     }
 
-    .session-header-meta {
-      font-size: 0.75rem;
-      opacity: 0.85;
-      font-weight: bold;
-    }
-
-    .session-header-title {
-      font-size: 0.95rem;
-      font-weight: bold;
-      min-height: 36px;
-    }
-
-    .action-btn-row {
-      display: flex;
-      gap: 6px;
-      margin-top: 4px;
-    }
-
-    .action-btn-row button {
-      background: rgba(255, 255, 255, 0.15);
-      border: none;
+    .refresh-btn {
+      background-color: var(--rnli-orange);
       color: white;
-      padding: 4px 8px;
-      border-radius: 3px;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 4px;
       cursor: pointer;
-      font-size: 0.75rem;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      transition: background 0.2s;
+    }
+
+    .refresh-btn:hover {
+      background-color: var(--rnli-orange-hover);
+    }
+
+    /* LTC Mode Text Button Styling */
+    .global-admin-btn {
+      background: white;
+      border: 2px solid var(--rnli-navy);
+      color: var(--rnli-navy);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
     }
-    .action-btn-row button:hover {
-      background: rgba(255, 255, 255, 0.3);
+
+    .global-admin-btn:hover {
+      background-color: #EBF3FC;
     }
-    .action-btn-row button.active-filter {
-      background-color: var(--accent-color);
+
+    .global-admin-btn.unlocked {
+      background-color: var(--rnli-navy);
+      color: white;
+      border-color: var(--rnli-navy);
+      box-shadow: 0 0 0 2px rgba(0, 33, 71, 0.3);
+    }
+
+    .tabs-container {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 18px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      background-color: #EAEFF4;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--rnli-navy);
+      white-space: nowrap;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      background-color: #DDE4EC;
+    }
+
+    .tab-btn.active {
+      background-color: var(--rnli-orange);
+      color: white;
+      border-color: var(--rnli-orange);
+    }
+
+    .matrix-wrapper {
+      overflow-x: auto;
+      max-height: 650px;
+      overflow-y: auto;
+      border: 2px solid var(--rnli-navy);
+      border-radius: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed; /* Enforces strict layout boundaries across elements */
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      text-align: left;
+      width: 160px;
+      min-width: 160px;
+      max-width: 160px;
+      overflow: hidden; /* Stops horizontal bleed-through */
+    }
+
+    th {
+      background-color: var(--rnli-navy);
+      color: white;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 115px; /* Unified top header height alignment */
+      vertical-align: top;
+    }
+
+    /* Absolute Placement Structure for Header Buttons alignment */
+    .session-header-container {
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .session-header-top {
+      margin-bottom: 35px; /* reserves precise baseline room for buttons */
+    }
+
+    /* Fixed Sticky Column Dimensions and Solid Masking */
+    th:first-child, td:first-child {
+      position: sticky;
+      left: 0;
+      width: 115px;      
+      min-width: 115px;  
+      max-width: 115px;  
+      background-color: #ffffff !important;
+      z-index: 200; /* High index bounds clean cutting matrix content sliding underneath */
+      border-right: 3px solid var(--rnli-navy);
+      word-break: break-all;
+    }
+
+    th:first-child {
+      z-index: 300; /* Corner anchor sits above all dimensions */
+      background-color: var(--rnli-navy) !important;
+      color: white;
+    }
+
+.session-header-meta {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #ffffff;       /* Pure white to stand out */
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .session-header-title {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #A4B9D0;       /* Softer blue for secondary text */
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      word-break: break-word;
+    }
+
+    .action-btn-row {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      gap: 4px;
+      background-color: var(--rnli-navy);
+    }
+
+    .narrative-btn, .filter-arrow-btn {
+      background-color: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 6px 5px; /* Shifted padding for icon symmetry */
+      font-size: 0.68rem;
+      font-weight: 700;
+      border-radius: 3px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      text-transform: uppercase;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .narrative-btn:hover, .filter-arrow-btn:hover {
+      background-color: var(--rnli-orange);
+      border-color: var(--rnli-orange);
+    }
+
+    .filter-arrow-btn.active-filter {
+      background-color: var(--rnli-orange);
+      border-color: #FFF;
+    }
+
+    .crew-name-cell {
+      font-weight: 700;
+      color: var(--rnli-navy);
+      font-size: 0.78rem; 
+      line-height: 1.3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .crew-filter-btn {
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.65rem;
+      padding: 1px 3px;
+      color: var(--rnli-navy);
+      flex-shrink: 0;
+    }
+
+    .crew-filter-btn:hover {
+      background-color: var(--rnli-orange);
+      color: white;
+      border-color: var(--rnli-orange);
+    }
+
+    .crew-filter-btn.active-filter {
+      background-color: var(--rnli-navy);
+      color: white;
+      border-color: var(--rnli-navy);
+    }
+
+    tr:hover td.crew-name-cell {
+      background-color: #F4F6F8 !important;
     }
 
     .matrix-cell {
       cursor: pointer;
-      transition: background-color 0.15s ease;
-      text-align: center;
+      transition: background 0.2s;
+      vertical-align: top;
+      background-color: #FFF;
     }
+
     .matrix-cell:hover {
-      background-color: #eceff1;
+      background-color: #F4F6F8;
     }
 
-    /* Condition Status Matrix Colors */
-    .status-empty { color: #90a4ae; }
-    .status-registered { background-color: #e0f2f1; color: #004d40; }
-    .status-preferred { background-color: #fff3e0; color: #e65100; }
-    .status-allocated { background-color: #e3f2fd; color: #0d47a1; border: 2px solid #90caf9; }
-
-    .cell-notes {
-      display: block;
+    .empty-tile {
+      color: #8A9CAE;
       font-size: 0.75rem;
-      color: #546e7a;
       font-style: italic;
-      margin-top: 4px;
-    }
-
-    /* Modal System Layouts */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 100;
+      height: 100%;
+      min-height: 48px;
+    }
+
+    .tile-box {
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      font-size: 0.78rem;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      width: 100%;
+    }
+
+    .tile-box.preferred {
+      background-color: var(--cat-preferred-bg);
+      border-color: var(--cat-preferred-border);
+      color: var(--cat-preferred-text);
+      border-left: 4px solid var(--rnli-orange);
+    }
+
+    .tile-box.allocated {
+      background-color: var(--cat-allocated-bg);
+      border-color: var(--cat-allocated-border);
+      color: var(--cat-allocated-text);
+      border-left: 4px solid var(--rnli-navy);
+    }
+
+    .tile-box.notraining {
+      background-color: var(--cat-notraining-bg);
+      border-color: var(--cat-notraining-border);
+      color: var(--cat-notraining-text);
+      border-left: 4px solid var(--cat-notraining-text);
+    }
+
+    .tile-category-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .tile-category {
+      font-weight: 800;
+      font-size: 0.75rem;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .tile-tooltip-indicator {
+      font-size: 0.72rem;
+      cursor: help;
+      opacity: 0.9;
+    }
+
+    .tile-role {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .tile-subcat {
+      font-size: 0.7rem;
+      font-style: italic;
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px dashed rgba(0, 0, 0, 0.1);
+      opacity: 0.9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hide-column {
+      display: none !important;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 33, 71, 0.6);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      padding: 10px;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .modal-card {
       background: white;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 450px;
       padding: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      border-radius: 6px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 12px 30px rgba(0,33,71,0.2);
+      border-top: 6px solid var(--rnli-navy);
     }
 
-    .modal-header {
-      margin-bottom: 16px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 8px;
+    .modal-header-wrapper {
+      margin-bottom: 18px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--rnli-navy);
+    }
+
+    .modal-subtitle {
+      font-size: 0.85rem;
+      color: #5A6E7F;
+      margin-top: 3px;
+    }
+
+    .admin-notes-callout {
+      background-color: var(--cat-preferred-bg);
+      border: 1px dashed var(--cat-preferred-border);
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: var(--cat-preferred-text);
+      line-height: 1.4;
     }
 
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
-    .form-group label {
+    label {
       display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
+      font-size: 0.82rem;
+      font-weight: 700;
       margin-bottom: 6px;
+      color: var(--rnli-navy);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
-    .form-control {
+    select, input, textarea {
       width: 100%;
-      padding: 10px;
+      padding: 8px;
       border: 1px solid var(--border-color);
       border-radius: 4px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
+      color: var(--text-main);
     }
 
-    .modal-btn-row {
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--rnli-orange);
+      box-shadow: 0 0 0 2px rgba(226, 91, 29, 0.15);
+    }
+
+    textarea {
+      resize: vertical;
+      height: 65px;
+    }
+
+    .modal-actions {
       display: flex;
       justify-content: flex-end;
       gap: 10px;
       margin-top: 20px;
     }
 
-    .loading-shield, .error-msg, .info-msg {
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary { 
+      background-color: #EAEFF4; 
+      color: var(--rnli-navy); 
+    }
+    .btn-secondary:hover {
+      background-color: #DDE4EC;
+    }
+    
+    .btn-primary { 
+      background-color: var(--rnli-orange); 
+      color: white; 
+    }
+    .btn-primary:hover {
+      background-color: var(--rnli-orange-hover);
+    }
+    
+    .btn-danger { 
+      background-color: #D32F2F; 
+      color: white; 
+    }
+    .btn-danger:hover {
+      background-color: #B71C1C;
+    }
+
+    .loading-shield {
       text-align: center;
       padding: 40px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--rnli-navy);
     }
-    .error-msg { color: #c62828; }
 
-    @media (max-width: 768px) {
-      body { padding: 10px; }
-      header { flex-direction: column; gap: 10px; text-align: center; }
+    .narrative-textarea {
+      width: 100%;
+      height: 260px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      padding: 12px;
+      background-color: #F4F6F8;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      color: var(--text-main);
+      resize: none;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Newhaven Lifeboat TPC Matrix</h1>
-    <div class="header-btn-group">
-      <a id="globalSheetBtn" href="#" target="_blank" class="btn btn-secondary" style="display: none;">
-        📊 Open Master Sheet
-      </a>
-      <button id="globalAdminBtn" class="btn" onclick="toggleGlobalAdminMode()">
-        🔓 Unlock LTC Mode
-      </button>
+  <div class="container">
+    <header>
+      <div>
+        <h1 id="uiDashboardTitle">Training Planning Calendar</h1>
+      </div>
+      <div class="header-actions">
+        <button id="globalSheetBtn" class="global-admin-btn" style="display: none;" onclick="window.open('https://docs.google.com/spreadsheets/d/1pShwO5f9OiTReD3llwWMkrfHc1z405q3PP-m0-AbPIk/edit?usp=sharing', '_blank')">🟢 View Database</button>
+        <button id="globalAdminBtn" class="global-admin-btn" onclick="toggleGlobalAdminMode()">LTC Mode</button>
+        <button id="uiRefreshBtn" class="refresh-btn" onclick="fetchMatrixData()">Refresh Dashboard</button>
+      </div>
+    </header>
+
+    <div class="tabs-container" id="monthTabsPanel"></div>
+
+    <div id="dashboardView">
+      <div class="loading-shield">Assembling core data feeds...</div>
     </div>
-  </header>
+  </div>
 
-  <main id="dashboardView">
-    <div class="loading-shield">Assembling ledger matrix arrays...</div>
-  </main>
-
-  <div id="interactionModal" class="modal-overlay" onclick="if(event.target===this) closeModal()">
+  <div class="modal-overlay" id="actionModal">
     <div class="modal-card">
-      <div id="modalTitle" class="modal-header">Crew Duty Action</div>
-      <div id="modalContent"></div>
+      <div class="modal-header-wrapper">
+        <div class="modal-title" id="mCrewName">Crew Member</div>
+        <div class="modal-subtitle" id="mSessionTitle">Session Specifics</div>
+      </div>
+
+      <div id="formSectionSignup">
+        <div class="form-group">
+          <label id="uiPrefChoiceLabel">Preference Choice</label>
+          <select id="selectPrefRole"></select>
+        </div>
+        <div class="form-group">
+          <label id="uiNotesLabel">Notes / Availability Details</label>
+          <textarea id="inputNotes" placeholder="Any specific scheduling notes..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button id="uiSignupRemoveBtn" class="btn btn-danger" onclick="executeAction('remove')">Clear / Withdraw</button>
+          <button id="uiSignupCancelBtn" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button id="uiSignupSaveBtn" class="btn btn-primary" onclick="executeAction('signup')">Save Preference</button>
+        </div>
+      </div>
+
+      <div id="formSectionAllocate" style="display: none;">
+        <div class="form-group">
+          <label id="uiSubmittedNotesLabel">Submitted Crew Availability Notes</label>
+          <div id="adminNotesViewBox" class="admin-notes-callout">None</div>
+        </div>
+
+        <div class="form-group">
+          <label id="uiAllocCategoryLabel">Allocated Category</label>
+          <select id="selectCategory" onchange="checkNoTrainingRule(this)"></select>
+        </div>
+        <div class="form-group">
+          <label id="uiAllocRoleLabel">Allocated Role</label>
+          <select id="selectRole"></select>
+        </div>
+        <div class="form-group">
+          <label id="uiAllocActivityLabel">Allocated Activity / Sub-Category</label>
+          <input type="text" id="selectSubCategory" list="subCategoryOptions" placeholder="Select or type custom activity...">
+          <datalist id="subCategoryOptions"></datalist>
+        </div>
+        <div class="modal-actions">
+          <button id="uiAllocRemoveBtn" class="btn btn-danger" onclick="executeAction('remove')">Remove Allocation</button>
+          <button id="uiAllocCancelBtn" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button id="uiAllocCommitBtn" class="btn btn-primary" onclick="executeAction('allocate')">Commit Allocation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="narrativeModal">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header-wrapper">
+        <div id="uiNarrativeTitle" class="modal-title">Generated Session SMS Narrative</div>
+        <div class="modal-subtitle" id="narrativeModalSubtitle">Overview Breakdown</div>
+      </div>
+      <div class="form-group">
+        <textarea id="narrativeOutputText" class="narrative-textarea" readonly></textarea>
+      </div>
+      <div class="modal-actions">
+        <button id="uiNarrativeCloseBtn" class="btn btn-secondary" onclick="closeNarrativeModal()">Close</button>
+        <button id="uiNarrativeCopyBtn" class="btn btn-primary" onclick="copyNarrativeToClipboard()">Copy to Clipboard</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // System Constants
-    const ADMIN_PASSWORD = "admin";
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec"; // Provide your absolute Web App Execution URL here if hosting locally on GitHub Pages
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYluQ9ADJKjNu_S8eke9xAG7qWvwDZcV9wllfrjub0KMZAeXLc-Pc0aE1i-7ID9DM7Vw/exec";
+    const ADMIN_PASSWORD = "admin"; 
 
     const UI_TEXT = {
+      dashboardTitle: "Newhaven TPC",
+      adminBtnText: "LTC Mode",
       adminUnlockTooltip: "Unlock LTC Mode",
       adminLockTooltip: "Lock LTC Mode",
-      adminPromptChallenge: "Enter LTC Administrator Password:",
-      adminInvalidCredentials: "Access Denied: Invalid Password."
+      refreshBtn: "Refresh Dashboard",
+      initialLoading: "Assembling core data feeds...",
+      loadingFetch: "Loading...",
+      loadingWrite: "Writing...",
+      loadingTimeoutError: "Pipeline Execution Timeout or Configuration Error. Check Apps Script logs.",
+      urlConfigError: "Configuration Error: Please paste your script deployment URL into the WEB_APP_URL constant.",
+      noSessionDates: "No session dates found.",
+      noSessionsForMonth: "No sessions mapped to this month tab context.",
+      noPersonnelCrew: "No personnel listed in Crew worksheet.",
+      tileModify: "+ Click to Modify",
+      tileSignUp: "+ Sign Up",
+      tileFallbackCategory: "Pending...",
+      tileFallbackRole: "Unassigned",
+      fallbackDayName: "Training Day",
+      crewTableHeaderLabel: "Crew Member",
+      cancelBtn: "Cancel",
+      removeBtn: "Withdraw",
+      removeAllocBtn: "Remove Allocation",
+      crewMemberFallback: "Crew Member",
+      sessionSpecificsFallback: "Session Context Data Record",
+      prefChoiceLabel: "Preference",
+      notesLabel: "Notes / Availability Details",
+      notesPlaceholder: "Any specific scheduling notes...",
+      savePrefBtn: "Save",
+      submittedNotesLabel: "Notes",
+      noNotesAdminView: "No notes for this session.",
+      allocCategoryLabel: "Afloat/Ashore",
+      allocRoleLabel: "Role",
+      allocActivityLabel: "Activity",
+      allocActivityPlaceholder: "Select or type custom activity...",
+      commitAllocBtn: "Commit",
+      narrativeTitle: "SMS Narrative Broadcast",
+      narrativeSubtitleFallback: "Overview Breakdown",
+      closeBtn: "Close",
+      copyClipboardBtn: "Copy to Clipboard",
+      narrativeSuccessAlert: "Copied to clipboard successfully!",
+      narrativeErrorAlert: "Cannot generate narrative dialogue.\nThe following crew members have signed up but have unallocated roles:\n\n",
+      narrativeTemplateSegment1: "'s training will comprise of ",
+      narrativeTemplateSegment2: " session(s).\n\n",
+      narrativeSessionLabel: "Session",
+      adminPromptChallenge: "Enter LTC System Password:",
+      adminInvalidCredentials: "Invalid LTC credentials. Access Denied.",
+      submissionDelayedAlert: "Submission Delayed: "
     };
 
-    // Central App State
     let state = {
       crew: [],
       sessions: [],
-      categories: [],
-      roles: [],
-      adminCategories: [],
-      subCategories: [],
+      categories: [],       
+      roles: [],            
+      adminCategories: [],  
+      subCategories: [],    
       signups: [],
+      activeMonth: "",
+      lastRenderedMonth: "",
+      selectedCrew: "",
+      selectedSessionId: "",
       isGlobalAdminUnlocked: false,
-      activeSessionFilterId: null
+      activeSessionFilterId: null, 
+      activeCrewFilterName: null    
     };
 
-    // Automatically Fetch Database on Load
     window.addEventListener("DOMContentLoaded", () => {
+      applyStaticUIText();
       fetchMatrixData();
     });
 
-    /**
-     * Pulls integrated matrix payloads across Apps Script endpoints
-     */
-    function fetchMatrixData() {
+    function applyStaticUIText() {
+      document.getElementById("uiDashboardTitle").textContent = UI_TEXT.dashboardTitle;
+      
+      const adminBtn = document.getElementById("globalAdminBtn");
+      adminBtn.textContent = UI_TEXT.adminBtnText;
+      adminBtn.title = UI_TEXT.adminUnlockTooltip;
+      
+      document.getElementById("uiRefreshBtn").textContent = UI_TEXT.refreshBtn;
+      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.initialLoading}</div>`;
+      
+      document.getElementById("uiPrefChoiceLabel").textContent = UI_TEXT.prefChoiceLabel;
+      document.getElementById("uiNotesLabel").textContent = UI_TEXT.notesLabel;
+      document.getElementById("inputNotes").placeholder = UI_TEXT.notesPlaceholder;
+      document.getElementById("uiSignupRemoveBtn").textContent = UI_TEXT.removeBtn;
+      document.getElementById("uiSignupCancelBtn").textContent = UI_TEXT.cancelBtn;
+      document.getElementById("uiSignupSaveBtn").textContent = UI_TEXT.savePrefBtn;
+      
+      document.getElementById("uiSubmittedNotesLabel").textContent = UI_TEXT.submittedNotesLabel;
+      document.getElementById("uiAllocCategoryLabel").textContent = UI_TEXT.allocCategoryLabel;
+      document.getElementById("uiAllocRoleLabel").textContent = UI_TEXT.allocRoleLabel;
+      document.getElementById("uiAllocActivityLabel").textContent = UI_TEXT.allocActivityLabel;
+      document.getElementById("selectSubCategory").placeholder = UI_TEXT.allocActivityPlaceholder;
+      document.getElementById("uiAllocRemoveBtn").textContent = UI_TEXT.removeAllocBtn;
+      document.getElementById("uiAllocCancelBtn").textContent = UI_TEXT.cancelBtn;
+      document.getElementById("uiAllocCommitBtn").textContent = UI_TEXT.commitAllocBtn;
+      
+      document.getElementById("uiNarrativeTitle").textContent = UI_TEXT.narrativeTitle;
+      document.getElementById("uiNarrativeCloseBtn").textContent = UI_TEXT.closeBtn;
+      document.getElementById("uiNarrativeCopyBtn").textContent = UI_TEXT.copyClipboardBtn;
+    }
+
+function fetchMatrixData() {
+      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingFetch}</div>`;
+      state.activeSessionFilterId = null;
+      state.activeCrewFilterName = null;
+      
+      // FIXED: When running in Google environment, invoke direct data payload method instead of doGet()
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
-          .withSuccessHandler(updateStateAndRender)
+          .withSuccessHandler(processServerPayload)
           .withFailureHandler(handleNetworkError)
-          .getMatrixDataPayload();
+          .getMatrixDataPayload(); 
       } else {
-        if (!WEB_APP_URL) {
-          handleNetworkError("Web App runtime execution URL not discovered. Configure WEB_APP_URL constant.");
+        if(WEB_APP_URL.includes("YOUR_APPS_SCRIPT")) {
+          document.getElementById("dashboardView").innerHTML = `<div class="loading-shield" style="color:red;">${UI_TEXT.urlConfigError}</div>`;
           return;
         }
         fetch(WEB_APP_URL)
           .then(res => res.json())
-          .then(updateStateAndRender)
+          .then(processServerPayload)
           .catch(handleNetworkError);
       }
     }
 
-    function updateStateAndRender(data) {
-      state.crew = data.crew || [];
-      state.sessions = data.sessions || [];
-      state.categories = data.categories || [];
-      state.roles = data.roles || [];
-      state.adminCategories = data.adminCategories || [];
-      state.subCategories = data.subCategories || [];
-      state.signups = data.signups || [];
+    function handleNetworkError(err) {
+      console.error(err);
+      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield" style="color:red;">${UI_TEXT.loadingTimeoutError}</div>`;
+    }
+
+    function processServerPayload(response) {
+      if (typeof response === "string") {
+        response = JSON.parse(response);
+      }
       
+      state.crew = response.crew || [];
+      state.sessions = response.sessions || [];
+      state.categories = response.categories || [];
+      state.roles = response.roles || [];
+      state.adminCategories = response.adminCategories || []; 
+      state.subCategories = response.subCategories || [];
+      state.signups = response.signups || [];
+
+      const distinctMonths = [...new Set(state.sessions.map(s => s.month).filter(Boolean))];
+
+      if (distinctMonths.length > 0 && (!state.activeMonth || !distinctMonths.includes(state.activeMonth))) {
+        state.activeMonth = distinctMonths[0];
+      }
+
+      populateDropdownLists();
+      renderMonthTabs(distinctMonths);
       renderMatrixGrid();
     }
 
-    /**
-     * Builds and renders the active operational grid
-     */
-    function renderMatrixGrid() {
-      const container = document.getElementById("dashboardView");
-      if (!state.sessions.length && !state.crew.length) {
-        container.innerHTML = `<div class="info-msg">No training session tracks discovered in database logs.</div>`;
+    function populateDropdownLists() {
+      populateSelectElement("selectCategory", state.adminCategories);
+      populateSelectElement("selectRole", state.roles);
+      
+      const dl = document.getElementById("subCategoryOptions");
+      dl.innerHTML = "";
+      const activityTrackingList = state.subCategories.includes("No Training") ? state.subCategories : ["No Training", ...state.subCategories];
+      activityTrackingList.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        dl.appendChild(option);
+      });
+      
+      const prefSelect = document.getElementById("selectPrefRole");
+      prefSelect.innerHTML = "";
+      const filteredCategories = state.categories.filter(cat => cat !== "No Training");
+      const prefOptions = ["Any", ...filteredCategories];
+      prefOptions.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        prefSelect.appendChild(option);
+      });
+    }
+
+    function populateSelectElement(id, list) {
+      const select = document.getElementById(id);
+      select.innerHTML = "";
+      const trackingList = list.includes("No Training") ? list : ["No Training", ...list];
+      trackingList.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        select.appendChild(option);
+      });
+    }
+
+    function renderMonthTabs(months) {
+      const panel = document.getElementById("monthTabsPanel");
+      panel.innerHTML = "";
+
+      if(months.length === 0) {
+        panel.innerHTML = `<div style="font-style:italic; padding:10px;">${UI_TEXT.noSessionDates}</div>`;
         return;
       }
 
-      let activeSessions = state.sessions;
-      if (state.activeSessionFilterId) {
-        activeSessions = state.sessions.filter(s => s.id == state.activeSessionFilterId);
+      months.forEach(m => {
+        const btn = document.createElement("button");
+        btn.className = `tab-btn ${state.activeMonth === m ? 'active' : ''}`;
+        btn.textContent = m;
+        btn.onclick = () => {
+          state.activeMonth = m;
+          state.activeSessionFilterId = null; 
+          state.activeCrewFilterName = null;
+          renderMonthTabs(months);
+          renderMatrixGrid();
+        };
+        panel.appendChild(btn);
+      });
+    }
+
+    function toggleSessionFilter(sessionId) {
+      if (state.activeSessionFilterId == sessionId) {
+        state.activeSessionFilterId = null; 
+      } else {
+        state.activeSessionFilterId = sessionId;
+        state.activeCrewFilterName = null; 
+      }
+      renderMatrixGrid();
+    }
+
+    function toggleCrewFilter(crewName) {
+      if (state.activeCrewFilterName === crewName) {
+        state.activeCrewFilterName = null;
+      } else {
+        state.activeCrewFilterName = crewName;
+        state.activeSessionFilterId = null; 
+      }
+      renderMatrixGrid();
+    }
+
+function renderMatrixGrid() {
+      // 1. CAPTURE CURRENT SCROLL POSITIONS BEFORE RE-RENDERING
+      const existingWrapper = document.querySelector('.matrix-wrapper');
+      let savedScrollLeft = existingWrapper ? existingWrapper.scrollLeft : 0;
+      let savedScrollTop = existingWrapper ? existingWrapper.scrollTop : 0;
+
+      // Clear the scroll memory if the user just clicked onto a completely different month tab
+      if (state.lastRenderedMonth !== state.activeMonth) {
+        savedScrollLeft = 0;
+        savedScrollTop = 0;
+        state.lastRenderedMonth = state.activeMonth;
       }
 
-      let html = `<div class="table-wrapper"><table class="matrix-table"><thead><tr><th>Crew Member</th>`;
+      const view = document.getElementById("dashboardView");
+      const activeSessions = state.sessions.filter(s => s.month === state.activeMonth);
 
-      // Draw Session Header Columns
+      if (activeSessions.length === 0) {
+        view.innerHTML = `<div class="loading-shield">${UI_TEXT.noSessionsForMonth}</div>`;
+        return;
+      }
+
+      let hiddenSessionIds = [];
+      if (state.activeCrewFilterName) {
+        activeSessions.forEach(sess => {
+          const match = state.signups.find(s => s.name === state.activeCrewFilterName && s.sessionId == sess.id);
+          const hasRecord = match && (match.preferred || match.allocatedCategory);
+          if (!hasRecord) {
+            hiddenSessionIds.push(sess.id);
+          }
+        });
+      }
+
+      let html = `
+        <div class="matrix-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+      `;
+
       activeSessions.forEach(sess => {
+        const isColHidden = hiddenSessionIds.includes(sess.id);
         const filterClass = state.activeSessionFilterId == sess.id ? "filter-arrow-btn active-filter" : "filter-arrow-btn";
-        const isLocked = sess.isLocked === true;
         
         html += `
-          <th>
-            <div class="session-header-container" style="position: relative;">
-              <div class="admin-lock-control" style="display: ${state.isGlobalAdminUnlocked ? 'block' : 'none'}; position: absolute; top: -4px; right: -4px; z-index: 10;">
-                <label style="font-size: 0.65rem; color: #FFF; display: flex; align-items: center; gap: 2px; cursor: pointer; background: rgba(0,0,0,0.6); padding: 2px 5px; border-radius: 3px;">
-                  <input type="checkbox" ${isLocked ? 'checked' : ''} onchange="commitSessionLockToggle('${sess.id}', this.checked)" style="width:11px; height:11px; cursor:pointer;">
-                  🔒 LOCK
-                </label>
-              </div>
-
-              <div class="session-header-top" style="margin-top: ${state.isGlobalAdminUnlocked ? '14px' : '0px'};">
-                <div class="session-header-meta">${isLocked ? '🔒 ' : ''}${sess.date} @ ${sess.time}</div>
-                <div class="session-header-title">${escapeHtml(sess.topic || "Unnamed track")}</div>
+          <th class="${isColHidden ? 'hide-column' : ''}">
+            <div class="session-header-container">
+              <div class="session-header-top">
+                <div class="session-header-title">${sess.topic || "Unnamed Session"}</div>
+                <div class="session-header-meta">${sess.date} @ ${sess.time}</div>
               </div>
               <div class="action-btn-row">
                 <button class="narrative-btn" title="Generate Session SMS Narrative" onclick="triggerSessionNarrative('${sess.id}')">
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="display:block;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
                 </button>
                 <button class="${filterClass}" title="Filter signups for this session" onclick="toggleSessionFilter('${sess.id}')">
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="display:block;"><path d="M10 24v-9L3.07 4.93C2.43 4.09 3.03 3 4.08 3h15.83c1.05 0 1.65 1.09 1.02 1.93L14 15v7c0 .55-.45 1-1 1h-2c-.55 0-1-.45-1-1z"/></svg>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:block;"><path d="M10 24v-9L3.07 4.93C2.43 4.09 3.03 3 4.08 3h15.83c1.05 0 1.65 1.09 1.02 1.93L14 15v7c0 .55-.45 1-1 1h-2c-.55 0-1-.45-1-1z"/></svg>
                 </button>
               </div>
             </div>
@@ -414,51 +962,214 @@
         `;
       });
 
-      html += `</tr></thead><tbody>`;
+      html += `
+              </tr>
+            </thead>
+            <tbody>
+      `;
 
-      // Draw Crew Rows
+      if(state.crew.length === 0) {
+        html += `<tr><td colspan="${activeSessions.length + 1}" style="text-align:center; font-style:italic;">${UI_TEXT.noPersonnelCrew}</td></tr>`;
+      }
+
       state.crew.forEach(crewName => {
-        html += `<tr><td class="crew-name-cell">${escapeHtml(crewName)}</td>`;
-        
+        if (state.activeSessionFilterId) {
+          const match = state.signups.find(s => s.name === crewName && s.sessionId == state.activeSessionFilterId);
+          const hasRecord = match && (match.preferred || match.allocatedCategory);
+          if (!hasRecord) return; 
+        }
+
+        const crewFilterClass = state.activeCrewFilterName === crewName ? "crew-filter-btn active-filter" : "crew-filter-btn";
+
+        html += `
+          <tr>
+            <td class="crew-name-cell">
+              <span>${crewName}</span>
+              <button class="${crewFilterClass}" title="Isolate this crew's timeline" onclick="toggleCrewFilter('${escapeHtml(crewName)}')">▤</button>
+            </td>
+        `;
+
         activeSessions.forEach(sess => {
-          const isCurrentSessLocked = sess.isLocked === true;
-          const allocation = state.signups.find(s => s.name === crewName && s.sessionId == sess.id);
-          
-          let cellText = "-";
-          let cellClass = "status-empty";
-          
-          if (allocation) {
-            if (allocation.allocatedCategory || allocation.allocatedRole) {
-              cellText = `<strong>${escapeHtml(allocation.allocatedCategory)}</strong><br><small>${escapeHtml(allocation.allocatedRole)} ${allocation.allocatedSubCategory ? `(${escapeHtml(allocation.allocatedSubCategory)})` : ''}</small>`;
-              cellClass = "status-allocated";
-            } else if (allocation.preferred) {
-              cellText = `Pref: ${escapeHtml(allocation.preferred)}`;
-              if (allocation.notes) cellText += `<br><span class="cell-notes">"${escapeHtml(allocation.notes)}"</span>`;
-              cellClass = "status-preferred";
-            } else {
-              cellText = "Signed Up";
-              cellClass = "status-registered";
-            }
-          }
+          const isColHidden = hiddenSessionIds.includes(sess.id);
+          const match = state.signups.find(s => s.name === crewName && s.sessionId == sess.id);
 
           html += `
-            <td class="matrix-cell ${cellClass}" 
-                onclick="${isCurrentSessLocked && !state.isGlobalAdminUnlocked ? "alert('Sorry, too late to change. Please contact the LTCs')" : `openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')`}">
-              ${cellText}
-            </td>
+            <td class="matrix-cell ${isColHidden ? 'hide-column' : ''}" onclick="openInteractionModal('${escapeHtml(crewName)}', '${sess.id}')">
           `;
+
+          if (match) {
+            if (match.allocatedCategory && match.allocatedCategory !== "No Training") {
+              const styleClass = match.allocatedCategory.toLowerCase().replace(/[^a-z0-9]/g, "") === "notraining" ? "notraining" : "allocated";
+              
+              html += `
+                <div class="tile-box ${styleClass}">
+                  <div class="tile-category-wrapper">
+                    <div class="tile-category">${escapeHtml(match.allocatedCategory)}</div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">🗎</span>` : ''}
+                  </div>
+                  <div class="tile-role">${escapeHtml(match.allocatedRole || UI_TEXT.tileFallbackRole)}</div>
+                  ${match.allocatedSubCategory ? `<div class="tile-subcat" title="${escapeHtml(match.allocatedSubCategory)}">${escapeHtml(match.allocatedSubCategory)}</div>` : ''}
+                </div>
+              `;
+            } 
+            else if (match.allocatedCategory === "No Training") {
+              html += `
+                <div class="tile-box notraining">
+                  <div class="tile-category-wrapper">
+                    <div class="tile-category">No Training</div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">🗎</span>` : ''}
+                  </div>
+                </div>
+              `;
+            }
+            else if (match.preferred) {
+              html += `
+                <div class="tile-box preferred">
+                  <div class="tile-category-wrapper">
+                    <div class="tile-category">${UI_TEXT.tileFallbackCategory}</div>
+                    ${match.notes ? `<span class="tile-tooltip-indicator" title="Crew Note: ${escapeHtml(match.notes)}">🗎</span>` : ''}
+                  </div>
+                  <div class="tile-role">${escapeHtml(match.preferred)}</div>
+                </div>
+              `;
+            } else {
+              html += `<div class="empty-tile">${UI_TEXT.tileModify}</div>`;
+            }
+          } else {
+            html += `<div class="empty-tile">${UI_TEXT.tileSignUp}</div>`;
+          }
+
+          html += `</td>`;
         });
-        
+
         html += `</tr>`;
       });
 
-      html += `</tbody></table></div>`;
-      container.innerHTML = html;
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      // Inject the newly calculated HTML into the page container
+      view.innerHTML = html;
+
+      // 2. RESTORE SCROLL POSITIONS INSTANTLY AFTER INJECTION
+      const newWrapper = document.querySelector('.matrix-wrapper');
+      if (newWrapper) {
+        newWrapper.scrollLeft = savedScrollLeft;
+        newWrapper.scrollTop = savedScrollTop;
+      }
     }
 
-    /**
-     * Handles administrative mode toggles
-     */
+    function triggerSessionNarrative(sessionId) {
+      const targetSess = state.sessions.find(s => s.id == sessionId);
+      if(!targetSess) return;
+
+      const sessionSignups = state.signups.filter(s => s.sessionId == sessionId);
+      const unallocatedCrew = sessionSignups.filter(s => s.preferred && (!s.allocatedCategory || s.allocatedCategory.trim() === ""));
+      
+      if (unallocatedCrew.length > 0) {
+        const namesList = unallocatedCrew.map(c => c.name).join(", ");
+        alert(`${UI_TEXT.narrativeErrorAlert}${namesList}`);
+        return;
+      }
+
+      const validAllocated = sessionSignups.filter(s => s.allocatedCategory && s.allocatedCategory !== "No Training" && s.allocatedCategory.trim() !== "");
+      let dayName = targetSess.dayName || UI_TEXT.fallbackDayName;
+
+      const allocationGroups = {};
+      validAllocated.forEach(person => {
+        const catKey = person.allocatedCategory;
+        if (!allocationGroups[catKey]) {
+          allocationGroups[catKey] = {
+            subCategory: person.allocatedSubCategory || "General",
+            crewList: []
+          };
+        }
+        allocationGroups[catKey].crewList.push({
+          name: person.name,
+          role: person.allocatedRole || "Crew"
+        });
+      });
+
+      const uniqueCategoryKeys = Object.keys(allocationGroups);
+      const N = uniqueCategoryKeys.length;
+
+      let textOutput = `${dayName}${UI_TEXT.narrativeTemplateSegment1}${N}${UI_TEXT.narrativeTemplateSegment2}`;
+
+      uniqueCategoryKeys.forEach((categoryName, index) => {
+        const currentGroup = allocationGroups[categoryName];
+        textOutput += `${UI_TEXT.narrativeSessionLabel} ${index + 1}: ${categoryName} (${currentGroup.subCategory})\n`;
+        
+        currentGroup.crewList.forEach(crewMember => {
+          textOutput += `${crewMember.name} (${crewMember.role})\n`;
+        });
+        
+        textOutput += `\n`;
+      });
+
+      document.getElementById("narrativeModalSubtitle").textContent = `${targetSess.topic || 'Session'} Summary`;
+      document.getElementById("narrativeOutputText").value = textOutput.trim();
+      document.getElementById("narrativeModal").classList.add("open");
+    }
+
+    function closeNarrativeModal() {
+      document.getElementById("narrativeModal").classList.remove("open");
+    }
+
+    function copyNarrativeToClipboard() {
+      const copyTextEl = document.getElementById("narrativeOutputText");
+      copyTextEl.select();
+      copyTextEl.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(copyTextEl.value);
+      alert(UI_TEXT.narrativeSuccessAlert);
+    }
+
+    function openInteractionModal(crewName, sessionId) {
+      state.selectedCrew = crewName;
+      state.selectedSessionId = sessionId;
+
+      if (state.isGlobalAdminUnlocked) {
+        document.getElementById("formSectionSignup").style.display = "none";
+        document.getElementById("formSectionAllocate").style.display = "block";
+      } else {
+        document.getElementById("formSectionSignup").style.display = "block";
+        document.getElementById("formSectionAllocate").style.display = "none";
+      }
+
+      const targetSess = state.sessions.find(s => s.id == sessionId);
+      const existingMatch = state.signups.find(s => s.name === crewName && s.sessionId == sessionId);
+
+      document.getElementById("mCrewName").textContent = crewName || UI_TEXT.crewMemberFallback;
+      document.getElementById("mSessionTitle").textContent = targetSess ? `${targetSess.topic} (${targetSess.date} @ ${targetSess.time})` : UI_TEXT.sessionSpecificsFallback;
+
+      const adminBox = document.getElementById("adminNotesViewBox");
+      if (existingMatch && existingMatch.notes && existingMatch.notes.trim() !== "") {
+        adminBox.textContent = `"${existingMatch.notes}"`;
+        adminBox.style.fontStyle = "normal";
+        adminBox.style.color = "var(--cat-preferred-text)";
+      } else {
+        adminBox.textContent = UI_TEXT.noNotesAdminView;
+        adminBox.style.fontStyle = "italic";
+        adminBox.style.color = "#718096";
+      }
+
+      document.getElementById("selectPrefRole").value = (existingMatch && existingMatch.preferred) ? existingMatch.preferred : "Any";
+      document.getElementById("inputNotes").value = (existingMatch && existingMatch.notes) ? existingMatch.notes : "";
+      
+      document.getElementById("selectCategory").value = (existingMatch && existingMatch.allocatedCategory) ? existingMatch.allocatedCategory : "No Training";
+      document.getElementById("selectRole").value = (existingMatch && existingMatch.allocatedRole) ? existingMatch.allocatedRole : "No Training";
+      
+      document.getElementById("selectSubCategory").value = (existingMatch && existingMatch.allocatedSubCategory) ? existingMatch.allocatedSubCategory : "";
+
+      document.getElementById("actionModal").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("actionModal").classList.remove("open");
+    }
+
     function toggleGlobalAdminMode() {
       const btn = document.getElementById("globalAdminBtn");
       const sheetBtn = document.getElementById("globalSheetBtn");
@@ -466,153 +1177,59 @@
       if (state.isGlobalAdminUnlocked) {
         state.isGlobalAdminUnlocked = false;
         btn.classList.remove("unlocked");
-        btn.innerHTML = "🔓 Unlock LTC Mode";
-        if (sheetBtn) sheetBtn.style.display = "none";
+        btn.title = UI_TEXT.adminUnlockTooltip;
+        sheetBtn.style.display = "none";
       } else {
         const inputPass = prompt(UI_TEXT.adminPromptChallenge);
         if (inputPass === ADMIN_PASSWORD) {
           state.isGlobalAdminUnlocked = true;
           btn.classList.add("unlocked");
-          btn.innerHTML = "🔒 Lock LTC Mode";
-          if (sheetBtn) sheetBtn.style.display = "inline-flex";
+          btn.title = UI_TEXT.adminLockTooltip;
+          sheetBtn.style.display = "inline-flex";
         } else if (inputPass !== null) {
           alert(UI_TEXT.adminInvalidCredentials);
         }
       }
-      
-      document.querySelectorAll('.admin-lock-control').forEach(el => {
-        el.style.display = state.isGlobalAdminUnlocked ? 'block' : 'none';
-      });
-      renderMatrixGrid();
     }
 
-    /**
-     * Dispatches checked toggles back to Google Sheet Session metadata columns
-     */
-    function commitSessionLockToggle(sessId, checkState) {
-      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">Updating Session Lock State...</div>`;
-      
+    function checkNoTrainingRule(elem) {
+      if(elem.value === "No Training") {
+        document.getElementById("selectRole").value = "No Training";
+        document.getElementById("selectSubCategory").value = "No Training";
+      }
+    }
+
+function executeAction(actionType) {
       let payload = {
-        action: "toggleLock",
-        sessionId: sessId,
-        lockState: checkState
+        action: actionType,
+        sessionId: state.selectedSessionId,
+        crewName: state.selectedCrew
       };
 
-      dispatchAction(payload);
-    }
-
-    /**
-     * Builds and triggers dialog dialogue canvas structures
-     */
-    function openInteractionModal(crewName, sessionId) {
-      const session = state.sessions.find(s => s.id == sessionId);
-      const allocation = state.signups.find(s => s.name === crewName && s.sessionId == sessionId) || {};
-      
-      const modal = document.getElementById("interactionModal");
-      document.getElementById("modalTitle").innerText = `${crewName} - ${session ? session.date : 'Log Details'}`;
-      
-      let html = "";
-      
-      if (state.isGlobalAdminUnlocked) {
-        html += `
-          <form id="modalForm" onsubmit="submitModalAction(event, '${escapeHtml(crewName)}', '${sessionId}')">
-            <div class="form-group">
-              <label>Allocated Category</label>
-              <select id="allocCategory" class="form-control">
-                <option value="">-- None --</option>
-                ${state.adminCategories.map(cat => `<option value="${escapeHtml(cat)}" ${allocation.allocatedCategory === cat ? 'selected' : ''}>${escapeHtml(cat)}</option>`).join('')}
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Allocated Role</label>
-              <select id="allocRole" class="form-control">
-                <option value="">-- None --</option>
-                ${state.roles.map(r => `<option value="${escapeHtml(r)}" ${allocation.allocatedRole === r ? 'selected' : ''}>${escapeHtml(r)}</option>`).join('')}
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Activity Sub-Category</label>
-              <select id="allocSubCategory" class="form-control">
-                <option value="">-- None --</option>
-                ${state.subCategories.map(sub => `<option value="${escapeHtml(sub)}" ${allocation.allocatedSubCategory === sub ? 'selected' : ''}>${escapeHtml(sub)}</option>`).join('')}
-              </select>
-            </div>
-            <div class="modal-btn-row">
-              <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-              <button type="submit" class="btn btn-primary">Allocate Role</button>
-            </div>
-          </form>
-        `;
-      } else {
-        html += `
-          <form id="modalForm" onsubmit="submitModalAction(event, '${escapeHtml(crewName)}', '${sessionId}')">
-            <div class="form-group">
-              <label>Preferred Position Choice</label>
-              <select id="prefChoice" class="form-control">
-                <option value="">-- Choose Option --</option>
-                ${state.categories.map(c => `<option value="${escapeHtml(c)}" ${allocation.preferred === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Notes / Availability Constraints</label>
-              <textarea id="crewNotes" class="form-control" rows="2" placeholder="e.g., Leaving early at 19:30...">${escapeHtml(allocation.notes || '')}</textarea>
-            </div>
-            <div class="modal-btn-row">
-              ${allocation.name ? `<button type="button" class="btn btn-danger" onclick="executeWithdrawal('${escapeHtml(crewName)}', '${sessionId}')">Withdraw</button>` : ''}
-              <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-              <button type="submit" class="btn btn-success">Save Signup</button>
-            </div>
-          </form>
-        `;
+      if (actionType === "signup") {
+        payload.preferredRole = document.getElementById("selectPrefRole").value;
+        payload.notes = document.getElementById("inputNotes").value.trim();
+      } 
+      else if (actionType === "allocate") {
+        payload.roleType = document.getElementById("selectCategory").value;
+        payload.specificRole = document.getElementById("selectRole").value;
+        payload.subCategory = document.getElementById("selectSubCategory").value.trim();
       }
-      
-      document.getElementById("modalContent").innerHTML = html;
-      modal.style.display = "flex";
-    }
 
-    function closeModal() {
-      document.getElementById("interactionModal").style.display = "none";
-    }
-
-    function submitModalAction(e, crewName, sessionId) {
-      e.preventDefault();
       closeModal();
-      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">Posting transaction changes to database...</div>`;
-      
-      let payload = { crewName: crewName, sessionId: sessionId };
-      
-      if (state.isGlobalAdminUnlocked) {
-        payload.action = "allocate";
-        payload.roleType = document.getElementById("allocCategory").value;
-        payload.specificRole = document.getElementById("allocRole").value;
-        payload.subCategory = document.getElementById("allocSubCategory").value;
-      } else {
-        payload.action = "signup";
-        payload.preferredRole = document.getElementById("prefChoice").value;
-        payload.notes = document.getElementById("crewNotes").value;
-      }
-      
-      dispatchAction(payload);
-    }
+      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">${UI_TEXT.loadingWrite}</div>`;
 
-    function executeWithdrawal(crewName, sessionId) {
-      if (!confirm("Confirm removal request from this tracking schedule?")) return;
-      closeModal();
-      document.getElementById("dashboardView").innerHTML = `<div class="loading-shield">Withdrawing ledger row...</div>`;
-      
-      dispatchAction({
-        action: "remove",
-        crewName: crewName,
-        sessionId: sessionId
-      });
-    }
-
-    function dispatchAction(payload) {
+      // FIXED: Pass payload object directly to backend handler instead of stringifying to doPost()
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
-          .withSuccessHandler(fetchMatrixData)
+          .withSuccessHandler((result) => { 
+            if (result && result.status === "error") {
+              alert(UI_TEXT.submissionDelayedAlert + result.message + "\n\nPlease try again in a few moments.");
+            }
+            fetchMatrixData(); 
+          })
           .withFailureHandler(handleNetworkError)
-          .processClientAction(payload);
+          .processClientAction(payload); 
       } else {
         fetch(WEB_APP_URL, {
           method: "POST",
@@ -620,63 +1237,18 @@
           headers: { "Content-Type": "text/plain;charset=utf-8" }
         })
         .then(res => res.json())
-        .then(fetchMatrixData)
+        .then((result) => { 
+          if (result && result.status === "error") {
+            alert(UI_TEXT.submissionDelayedAlert + result.message + "\n\nPlease try again in a few moments.");
+          }
+          fetchMatrixData(); 
+        })
         .catch(handleNetworkError);
       }
     }
 
-    function toggleSessionFilter(sessionId) {
-      state.activeSessionFilterId = (state.activeSessionFilterId == sessionId) ? null : sessionId;
-      renderMatrixGrid();
-    }
-
-    /**
-     * Converts matching signups to an SMS message text structure copied to clipboards
-     */
-    function triggerSessionNarrative(sessionId) {
-      const session = state.sessions.find(s => s.id == sessionId);
-      if (!session) return;
-      
-      const signupsForSess = state.signups.filter(s => s.sessionId == sessionId);
-      let text = `*Newhaven Lifeboat Training Matrix*\nSession: ${session.date} @ ${session.time} (${session.topic})\n\n`;
-      
-      const allocated = signupsForSess.filter(s => s.allocatedCategory || s.allocatedRole);
-      text += `*Allocated Crew:*\n`;
-      if (allocated.length) {
-        allocated.forEach(a => {
-          text += `- ${a.name}: ${a.allocatedCategory} (${a.allocatedRole}) ${a.allocatedSubCategory ? `[${a.allocatedSubCategory}]` : ''}\n`;
-        });
-      } else { text += `None allocated.\n`; }
-      
-      const pending = signupsForSess.filter(s => !s.allocatedCategory && !s.allocatedRole);
-      text += `\n*Awaiting Allocation:*\n`;
-      if (pending.length) {
-        pending.forEach(p => {
-          text += `- ${p.name} (Pref: ${p.preferred || 'None'}) ${p.notes ? `["${p.notes}"]` : ''}\n`;
-        });
-      } else { text += `None pending.\n`; }
-      
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-          alert("SMS Session Layout Narrative copied to clipboard successfully!");
-        }).catch(() => { alert(text); });
-      } else {
-        alert(text);
-      }
-    }
-
-    function handleNetworkError(err) {
-      document.getElementById("dashboardView").innerHTML = `
-        <div class="error-msg">
-          <strong>Database Sync Error:</strong><br>
-          ${escapeHtml(err.toString())}<br><br>
-          <button class="btn btn-primary" onclick="fetchMatrixData()">Retry Synchronization Pipeline</button>
-        </div>
-      `;
-    }
-
     function escapeHtml(str) {
-      if (!str) return '';
+      if(!str) return "";
       return str.toString()
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
